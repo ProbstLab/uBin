@@ -1,10 +1,20 @@
-const { app, BrowserWindow, Menu, shell } = require('electron');
+const { app, BrowserWindow, Menu, shell, ipcMain } = require('electron');
+const { DB } = require('./api/db')
+
+console.log("Hi?", DB.test())
 
 let menu;
 let template;
 let mainWindow = null;
 
+ipcMain.on('DB', (event, ipcType, inputData) => {
+    console.log('ipcMain', ipcType, inputData);
+    DB.connect()
+})
+console.log("here is a ipcmain process:", ipcMain)
+
 if (process.env.NODE_ENV === 'production') {
+    require('electron-debug')(); // eslint-disable-line global-require
   const sourceMapSupport = require('source-map-support'); // eslint-disable-line
   sourceMapSupport.install();
 }
@@ -22,7 +32,7 @@ app.on('window-all-closed', () => {
 
 
 const installExtensions = () => {
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'production') {
     const installer = require('electron-devtools-installer'); // eslint-disable-line global-require
 
     const extensions = [
@@ -56,7 +66,7 @@ app.on('ready', () =>
     mainWindow = null;
   });
 
-  if (process.env.NODE_ENV === 'development') {
+  // if (process.env.NODE_ENV === 'development') {
     mainWindow.openDevTools();
     mainWindow.webContents.on('context-menu', (e, props) => {
       const { x, y } = props;
@@ -68,7 +78,7 @@ app.on('ready', () =>
         }
       }]).popup(mainWindow);
     });
-  }
+  // }
 
   if (process.platform === 'darwin') {
     template = [{

@@ -5,7 +5,7 @@ import Root from './containers/Root';
 import './app.global.scss';
 
 const { configureStore, history } = require('./store/configureStore');
-const store = configureStore();
+const store = configureStore()
 
 render(
   <AppContainer>

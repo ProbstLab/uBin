@@ -1,0 +1,13 @@
+{
+  "type": "sqlite",
+  "synchronize": true,
+  "logging": false,
+  "logger": "simple-console",
+  "database": "database.sqlite",
+  "entities": [
+    "app/db/entities/*.js"
+  ],
+  "migrations": [
+    "app/db/migrations/**/*.ts"
+  ]
+}

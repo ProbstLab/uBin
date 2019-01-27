@@ -41,20 +41,12 @@ module.exports = {
       clear: true
     },
     {
-      file: 'app/routes.tsx',
-      pattern: /CounterPage/
-    },
-    {
       file: 'test/e2e.ts',
       clear: true
     },
     {
       file: 'README.md',
       clear: true
-    },
-    {
-      file: 'app/components/Home.tsx',
-      pattern: /(h2|Link)/
     }
   ],
   // add the following files to the project, mostly

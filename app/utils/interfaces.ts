@@ -1,0 +1,52 @@
+export interface IIdType {
+  id: number
+}
+
+export interface IImportFile {
+  id?: number
+  name: string
+}
+
+export interface IImportRecord {
+  id?: number
+  name: string
+  files: IImportFile[]
+}
+
+export interface IEnzyme {
+  id?: number,
+  name: string
+}
+
+export interface ITaxonomy {
+  id?: number
+  name: string
+  order: number
+  children: ITaxonomyAssociativeArray
+  parent?: number
+}
+
+export interface ISample {
+  id?: number
+  scaffold: string
+  coverage: number
+  gc: number
+  length: number
+  taxonomy?: (number | ITaxonomy | IdValuePair)[] | IdValuePair
+  taxonomyKeys: string[]
+  enzymes?: (number | IEnzyme | IdValuePair)[]
+  enzymeKeys: number[]
+  importRecord?: IImportRecord
+}
+
+export interface IdValuePair {
+  id?: number | string
+}
+
+export interface IDynamicAssociativeArray {
+  [key: string]: ITaxonomy | IEnzyme | ISample
+}
+
+export interface ITaxonomyAssociativeArray {
+  [key: string]: ITaxonomy
+}

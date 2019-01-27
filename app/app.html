@@ -26,6 +26,14 @@
           : './dist/bundle.js';
         // HACK: Writing the script path should be done with webpack
         document.body.appendChild(script);
+        var typeorm = require("typeorm");
+        console.log("Typeorm: ", typeorm)
+        // typeorm.createConnection().then(() => {
+        //     let taxonomy = {};
+        //     taxonomy.name = "Me and Bears";
+        //     typeorm.getRepository("Taxonomy").save(taxonomy);
+        //     typeorm.getRepository("Taxonomy").count().then(count => console.log("Taxonomy count: ", count))
+        // }).catch(error => console.log(error))
       }
     </script>
   </body>

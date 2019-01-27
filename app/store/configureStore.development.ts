@@ -1,59 +1,54 @@
-import { createStore, applyMiddleware, compose } from 'redux';
-import thunk from 'redux-thunk';
-import { createHashHistory } from 'history';
-import { routerMiddleware, push } from 'react-router-redux';
-import { createLogger } from 'redux-logger';
-import rootReducer from '../reducers';
+import { createStore, applyMiddleware, compose, combineReducers } from 'redux'
+import { connectRouter, routerMiddleware } from 'connected-react-router'
+import thunk from 'redux-thunk'
+import createHistory from 'history/createBrowserHistory'
+import promise from 'redux-promise-middleware'
 
-import * as counterActions from '../actions/counter';
+import {samplesReducer, IClientState, fileTreeReducer, dbReducer} from '../controllers'
 
-declare const window: Window & {
-  __REDUX_DEVTOOLS_EXTENSION_COMPOSE__?(a: any): void;
-};
+// export const history = createHistory()
+const history = createHistory()
+
+const enhancers = []
+const middleware = [thunk, routerMiddleware(history), promise()]
+
+if (process.env.NODE_ENV === 'development') {
+    const devToolsExtension = (window as any).__REDUX_DEVTOOLS_EXTENSION__
+
+    if (typeof devToolsExtension === 'function') {
+        enhancers.push(devToolsExtension())
+    }
+}
+
+const composedEnhancers = compose(
+    applyMiddleware(...middleware),
+    ...enhancers,
+)
+
+const rootReducer = combineReducers<IClientState>({
+    samples: samplesReducer,
+    fileTree: fileTreeReducer,
+    database: dbReducer,
+    router: connectRouter(history),
+})
 
 declare const module: NodeModule & {
-  hot?: {
-    accept(...args: any[]): any;
-  }
-};
-
-const actionCreators = Object.assign({}, 
-  counterActions,
-  {push}
-);
-
-const logger = (<any>createLogger)({
-  level: 'info',
-  collapsed: true
-});
-
-const history = createHashHistory();
-const router = routerMiddleware(history);
-
-// If Redux DevTools Extension is installed use it, otherwise use Redux compose
-/* eslint-disable no-underscore-dangle */
-const composeEnhancers: typeof compose = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ?
-  window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
-    // Options: http://zalmoxisus.github.io/redux-devtools-extension/API/Arguments.html
-    actionCreators
-  }) as any :
-  compose;
-/* eslint-enable no-underscore-dangle */
-const enhancer = composeEnhancers(
-  applyMiddleware(thunk, router, logger)
-);
+    hot?: {
+        accept(...args: any[]): any;
+    }
+}
 
 export = {
-  history,
-  configureStore(initialState: Object | void) {
-    const store = createStore(rootReducer, initialState, enhancer);
+    history,
+    configureStore() {
+        const store = createStore(rootReducer, composedEnhancers);
 
-    if (module.hot) {
-      module.hot.accept('../reducers', () =>
-        store.replaceReducer(require('../reducers')) // eslint-disable-line global-require
-      );
+        if (module.hot) {
+            // module.hot.accept('../reducers', () =>
+            //     store.replaceReducer(require('../reducers')) // eslint-disable-line global-require
+            // );
+        }
+        // store.dispatch(DBActions.startDatabase())
+        return store;
     }
-
-    return store;
-  }
 };

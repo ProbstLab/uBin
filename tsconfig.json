@@ -18,9 +18,9 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "noUnusedLocals": true,
-    
-    "experimentalDecorators": true,
+
     "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
 
     "sourceMap": true,
 
