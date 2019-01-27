@@ -9,20 +9,19 @@ import {
 import {Connection} from "typeorm";
 import {ThunkAction, ThunkDispatch} from "redux-thunk";
 import {AnyAction} from "redux";
-import {getDBConnection} from "./selectors";
+// import {getDBConnection} from "./selectors";
 import {IClientState} from "../index";
 import {getTaxonimiesForImportQuery} from "./queries";
 import {ipcRenderer} from "electron";
 
-console.log("window: ", window)
-const orm = (window as any).typeorm
+// console.log("window: ", window)
+// const orm = (window as any).typeorm
 
 export class DBActions {
-  static connectDatabase(): IConnectDatabase {
+  static connectDatabase(connection: Promise<Connection>): IConnectDatabase {
+    console.log("connection: ", connection)
     return {
-      type: dbActions.connectDatabase, payload: orm.createConnection().then(async (connection: Connection) => {
-        return connection
-      }).catch((error: any) => console.log("wtf?", error))
+      type: dbActions.connectDatabase, payload: connection
     }
   }
   static connectDatabaseFulfilled(connection: Connection): IConnectDatabaseFulfilled {
@@ -41,21 +40,25 @@ export class DBActions {
     return {type: dbActions.getImportsPending, payload}
   }
   static startDatabase(): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
-    console.log("ipcrenderer, send!")
+    // console.log("ipcrenderer, send!")
     ipcRenderer.send('DB', 'DB_START', {test: "wow"})
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>((resolve) => {
-        let connection: (Connection | undefined) = getDBConnection(getState())
-        if (!connection) {
-          dispatch(DBActions.connectDatabase())
-        }
-        setTimeout(() => {
-          connection = getDBConnection(getState())
-          if (connection) {
-            dispatch(DBActions.getImports(connection))
-            resolve()
-          }
-        }, 2000)
+        ipcRenderer.once('DB_CONNECT', (event: any, result: any) => {
+          console.log("db connect event", event, result)
+          dispatch(DBActions.connectDatabase(result))
+        })
+        // let connection: (Connection | undefined) = getDBConnection(getState())
+        // if (!connection) {
+        //   dispatch(DBActions.connectDatabase())
+        // }
+        // setTimeout(() => {
+        //   connection = getDBConnection(getState())
+        //   if (connection) {
+        //     dispatch(DBActions.getImports(connection))
+        //     resolve()
+        //   }
+        // }, 2000)
       })
     }
   }

@@ -10,7 +10,7 @@
     "rootDir": "./app/db/entities/**"
   },
   "include": [
-    "./app/api/**/*.ts",
+    "./app/db/dbApi.ts",
     "./app/db/entities/**/*.ts"
   ],
   "exclude": [

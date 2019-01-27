@@ -5,7 +5,7 @@ import createHistory from 'history/createBrowserHistory'
 import promise from 'redux-promise-middleware'
 
 import {samplesReducer, IClientState, fileTreeReducer, dbReducer} from '../controllers'
-import {DBActions} from '../controllers/database'
+// import {DBActions} from '../controllers/database'
 
 const history = createHistory()
 
@@ -34,7 +34,7 @@ export = {
   history,
   configureStore() {
     const store = createStore(rootReducer, composedEnhancers);
-    store.dispatch(DBActions.connectDatabase())
+    // store.dispatch(DBActions.connectDatabase())
 
     return store;
   }

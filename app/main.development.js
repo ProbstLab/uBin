@@ -1,5 +1,5 @@
 const { app, BrowserWindow, Menu, shell, ipcMain } = require('electron');
-const { DB } = require('./api/db')
+const { DB } = require('./db/dbApi')
 
 console.log("Hi?", DB.test())
 
@@ -8,8 +8,9 @@ let template;
 let mainWindow = null;
 
 ipcMain.on('DB', (event, ipcType, inputData) => {
-    console.log('ipcMain', ipcType, inputData);
-    DB.connect()
+  let connection = DB.connect()
+  console.log("connection:", connection)
+  event.sender.send('DB_CONNECT', {connection})
 })
 console.log("here is a ipcmain process:", ipcMain)
 

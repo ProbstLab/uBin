@@ -5,12 +5,11 @@ export class DB {
   static test(): string {
     return "Hello world!"
   }
-  static connect(): Promise<any> {
-    return createConnection()
-      .then(async (connection: Connection) => {
-        console.log("connected:", connection)
-        }
-      ).catch((error: any) => console.log("error: ", error))
+  static connect(): Promise<Connection> {
+    return createConnection({
+      type: "sqlite",
+      database: `${require('os').homedir()}/database.sqlite`
+    })
   }
 }
 
