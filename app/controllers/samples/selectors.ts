@@ -36,3 +36,8 @@ export const getImportRecords = createSelector(
   getSamplesState,
   (state: ISamplesState) => state.importRecords
 )
+
+export const getTaxonomyTreeFull = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.taxonomyTreeFull
+)

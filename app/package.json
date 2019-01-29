@@ -13,7 +13,5 @@
     "postinstall": "npm rebuild --runtime=electron --target=1.6.6 --disturl=https://atom.io/download/atom-shell --build-from-source"
   },
   "license": "MIT",
-  "dependencies": {
-    "typeorm": "^0.2.12"
-  }
+  "dependencies": {}
 }

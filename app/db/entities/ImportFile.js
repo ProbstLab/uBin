@@ -22,7 +22,7 @@ var ImportFile = /** @class */ (function () {
         typeorm_1.Column({
             type: 'varchar',
             length: 256,
-            unique: true,
+            unique: false,
         }),
         __metadata("design:type", String)
     ], ImportFile.prototype, "name", void 0);
@@ -31,7 +31,8 @@ var ImportFile = /** @class */ (function () {
         __metadata("design:type", ImportRecord_1.ImportRecord)
     ], ImportFile.prototype, "importRecord", void 0);
     ImportFile = __decorate([
-        typeorm_1.Entity()
+        typeorm_1.Entity(),
+        typeorm_1.Unique(['name', 'importRecord'])
     ], ImportFile);
     return ImportFile;
 }());

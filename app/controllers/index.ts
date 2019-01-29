@@ -15,6 +15,7 @@ export interface IClientState {
 export const samplesReducer = createReducer(samples.getInitialState(), {
   [samplesActions.setSampleFilter]: samples.setFilter,
   [samplesActions.getImportsFulfilled]: samples.getImportsFulfilled,
+  [samplesActions.getTaxonomiesForImportFulfilled]: samples.getTaxonomiesForImportFulfilled,
 })
 
 export const fileTreeReducer = createReducer(files.getInitialState(), {

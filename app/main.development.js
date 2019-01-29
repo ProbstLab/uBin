@@ -1,17 +1,8 @@
-const { app, BrowserWindow, Menu, shell, ipcMain } = require('electron');
-const { DB } = require('./api/db')
-
-console.log("Hi?", DB.test())
+const { app, BrowserWindow, Menu, shell } = require('electron');
 
 let menu;
 let template;
 let mainWindow = null;
-
-ipcMain.on('DB', (event, ipcType, inputData) => {
-    console.log('ipcMain', ipcType, inputData);
-    DB.connect()
-})
-console.log("here is a ipcmain process:", ipcMain)
 
 if (process.env.NODE_ENV === 'production') {
     require('electron-debug')(); // eslint-disable-line global-require

@@ -23,7 +23,8 @@ export interface ITaxonomy {
   name: string
   order: number
   children: ITaxonomyAssociativeArray
-  parent?: number
+  parent?: ITaxonomy | number
+  occurrences?: number
 }
 
 export interface ISample {

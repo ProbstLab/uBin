@@ -27,6 +27,10 @@ export interface IGetTaxonomiesForImport extends Action {
   type: dbActions.getTaxonomiesForImport
   payload: Promise<any>
 }
+export interface IGetTaxonomiesForImportPending extends Action {
+  type: dbActions.getTaxonomiesForImportPending
+  importPending: boolean
+}
 
 export interface IGetImports extends Action {
   type: dbActions.getImports

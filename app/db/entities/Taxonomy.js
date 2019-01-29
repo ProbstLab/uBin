@@ -14,6 +14,8 @@ var Sample_1 = require("./Sample");
 var Taxonomy = /** @class */ (function () {
     function Taxonomy() {
     }
+    Taxonomy_1 = Taxonomy;
+    var Taxonomy_1;
     __decorate([
         typeorm_1.PrimaryGeneratedColumn(),
         __metadata("design:type", Number)
@@ -38,16 +40,12 @@ var Taxonomy = /** @class */ (function () {
         __metadata("design:type", Array)
     ], Taxonomy.prototype, "samples", void 0);
     __decorate([
-        typeorm_1.TreeChildren(),
-        __metadata("design:type", Array)
-    ], Taxonomy.prototype, "children", void 0);
-    __decorate([
-        typeorm_1.TreeParent(),
+        typeorm_1.ManyToOne(function (type) { return Taxonomy_1; }, function (taxonomy) { return taxonomy.parent; }),
+        typeorm_1.JoinTable(),
         __metadata("design:type", Taxonomy)
     ], Taxonomy.prototype, "parent", void 0);
-    Taxonomy = __decorate([
+    Taxonomy = Taxonomy_1 = __decorate([
         typeorm_1.Entity(),
-        typeorm_1.Tree("closure-table"),
         typeorm_1.Unique(['order', 'id'])
     ], Taxonomy);
     return Taxonomy;

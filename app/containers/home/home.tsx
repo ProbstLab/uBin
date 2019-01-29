@@ -4,10 +4,11 @@ import {bindActionCreators, Dispatch} from 'redux'
 import {connect} from 'react-redux'
 import {withRouter, RouteComponentProps} from 'react-router'
 import {IClientState} from '../../controllers'
-import {Button, Callout, Menu, MenuItem, Popover, Position} from "@blueprintjs/core";
-import {getImportRecords, IImportRecord, SamplesActions} from "../../controllers/samples";
-import {DBActions} from "../../controllers/database";
-import {Connection} from "typeorm";
+import {Button, Callout, Menu, MenuDivider, MenuItem, Popover, Position} from '@blueprintjs/core';
+import {getImportRecords, getTaxonomyTreeFull, IImportRecord, SamplesActions} from '../../controllers/samples';
+import {DBActions} from '../../controllers/database';
+import {Connection} from 'typeorm';
+import {ITaxonomyAssociativeArray} from "../../utils/interfaces";
 
 interface IProps extends RouteComponentProps {
 }
@@ -15,6 +16,7 @@ interface IProps extends RouteComponentProps {
 interface IPropsFromState {
   connection: Connection | undefined
   importRecords: IImportRecord[]
+  taxonomyTreeFull: ITaxonomyAssociativeArray | undefined
 }
 
 interface IActionsFromState {
@@ -36,22 +38,25 @@ type TProps = IProps & IPropsFromState & IActionsFromState
 class CHome extends React.Component<TProps> {
 
   public loadSampleData(recordId: number): void {
-    console.log("load sampel data", recordId)
+    console.log('load sampel data', recordId)
     if (this.props.connection) {
       this.props.getTaxonomies(this.props.connection, recordId)
     }
   }
 
   public componentDidMount(): void {
-    this.props.startDb()
+    // this.props.startDb()
   }
 
   render(): JSX.Element {
+
     const sampleMenu = (
       <Menu>
-        <MenuItem icon="database" text="Import Records">
+        <MenuItem icon='ninja' text='A Ninja' disabled={true}/>
+        <MenuDivider />
+        <MenuItem icon='database' text='Import Records'>
           { this.props.importRecords.length ? this.props.importRecords.map((record: IImportRecord, index: number) =>
-            <MenuItem key={index} icon="pulse" text={record.name} onClick={() => this.loadSampleData(record.id)} />) :
+            <MenuItem key={index} icon='pulse' text={record.name} onClick={() => this.loadSampleData(record.id)} />) :
             <MenuItem text='No samples imported yet'/>}
         </MenuItem>
       </Menu>
@@ -60,7 +65,7 @@ class CHome extends React.Component<TProps> {
     return (
       <div style={homeStyle}>
         <Popover content={sampleMenu} position={Position.RIGHT_BOTTOM}>
-          <Button icon="settings" text="Data Settings/Import" />
+          <Button icon='settings' text='Data Settings/Import' />
         </Popover>
         <Callout title={'Home!'}>
           Hallo!
@@ -73,7 +78,8 @@ class CHome extends React.Component<TProps> {
 
 const mapStateToProps = (state: IClientState): IPropsFromState => ({
   importRecords: getImportRecords(state),
-  connection: state.database.connection
+  connection: state.database.connection,
+  taxonomyTreeFull: getTaxonomyTreeFull(state)
 })
 
 const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>

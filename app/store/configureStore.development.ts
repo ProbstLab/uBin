@@ -5,6 +5,7 @@ import createHistory from 'history/createBrowserHistory'
 import promise from 'redux-promise-middleware'
 
 import {samplesReducer, IClientState, fileTreeReducer, dbReducer} from '../controllers'
+import {DBActions} from "../controllers/database";
 
 // export const history = createHistory()
 const history = createHistory()
@@ -48,7 +49,7 @@ export = {
             //     store.replaceReducer(require('../reducers')) // eslint-disable-line global-require
             // );
         }
-        // store.dispatch(DBActions.startDatabase())
+        store.dispatch<any>(DBActions.startDatabase())
         return store;
     }
 };

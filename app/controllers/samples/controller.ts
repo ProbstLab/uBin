@@ -1,4 +1,5 @@
-import {IGetImportsFulfilled, ISamplesState, ISetSampleFilter} from './interfaces'
+import {IGetImportsFulfilled, IGetTaxonomiesForImportFulfilled, ISamplesState, ISetSampleFilter} from './interfaces'
+import {TreeCreator} from "../../utils/treeCreator";
 
 export const getInitialState = (): ISamplesState => ({
   filter: {
@@ -14,6 +15,13 @@ export const setFilter = (state: ISamplesState, action: ISetSampleFilter): ISamp
 export const getImportsFulfilled = (state: ISamplesState, action: IGetImportsFulfilled): ISamplesState => {
   return {
     ...state,
-    importRecords: [...state.importRecords, ...action.payload]
+    importRecords: [...state.importRecords.filter(value => value.id !== action.payload.id ), ...action.payload],
+  }
+}
+
+export const getTaxonomiesForImportFulfilled = (state: ISamplesState, action: IGetTaxonomiesForImportFulfilled): ISamplesState => {
+  return {
+    ...state,
+    taxonomyTreeFull: TreeCreator.createTree(action.payload)
   }
 }
