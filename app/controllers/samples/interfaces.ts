@@ -1,7 +1,7 @@
 import { Action } from 'redux'
 import { IValueMap } from 'common'
 import { ISampleFilter, ISample } from 'samples'
-import {ITaxonomyAssociativeArray} from "../../utils/interfaces";
+import {IGenericAssociativeArray} from "../../utils/interfaces";
 
 export interface IImportRecord {
   id: number
@@ -12,7 +12,7 @@ export interface ISamplesState {
   filter: ISampleFilter
   samples?: IValueMap<ISample>
   importRecords: IImportRecord[]
-  taxonomyTreeFull?: ITaxonomyAssociativeArray
+  taxonomyTreeFull?: IGenericAssociativeArray
 }
 
 export enum samplesActions {

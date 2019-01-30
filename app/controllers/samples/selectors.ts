@@ -39,5 +39,5 @@ export const getImportRecords = createSelector(
 
 export const getTaxonomyTreeFull = createSelector(
   getSamplesState,
-  (state: ISamplesState) => state.taxonomyTreeFull
+  (state: ISamplesState) => state.taxonomyTreeFull ? Object.keys(state.taxonomyTreeFull).map(value => state.taxonomyTreeFull ? state.taxonomyTreeFull[value] : null) : undefined
 )

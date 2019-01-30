@@ -114,6 +114,7 @@
   ],
   "homepage": "https://github.com/irath96/electron-react-typescript-boilerplate#readme",
   "devDependencies": {
+    "@types/color-convert": "^1.9.0",
     "@types/enzyme": "^3.1.1",
     "@types/history": "^4.5.2",
     "@types/jest": "^22.0.0",
@@ -129,7 +130,7 @@
     "@types/react-router-dom": "^4.0.7",
     "@types/redux-logger": "^3.0.0",
     "@types/sinon": "^4.0.0",
-    "asar": "^0.14.0",
+    "asar": "^0.14.6",
     "boiler-room-custodian": "^0.6.2",
     "concurrently": "^3.1.0",
     "cross-env": "^5.0.1",
@@ -170,7 +171,9 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^3.11.0",
+    "color-convert": "^1.9.3",
     "connected-react-router": "^6.2.1",
+    "csv-parser": "^2.1.0",
     "electron-debug": "^2.0.0",
     "history": "^4.7.2",
     "lodash": "^4.17.11",
@@ -180,6 +183,7 @@
     "react-redux": "^6.0.0",
     "react-router": "^4.1.1",
     "react-router-dom": "^4.1.1",
+    "react-vis": "^1.11.6",
     "redux-promise-middleware": "^5.1.1",
     "redux": "^4.0.1",
     "redux-thunk": "^2.3.0",
@@ -187,9 +191,7 @@
     "reselect": "^4.0.0",
     "sqlite3": "^4.0.6",
     "source-map-support": "^0.5.10",
-    "typeorm": "^0.2.12",
-    "csv-parse": "^4.3.1",
-    "csv-parser": "^2.1.0"
+    "typeorm": "^0.2.12"
   },
   "devEngines": {
     "node": ">=6.x",

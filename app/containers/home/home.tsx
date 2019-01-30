@@ -4,11 +4,13 @@ import {bindActionCreators, Dispatch} from 'redux'
 import {connect} from 'react-redux'
 import {withRouter, RouteComponentProps} from 'react-router'
 import {IClientState} from '../../controllers'
-import {Button, Callout, Menu, MenuDivider, MenuItem, Popover, Position} from '@blueprintjs/core';
-import {getImportRecords, getTaxonomyTreeFull, IImportRecord, SamplesActions} from '../../controllers/samples';
-import {DBActions} from '../../controllers/database';
-import {Connection} from 'typeorm';
-import {ITaxonomyAssociativeArray} from "../../utils/interfaces";
+import {Button, Callout, Menu, MenuDivider, MenuItem, Popover, Position} from '@blueprintjs/core'
+import {getImportRecords, getTaxonomyTreeFull, IImportRecord, SamplesActions} from '../../controllers/samples'
+import {DBActions} from '../../controllers/database'
+import {Connection} from 'typeorm'
+import {ITaxonomyForSunburst} from '../../utils/interfaces'
+import {UBinSunburst} from "../../components/uBinSunburst";
+
 
 interface IProps extends RouteComponentProps {
 }
@@ -16,7 +18,7 @@ interface IProps extends RouteComponentProps {
 interface IPropsFromState {
   connection: Connection | undefined
   importRecords: IImportRecord[]
-  taxonomyTreeFull: ITaxonomyAssociativeArray | undefined
+  taxonomyTreeFull: ITaxonomyForSunburst[] | undefined
 }
 
 interface IActionsFromState {
@@ -38,7 +40,6 @@ type TProps = IProps & IPropsFromState & IActionsFromState
 class CHome extends React.Component<TProps> {
 
   public loadSampleData(recordId: number): void {
-    console.log('load sampel data', recordId)
     if (this.props.connection) {
       this.props.getTaxonomies(this.props.connection, recordId)
     }
@@ -49,10 +50,9 @@ class CHome extends React.Component<TProps> {
   }
 
   render(): JSX.Element {
-
     const sampleMenu = (
       <Menu>
-        <MenuItem icon='ninja' text='A Ninja' disabled={true}/>
+        <MenuItem icon='menu' text='Menu' disabled={true}/>
         <MenuDivider />
         <MenuItem icon='database' text='Import Records'>
           { this.props.importRecords.length ? this.props.importRecords.map((record: IImportRecord, index: number) =>
@@ -62,6 +62,8 @@ class CHome extends React.Component<TProps> {
       </Menu>
     )
 
+    console.log("dataset:", { children: this.props.taxonomyTreeFull})
+
     return (
       <div style={homeStyle}>
         <Popover content={sampleMenu} position={Position.RIGHT_BOTTOM}>
@@ -70,6 +72,7 @@ class CHome extends React.Component<TProps> {
         <Callout title={'Home!'}>
           Hallo!
           <p>{this.props.location.key}</p>
+          {this.props.taxonomyTreeFull && <UBinSunburst data={{ children: this.props.taxonomyTreeFull}}/>}
         </Callout>
       </div>
     )

@@ -22,9 +22,17 @@ export interface ITaxonomy {
   id?: number
   name: string
   order: number
-  children: ITaxonomyAssociativeArray
+  children: IGenericAssociativeArray
   parent?: ITaxonomy | number
   occurrences?: number
+}
+
+export interface ITaxonomyForSunburst {
+  id?: number
+  name: string
+  order: number
+  children?: ITaxonomyForSunburst[]
+  value?: number
 }
 
 export interface ISample {
@@ -50,4 +58,8 @@ export interface IDynamicAssociativeArray {
 
 export interface ITaxonomyAssociativeArray {
   [key: string]: ITaxonomy
+}
+
+export interface IGenericAssociativeArray {
+  [key: string]: any
 }
