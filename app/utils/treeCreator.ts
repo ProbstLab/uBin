@@ -16,7 +16,9 @@ export class TreeCreator {
       }
     })
     Object.keys(tree).forEach((value: string) => {
-      tree[value] = TreeCreator.treeToSunburstFormat(tree[value])
+      const hexVal: string = TreeCreator.setColour(tree[value])
+      tree[value] = TreeCreator.treeToSunburstFormat(tree[value], hexVal)
+      tree[value].hex = hexVal
     })
     return tree
   }
@@ -51,8 +53,8 @@ export class TreeCreator {
     let children: ITaxonomyForSunburst[] = []
     let numChildren: number = Object.keys(taxonomy.children).length
     Object.keys(taxonomy.children).forEach((value: string, index: number) => {
-      const hexVal: string = TreeCreator.setColour(taxonomy.children[value], hex, index/(numChildren*2)+0.5)
-      taxonomy.children[value] = TreeCreator.treeToSunburstFormat(taxonomy.children[value], hex)
+      const hexVal: string = TreeCreator.setColour(taxonomy.children[value], hex, index/(numChildren**2)+0.5)
+      taxonomy.children[value] = TreeCreator.treeToSunburstFormat(taxonomy.children[value], hexVal)
       taxonomy.children[value].hex = hexVal
       children.push(taxonomy.children[value])
     })
@@ -137,7 +139,7 @@ export class TreeCreator {
           case 'Alphaproteobacteria':
             return '#C6E57A'
           case 'Betaproteobacteria':
-            return '#81CFFS'
+            return '#81CFFD'
           case 'Deltaprotobacteria':
             return '#9B1C30'
           case 'Epsilonproteobacteria':
@@ -155,8 +157,8 @@ export class TreeCreator {
         hsl[1] = hsl[1] >= 60 ? hsl[1] - 8 : hsl[1] + 8
         hsl[2] += 6
       } else {
-        hsl[1] = hsl[1] >= 60 ? hsl[1] - 30*step : hsl[1] + 40*step
-        hsl[2] += 30*step
+        hsl[1] = step*70
+        hsl[2] += 10*step
       }
       newHex = colorConvert.hsl.hex(hsl)
     }

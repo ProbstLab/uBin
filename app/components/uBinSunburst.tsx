@@ -26,7 +26,9 @@ export const EXTENDED_DISCRETE_COLOR_RANGE = [
 ]
 
 const sunburstLabelStyle = {
-  fontSize: '8px',
+  paddingTop: '8px',
+  fontSize: '14px',
+  fontWeight: 'bold',
   textAnchor: 'middle',
 } as React.CSSProperties
 
