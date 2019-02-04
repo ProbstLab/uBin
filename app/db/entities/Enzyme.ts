@@ -13,6 +13,20 @@ export class Enzyme {
   })
   name: string
 
+  @Column({
+    type: 'boolean',
+    default: false
+  })
+  bacterial: boolean
+
+  @Column({
+    type: 'boolean',
+    default: false
+  })
+  archaeal: boolean
+
   @ManyToMany(type => Sample, sample => sample.enzymes)
   samples: Sample[]
+
+  sampleCount: number
 }

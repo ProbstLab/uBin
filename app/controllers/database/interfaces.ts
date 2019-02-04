@@ -12,6 +12,8 @@ export enum dbActions {
   getImportsPending = 'database.getImports_PENDING',
   getTaxonomiesForImport = 'database.getTaxonomiesForImport',
   getTaxonomiesForImportPending = 'database.getTaxonomiesForImport_PENDING',
+  getEnzymeDistribution = 'database.getEnzymeDistribution',
+  getEnzymeDistributionPending = 'database.getEnzymeDistribution_PENDING',
 }
 
 export interface IConnectDatabase extends Action {
@@ -30,6 +32,15 @@ export interface IGetTaxonomiesForImport extends Action {
 export interface IGetTaxonomiesForImportPending extends Action {
   type: dbActions.getTaxonomiesForImportPending
   importPending: boolean
+}
+
+export interface IGetEnzymeDistribution extends Action {
+  type: dbActions.getEnzymeDistribution
+  payload: Promise<any>
+}
+export interface IGetEnzymeDistributionPending extends Action {
+  type: dbActions.getEnzymeDistributionPending
+  enzymeDistributionPending: boolean
 }
 
 export interface IGetImports extends Action {

@@ -12,5 +12,12 @@ export const getTaxonimiesForImportQuery = async (connection: Connection, record
     .leftJoin('taxonomy.samples', 'samples')
     .where('samples.importRecordId = :recordId', {recordId})
     .getMany()
+}
 
+export const getEnzymeDistributionQuery = async (connection: Connection, recordId: number): Promise<any> => {
+  return await connection.getRepository('enzyme').createQueryBuilder('enzyme')
+    .leftJoin('enzyme.samples', 'samples')
+    .loadRelationCountAndMap('enzyme.sampleCount', 'enzyme.samples')
+    .where('samples.importRecordId = :recordId', {recordId})
+    .orderBy('enzyme.name').getMany()
 }

@@ -1,15 +1,25 @@
 import * as React from 'react'
 import {push} from 'connected-react-router'
-import {bindActionCreators, Dispatch} from 'redux'
+import {AnyAction, bindActionCreators, Dispatch} from 'redux'
 import {connect} from 'react-redux'
 import {withRouter, RouteComponentProps} from 'react-router'
 import {IClientState} from '../../controllers'
-import {Button, Callout, Menu, MenuDivider, MenuItem, Popover, Position} from '@blueprintjs/core'
-import {getImportRecords, getTaxonomyTreeFull, IImportRecord, SamplesActions} from '../../controllers/samples'
+import {Button, Menu, MenuDivider, MenuItem, Popover, Position} from '@blueprintjs/core'
+import {
+  getImportRecords,
+  getTaxonomyTreeFull,
+  IImportRecord,
+  SamplesActions,
+  getArchaealEnzymeDistributionForChart,
+  getBacterialEnzymeDistributionForChart
+} from '../../controllers/samples'
 import {DBActions} from '../../controllers/database'
 import {Connection} from 'typeorm'
 import {ITaxonomyForSunburst} from '../../utils/interfaces'
-import {UBinSunburst} from "../../components/uBinSunburst";
+import {UBinSunburst} from "../../components/uBinSunburst"
+import {ThunkAction} from 'redux-thunk'
+import {IVisData} from '../../utils/interfaces'
+import {UBinBarChart} from '../../components/uBinBarChart'
 
 
 interface IProps extends RouteComponentProps {
@@ -19,12 +29,15 @@ interface IPropsFromState {
   connection: Connection | undefined
   importRecords: IImportRecord[]
   taxonomyTreeFull: ITaxonomyForSunburst[] | undefined
+  archaealEnzymeDistribution: IVisData[]
+  bacterialEnzymeDistribution: IVisData[]
 }
 
 interface IActionsFromState {
   changePage(page: string): void
   startDb(): void
-  getTaxonomies(connection: Connection, recordId: number): void
+  getImportData(recordId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
+  // getTaxonomies(connection: Connection, recordId: number): void
 }
 
 const homeStyle = {
@@ -41,7 +54,7 @@ class CHome extends React.Component<TProps> {
 
   public loadSampleData(recordId: number): void {
     if (this.props.connection) {
-      this.props.getTaxonomies(this.props.connection, recordId)
+      this.props.getImportData(recordId)
     }
   }
 
@@ -62,18 +75,16 @@ class CHome extends React.Component<TProps> {
       </Menu>
     )
 
-    console.log("dataset:", { children: this.props.taxonomyTreeFull})
-
     return (
       <div style={homeStyle}>
-        <Popover content={sampleMenu} position={Position.RIGHT_BOTTOM}>
-          <Button icon='settings' text='Data Settings/Import' />
-        </Popover>
-        <Callout title={'Home!'}>
-          Hallo!
-          <p>{this.props.location.key}</p>
-          {this.props.taxonomyTreeFull && <UBinSunburst data={{ children: this.props.taxonomyTreeFull}}/>}
-        </Callout>
+        <div style={{width: '100%'}}>
+          <Popover content={sampleMenu} position={Position.RIGHT_BOTTOM}>
+            <Button icon='settings' text='Data Settings/Import' />
+          </Popover>
+        </div>
+        {this.props.taxonomyTreeFull && <UBinSunburst data={{ children: this.props.taxonomyTreeFull}}/>}
+        <UBinBarChart data={this.props.archaealEnzymeDistribution} title='Archaeal Single Copy Genes'/>
+        <UBinBarChart data={this.props.bacterialEnzymeDistribution} title='Bacterial Single Copy Genes'/>
       </div>
     )
   }
@@ -82,7 +93,9 @@ class CHome extends React.Component<TProps> {
 const mapStateToProps = (state: IClientState): IPropsFromState => ({
   importRecords: getImportRecords(state),
   connection: state.database.connection,
-  taxonomyTreeFull: getTaxonomyTreeFull(state)
+  taxonomyTreeFull: getTaxonomyTreeFull(state),
+  archaealEnzymeDistribution: getArchaealEnzymeDistributionForChart(state),
+  bacterialEnzymeDistribution: getBacterialEnzymeDistributionForChart(state)
 })
 
 const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
@@ -91,7 +104,8 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       changeFilter: SamplesActions.setFilter,
       changePage: push,
       startDb: DBActions.startDatabase,
-      getTaxonomies: (connection, recordId) => DBActions.getTaxonomiesForImport(connection, recordId)
+      getImportData: recordId => DBActions.getImportData(recordId)
+      // getTaxonomies: (connection, recordId) => DBActions.getTaxonomiesForImport(connection, recordId)
     },
     dispatch,
   )

@@ -15,7 +15,9 @@ export interface IImportRecord {
 
 export interface IEnzyme {
   id?: number,
-  name: string
+  name: string,
+  bacterial: boolean,
+  archaeal: boolean,
 }
 
 export interface ITaxonomy {
@@ -62,4 +64,16 @@ export interface ITaxonomyAssociativeArray {
 
 export interface IGenericAssociativeArray {
   [key: string]: any
+}
+
+export interface IVisData {
+  x: string | number
+  y: number
+  [key: string]: string | number
+}
+export interface IVisLabel {
+  x: number
+  y: number
+  label: string
+  [key: string]: string | number
 }

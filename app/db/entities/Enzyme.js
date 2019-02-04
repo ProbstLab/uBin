@@ -27,6 +27,20 @@ var Enzyme = /** @class */ (function () {
         __metadata("design:type", String)
     ], Enzyme.prototype, "name", void 0);
     __decorate([
+        typeorm_1.Column({
+            type: 'boolean',
+            default: false
+        }),
+        __metadata("design:type", Boolean)
+    ], Enzyme.prototype, "bacterial", void 0);
+    __decorate([
+        typeorm_1.Column({
+            type: 'boolean',
+            default: false
+        }),
+        __metadata("design:type", Boolean)
+    ], Enzyme.prototype, "archaeal", void 0);
+    __decorate([
         typeorm_1.ManyToMany(function (type) { return Sample_1.Sample; }, function (sample) { return sample.enzymes; }),
         __metadata("design:type", Array)
     ], Enzyme.prototype, "samples", void 0);

@@ -1,32 +1,8 @@
 import {LabelSeries, Sunburst} from "react-vis";
 import * as React from "react";
-
-export const EXTENDED_DISCRETE_COLOR_RANGE = [
-  '#19CDD7',
-  '#DDB27C',
-  '#88572C',
-  '#FF991F',
-  '#F15C17',
-  '#223F9A',
-  '#DA70BF',
-  '#125C77',
-  '#4DC19C',
-  '#776E57',
-  '#12939A',
-  '#17B8BE',
-  '#F6D18A',
-  '#B7885E',
-  '#FFCB99',
-  '#F89570',
-  '#829AE3',
-  '#E79FD5',
-  '#1E96BE',
-  '#89DAC1',
-  '#B3AD9E',
-]
+import {MouseEvent} from 'react'
 
 const sunburstLabelStyle = {
-  paddingTop: '8px',
   fontSize: '14px',
   fontWeight: 'bold',
   textAnchor: 'middle',
@@ -62,7 +38,7 @@ function updateData(data: any, keyPath: any): any {
   // add a fill to all the uncolored cells
   if (!data.hex) {
     data.style = {
-      fill: EXTENDED_DISCRETE_COLOR_RANGE[5],
+      fill: '#125C77',
     }
   }
   data.style = {
@@ -102,7 +78,7 @@ export class UBinSunburst extends React.Component<IProps> {
           hideRootNode
           onValueMouseOver={node => {
             if (clicked) {
-              return;
+              return
             }
             let {keyPath, namePath} = getKeyAndNamePath(node)
             keyPath = keyPath.reverse()
@@ -126,7 +102,7 @@ export class UBinSunburst extends React.Component<IProps> {
                 data: updateData(this.props.data, false)
               })
           }
-          onValueClick={() => this.setState({clicked: !clicked})}
+          onValueClick={(datapoint: any, event: MouseEvent<HTMLElement>) => { console.log(datapoint, event); this.setState({clicked: !clicked})}}
           style={{
             stroke: '#ddd',
             strokeOpacity: 0.3,

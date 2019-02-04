@@ -171,6 +171,7 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^3.11.0",
+    "@nivo/bar": "^0.52.1",
     "color-convert": "^1.9.3",
     "connected-react-router": "^6.2.1",
     "csv-parser": "^2.1.0",

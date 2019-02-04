@@ -1,5 +1,5 @@
 import { ISampleFilter } from 'samples'
-import {IGetImportsFulfilled, IGetTaxonomiesForImportFulfilled, ISetSampleFilter, samplesActions} from './interfaces'
+import {IGetEnzymeDistributionFulfilled, IGetImportsFulfilled, IGetTaxonomiesForImportFulfilled, ISetSampleFilter, samplesActions} from './interfaces'
 
 export class SamplesActions {
   static setFilter(filter: ISampleFilter): ISetSampleFilter {
@@ -10,5 +10,8 @@ export class SamplesActions {
   }
   static getTaxonomiesForImportFulfilled(payload: any): IGetTaxonomiesForImportFulfilled {
     return {type: samplesActions.getTaxonomiesForImportFulfilled, payload}
+  }
+  static getEnzymeDistributionFulfilled(payload: any): IGetEnzymeDistributionFulfilled {
+    return {type: samplesActions.getEnzymeDistributionFulfilled, payload}
   }
 }

@@ -89,14 +89,14 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
     files: [enzymeFileSaved, taxonomyFileSaved]
   }
   await connection.getRepository('import_record').save(importRecord)
-  await Promise.all(enzymeList.map(async (value: string) => {
+  await Promise.all(enzymeList.map(async (value: string, index: number) => {
     let exists = await connection.getRepository('enzyme')
       .count({where: {name: value }})
     if (exists) {
       enzymeMap[value] = await connection.getRepository('enzyme')
         .findOne({where: {name: value }}) as IEnzyme
     } else {
-      enzymeMap[value] = await connection.getRepository('enzyme').save({ name: value } ) as IEnzyme
+      enzymeMap[value] = await connection.getRepository('enzyme').save({ name: value, archaeal: index <= 50, bacterial: index > 50 } ) as IEnzyme
     }
   }))
   console.log("map before:", {...taxonomyMap})
@@ -123,7 +123,7 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
         taxonomyPath.push('children')
       }
       for (let enzymeKey of item.enzymeKeys.map((e: number, i: number) => e === 1 ? i : 0).filter((x: number) => x > 0)) {
-        newEnzymes.push(enzymeMap[enzymeList[enzymeKey]] as ITaxonomy)
+        newEnzymes.push(enzymeMap[enzymeList[enzymeKey]] as IEnzyme)
       }
       item.taxonomy = newTaxonomies
       item.enzymes = newEnzymes
@@ -162,7 +162,6 @@ const saveTaxonomy = async (taxonomyMap: ITaxonomyAssociativeArray, connection: 
         taxonomyMap[key] = await connection.getRepository('taxonomy')
           .findOne({where: {name: taxonomyMap[key].name, order: taxonomyMap[key].order}}) as ITaxonomy
       } else {
-        // connection.manager.
         taxonomyMap[key] = await connection.getRepository('taxonomy').save(taxonomyMap[key]) as ITaxonomy
       }
     }

@@ -1,4 +1,4 @@
-import {IGetImportsFulfilled, IGetTaxonomiesForImportFulfilled, ISamplesState, ISetSampleFilter} from './interfaces'
+import {IGetEnzymeDistributionFulfilled, IGetImportsFulfilled, IGetTaxonomiesForImportFulfilled, ISamplesState, ISetSampleFilter} from './interfaces'
 import {TreeCreator} from "../../utils/treeCreator";
 
 export const getInitialState = (): ISamplesState => ({
@@ -23,5 +23,12 @@ export const getTaxonomiesForImportFulfilled = (state: ISamplesState, action: IG
   return {
     ...state,
     taxonomyTreeFull: TreeCreator.createTree(action.payload)
+  }
+}
+
+export const getEnzymeDistributionFulfilled = (state: ISamplesState, action: IGetEnzymeDistributionFulfilled): ISamplesState => {
+  return {
+    ...state,
+    enzymeDistribution: action.payload
   }
 }

@@ -16,6 +16,7 @@ export const samplesReducer = createReducer(samples.getInitialState(), {
   [samplesActions.setSampleFilter]: samples.setFilter,
   [samplesActions.getImportsFulfilled]: samples.getImportsFulfilled,
   [samplesActions.getTaxonomiesForImportFulfilled]: samples.getTaxonomiesForImportFulfilled,
+  [samplesActions.getEnzymeDistributionFulfilled]: samples.getEnzymeDistributionFulfilled,
 })
 
 export const fileTreeReducer = createReducer(files.getInitialState(), {
