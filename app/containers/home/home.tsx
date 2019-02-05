@@ -9,18 +9,15 @@ import {
   getImportRecords,
   getTaxonomyTreeFull,
   IImportRecord,
-  SamplesActions,
   getArchaealEnzymeDistributionForChart,
-  getBacterialEnzymeDistributionForChart
+  getBacterialEnzymeDistributionForChart, SamplesActions
 } from '../../controllers/samples'
 import {DBActions} from '../../controllers/database'
 import {Connection} from 'typeorm'
-import {ITaxonomyForSunburst} from '../../utils/interfaces'
+import {IBarData, ITaxonomyForSunburst} from '../../utils/interfaces'
 import {UBinSunburst} from "../../components/uBinSunburst"
 import {ThunkAction} from 'redux-thunk'
-import {IVisData} from '../../utils/interfaces'
 import {UBinBarChart} from '../../components/uBinBarChart'
-
 
 interface IProps extends RouteComponentProps {
 }
@@ -29,15 +26,15 @@ interface IPropsFromState {
   connection: Connection | undefined
   importRecords: IImportRecord[]
   taxonomyTreeFull: ITaxonomyForSunburst[] | undefined
-  archaealEnzymeDistribution: IVisData[]
-  bacterialEnzymeDistribution: IVisData[]
+  archaealEnzymeDistribution: IBarData[]
+  bacterialEnzymeDistribution: IBarData[]
 }
 
 interface IActionsFromState {
   changePage(page: string): void
   startDb(): void
   getImportData(recordId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
-  // getTaxonomies(connection: Connection, recordId: number): void
+  updateSelectedTaxonomy(taxonomyId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
 }
 
 const homeStyle = {
@@ -76,16 +73,21 @@ class CHome extends React.Component<TProps> {
     )
 
     return (
-      <div style={homeStyle}>
-        <div style={{width: '100%'}}>
-          <Popover content={sampleMenu} position={Position.RIGHT_BOTTOM}>
-            <Button icon='settings' text='Data Settings/Import' />
-          </Popover>
+      <div>
+        <div style={homeStyle}>
+          <div style={{width: '100%'}}>
+            <Popover content={sampleMenu} position={Position.RIGHT_BOTTOM}>
+              <Button icon='settings' text='Data Settings/Import' />
+            </Popover>
+          </div>
+          {this.props.taxonomyTreeFull && <UBinSunburst data={{ children: this.props.taxonomyTreeFull}} clickEvent={this.props.updateSelectedTaxonomy}/>}
+          <div style={{width: "400px", height: "400px"}}>
+            {this.props.archaealEnzymeDistribution && <UBinBarChart data={this.props.archaealEnzymeDistribution} title='Archaeal Single Copy Genes'/>}
+            {this.props.bacterialEnzymeDistribution && <UBinBarChart data={this.props.bacterialEnzymeDistribution} title='Bacterial Single Copy Genes'/>}
+          </div>
         </div>
-        {this.props.taxonomyTreeFull && <UBinSunburst data={{ children: this.props.taxonomyTreeFull}}/>}
-        <UBinBarChart data={this.props.archaealEnzymeDistribution} title='Archaeal Single Copy Genes'/>
-        <UBinBarChart data={this.props.bacterialEnzymeDistribution} title='Bacterial Single Copy Genes'/>
       </div>
+
     )
   }
 }
@@ -101,10 +103,11 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
 const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
   bindActionCreators(
     {
-      changeFilter: SamplesActions.setFilter,
+      // changeFilter: SamplesActions.setFilter,
       changePage: push,
       startDb: DBActions.startDatabase,
-      getImportData: recordId => DBActions.getImportData(recordId)
+      getImportData: recordId => DBActions.getImportData(recordId),
+      updateSelectedTaxonomy: taxonomyId => SamplesActions.updateSelectedTaxonomy(taxonomyId)
       // getTaxonomies: (connection, recordId) => DBActions.getTaxonomiesForImport(connection, recordId)
     },
     dispatch,

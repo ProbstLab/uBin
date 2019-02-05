@@ -1,8 +1,4 @@
 import { createSelector } from 'reselect'
-import * as _ from 'lodash'
-
-import { IValueMap } from 'common'
-import { ISampleFilter, ISample } from 'samples'
 
 import { ISamplesState } from './interfaces'
 
@@ -11,28 +7,6 @@ import { IClientState } from '..'
 import {Enzyme} from '../../db/entities/Enzyme'
 
 const getSamplesState = (state: IClientState) => state.samples
-
-const getSamplesMap = createSelector(
-  getSamplesState,
-  (state: ISamplesState) => state.samples,
-)
-
-const getSamplesFilter = createSelector(
-  getSamplesState,
-  (state: ISamplesState) => state.filter,
-)
-
-const getSamplesAsArray = createSelector(
-  getSamplesMap,
-  (samples: IValueMap<ISample>) => Object.keys(samples).map(id => samples[id]),
-)
-
-export const getFilteredSamples = createSelector(
-  getSamplesAsArray,
-  getSamplesFilter,
-  (samples: ISample[], filter: ISampleFilter) =>
-    samples.filter(r => filter.taxonomy.every(taxonomy => _.includes(r.taxonomy, taxonomy))),
-)
 
 export const getImportRecords = createSelector(
   getSamplesState,
@@ -47,10 +21,12 @@ export const getTaxonomyTreeFull = createSelector(
 export const getBacterialEnzymeDistributionForChart = createSelector(
   getSamplesState,
   (state: ISamplesState) => state.enzymeDistribution ?
-    state.enzymeDistribution.map((value: Enzyme) => {return {x: value.name, y: value.sampleCount, id: value.id}}) : []
+    state.enzymeDistribution.filter(value => value.bacterial)
+      .map((value: Enzyme) => {return {name: value.name, amount: value.sampleCount, id: value.id}}) : []
 )
 export const getArchaealEnzymeDistributionForChart = createSelector(
   getSamplesState,
   (state: ISamplesState) => state.enzymeDistribution ?
-    state.enzymeDistribution.filter(value => value.archaeal).map((value: Enzyme) => {return {x: value.name, y: value.sampleCount, id: value.id}}) : []
+    state.enzymeDistribution.filter(value => value.archaeal)
+      .map((value: Enzyme) => {return {name: value.name, amount: value.sampleCount, id: value.id}}) : []
 )

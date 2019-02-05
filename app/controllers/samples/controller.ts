@@ -1,16 +1,15 @@
-import {IGetEnzymeDistributionFulfilled, IGetImportsFulfilled, IGetTaxonomiesForImportFulfilled, ISamplesState, ISetSampleFilter} from './interfaces'
+import {
+  IGetEnzymeDistributionFulfilled,
+  IGetImportsFulfilled,
+  IGetTaxonomiesForImportFulfilled,
+  ISamplesState,
+  ISetImportedRecord
+} from './interfaces'
 import {TreeCreator} from "../../utils/treeCreator";
 
 export const getInitialState = (): ISamplesState => ({
-  filter: {
-    taxonomy: ['x'],
-  },
   importRecords: [],
 })
-
-export const setFilter = (state: ISamplesState, action: ISetSampleFilter): ISamplesState => {
-  return { ...state, filter: action.filter }
-}
 
 export const getImportsFulfilled = (state: ISamplesState, action: IGetImportsFulfilled): ISamplesState => {
   return {
@@ -30,5 +29,11 @@ export const getEnzymeDistributionFulfilled = (state: ISamplesState, action: IGe
   return {
     ...state,
     enzymeDistribution: action.payload
+  }
+}
+export const setImportedRecord = (state: ISamplesState, action: ISetImportedRecord): ISamplesState => {
+  return {
+    ...state,
+    recordId: action.recordId
   }
 }

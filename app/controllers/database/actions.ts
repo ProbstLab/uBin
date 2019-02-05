@@ -12,6 +12,7 @@ import {AnyAction} from 'redux'
 import {getDBConnection} from './selectors'
 import {IClientState} from '../index'
 import {getTaxonimiesForImportQuery, getEnzymeDistributionQuery} from './queries'
+import {SamplesActions} from '../samples'
 
 console.log('window: ', window)
 const orm = (window as any).typeorm
@@ -35,8 +36,8 @@ export class DBActions {
     return {type: dbActions.getTaxonomiesForImportPending, importPending: true}
   }
 
-  static getEnzymeDistribution(connection: Connection, recordId: number): IGetEnzymeDistribution {
-    return {type: dbActions.getEnzymeDistribution, payload: getEnzymeDistributionQuery(connection, recordId)}
+  static getEnzymeDistribution(connection: Connection, recordId: number, taxonomyId?: number): IGetEnzymeDistribution {
+    return {type: dbActions.getEnzymeDistribution, payload: getEnzymeDistributionQuery(connection, recordId, taxonomyId)}
   }
   static getEnzymeDistributionPending(payload: any): IGetEnzymeDistributionPending {
     return {type: dbActions.getEnzymeDistributionPending, enzymeDistributionPending: true}
@@ -73,6 +74,7 @@ export class DBActions {
           Promise.all([
             dispatch(DBActions.getTaxonomiesForImport(connection, recordId)),
             dispatch(DBActions.getEnzymeDistribution(connection, recordId)),
+            dispatch(SamplesActions.setImportedRecord(recordId)),
           ]).then(() => resolve())
         } else {
           resolve()

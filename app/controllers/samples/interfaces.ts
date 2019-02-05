@@ -1,7 +1,7 @@
 import { Action } from 'redux'
 import { IValueMap } from 'common'
-import { ISampleFilter, ISample } from 'samples'
-import {IGenericAssociativeArray} from "../../utils/interfaces"
+import { ISample } from 'samples'
+import {IGenericAssociativeArray, ITaxonomyForSunburst} from "../../utils/interfaces"
 import {Enzyme} from '../../db/entities/Enzyme'
 
 export interface IImportRecord {
@@ -10,23 +10,19 @@ export interface IImportRecord {
 }
 
 export interface ISamplesState {
-  filter: ISampleFilter
   samples?: IValueMap<ISample>
   importRecords: IImportRecord[]
   taxonomyTreeFull?: IGenericAssociativeArray
   enzymeDistribution?: Enzyme[]
+  selectedTaxonomy?: ITaxonomyForSunburst
+  recordId?: number
 }
 
 export enum samplesActions {
-  setSampleFilter = 'samples.set-filter',
   getImportsFulfilled = 'database.getImports_FULFILLED',
   getTaxonomiesForImportFulfilled = 'database.getTaxonomiesForImport_FULFILLED',
   getEnzymeDistributionFulfilled = 'database.getEnzymeDistribution_FULFILLED',
-}
-
-export interface ISetSampleFilter extends Action {
-  type: samplesActions.setSampleFilter
-  filter: ISampleFilter
+  setImportedRecord = 'database.setImportedRecord',
 }
 export interface IGetImportsFulfilled extends Action {
   type: samplesActions.getImportsFulfilled
@@ -39,4 +35,8 @@ export interface IGetTaxonomiesForImportFulfilled extends Action {
 export interface IGetEnzymeDistributionFulfilled extends Action {
   type: samplesActions.getEnzymeDistributionFulfilled
   payload: any
+}
+export interface ISetImportedRecord extends Action {
+  type: samplesActions.setImportedRecord
+  recordId: number
 }

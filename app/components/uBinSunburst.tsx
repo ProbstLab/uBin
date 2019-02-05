@@ -52,6 +52,7 @@ function updateData(data: any, keyPath: any): any {
 
 interface IProps {
   data: any
+  clickEvent(datapoint: any): void
 }
 
 export interface ISunburstState {
@@ -102,7 +103,7 @@ export class UBinSunburst extends React.Component<IProps> {
                 data: updateData(this.props.data, false)
               })
           }
-          onValueClick={(datapoint: any, event: MouseEvent<HTMLElement>) => { console.log(datapoint, event); this.setState({clicked: !clicked})}}
+          onValueClick={(datapoint: any, event: MouseEvent<HTMLElement>) => { this.props.clickEvent(datapoint.id); this.setState({clicked: !clicked})}}
           style={{
             stroke: '#ddd',
             strokeOpacity: 0.3,

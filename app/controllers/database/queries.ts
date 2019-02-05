@@ -14,7 +14,7 @@ export const getTaxonimiesForImportQuery = async (connection: Connection, record
     .getMany()
 }
 
-export const getEnzymeDistributionQuery = async (connection: Connection, recordId: number): Promise<any> => {
+export const getEnzymeDistributionQuery = async (connection: Connection, recordId: number, taxonomyId?: number): Promise<any> => {
   return await connection.getRepository('enzyme').createQueryBuilder('enzyme')
     .leftJoin('enzyme.samples', 'samples')
     .loadRelationCountAndMap('enzyme.sampleCount', 'enzyme.samples')

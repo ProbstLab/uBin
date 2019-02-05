@@ -130,6 +130,7 @@
     "@types/react-router-dom": "^4.0.7",
     "@types/redux-logger": "^3.0.0",
     "@types/sinon": "^4.0.0",
+    "@types/victory":"^31.0.6",
     "asar": "^0.14.6",
     "boiler-room-custodian": "^0.6.2",
     "concurrently": "^3.1.0",
@@ -171,7 +172,6 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^3.11.0",
-    "@nivo/bar": "^0.52.1",
     "color-convert": "^1.9.3",
     "connected-react-router": "^6.2.1",
     "csv-parser": "^2.1.0",
@@ -192,7 +192,8 @@
     "reselect": "^4.0.0",
     "sqlite3": "^4.0.6",
     "source-map-support": "^0.5.10",
-    "typeorm": "^0.2.12"
+    "typeorm": "^0.2.12",
+    "victory": "^31.2.0"
   },
   "devEngines": {
     "node": ">=6.x",

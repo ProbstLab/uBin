@@ -66,14 +66,8 @@ export interface IGenericAssociativeArray {
   [key: string]: any
 }
 
-export interface IVisData {
-  x: string | number
-  y: number
-  [key: string]: string | number
-}
-export interface IVisLabel {
-  x: number
-  y: number
-  label: string
+export interface IBarData {
+  name: string | number
+  amount: number
   [key: string]: string | number
 }

@@ -1,45 +1,44 @@
 import * as React from "react"
-import {HorizontalGridLines, VerticalBarSeriesCanvas, VerticalGridLines, XYPlot, XAxis, YAxis, LabelSeries} from "react-vis"
-import {IVisData} from '../utils/interfaces'
+import { IBarData } from '../utils/interfaces'
+import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryLabel} from 'victory'
 
-const getLabelData = (data: IVisData[]) => data.map((value: IVisData, index: number): any => {
-  return {x: value.x, y: value.y, label: value.x.toString()}
-})
-
-const getGeneCount = (data: IVisData[]) => data.map(value => value.y)
+// const getLabelData = (data: IVisData[]) => data.map((value: IVisData, index: number): any => {
+//   return {x: value.x, y: value.y, label: value.x.toString()}
+// })
+//
+// const getGeneCount = (data: IVisData[]) => data.map(value => value.y)
 
 interface IProps {
-  data: IVisData[]
+  data: IBarData[]
   title: string
 }
 
 export interface IBarCharState {
-  labelData: any[]
-  geneCount: number
+  // labelData: any[]
+  // geneCount: number
 }
 
 export class UBinBarChart extends React.Component<IProps> {
 
-  public state: IBarCharState = {
-    labelData: getLabelData(this.props.data),
-    geneCount: getGeneCount(this.props.data).reduce((sum, val) => sum + val, 0)
-  }
+  public state: IBarCharState = {}
 
-  render(): JSX.Element {
-    const {labelData, geneCount} = this.state
+  public render(): JSX.Element {
     return (
-      <div>
-        <h5>{this.props.title} / {geneCount}</h5>
-        {/*<XYPlot width={300} height={500}>*/}
-        <XYPlot width={300} height={500} margin={{left: 40, right: 10, top: 10, bottom: 100}}>
-          <VerticalGridLines />
-          <HorizontalGridLines />
-          <XAxis tickLabelAngle={-80}/>
-          <YAxis />
-          <VerticalBarSeriesCanvas data={this.props.data} />
-          <LabelSeries data={labelData}/>
-        </XYPlot>
-      </div>
+      <VictoryChart theme={VictoryTheme.material} domainPadding={20}
+                    padding={{ left: 40, top: 40, right: 10, bottom: 200 }}>
+        <VictoryAxis
+          tickLabelComponent={<VictoryLabel style={{textAnchor:'end'}} angle={-75}/>}
+        />
+        <VictoryAxis
+          dependentAxis={true}
+          tickFormat={(t: number) => {return  t >= 1000 ? `${Math.round(t)/1000}k` : t}}
+        />
+        <VictoryBar
+          data={this.props.data}
+          x="name"
+          y="amount"
+        />
+      </VictoryChart>
     )
   }
 }
