@@ -19,6 +19,7 @@ import {UBinSunburst} from "../../components/uBinSunburst"
 import {ThunkAction} from 'redux-thunk'
 import {UBinBarChart} from '../../components/uBinBarChart'
 import {UBinScatter} from '../../components/uBinScatter'
+import {UBinZoomBarChart} from '../../components/uBinZoomBarChart'
 
 interface IProps extends RouteComponentProps {
 }
@@ -85,15 +86,31 @@ class CHome extends React.Component<TProps> {
           </div>
           {this.props.taxonomyTreeFull &&
           <div style={{width: '100%', display: 'flex'}}>
-            <div style={{width: '30%'}}>
-              <UBinScatter data={this.props.samples}/>
-            </div>
-            <div style={{width: '40%'}}>
-              <UBinSunburst data={{ children: this.props.taxonomyTreeFull}} clickEvent={this.props.updateSelectedTaxonomy}/>
+            <div style={{width: '70%'}}>
+              <div style={{width: '100%', display: 'flex'}}>
+                <div style={{width: '50%', height: '400px'}}>
+                  <UBinScatter data={this.props.samples}/>
+                </div>
+                <div style={{width: '50%'}}>
+                  <UBinSunburst data={{ children: this.props.taxonomyTreeFull}} clickEvent={this.props.updateSelectedTaxonomy}/>
+                </div>
+              </div>
+              <div style={{width: '100%', display: 'flex'}}>
+                <div style={{width: '50%', height: '500px'}}>
+                  <UBinZoomBarChart data={this.props.samples} title='GC/Length' xName='gc' yName='length'/>
+                </div>
+                <div style={{width: '50%', height: '500px'}}>
+                  <UBinZoomBarChart data={this.props.samples} title='Coverage/Length' xName='coverage' yName='length'/>
+                </div>
+              </div>
             </div>
             <div style={{width: '30%', height: 'inherit'}}>
-              <UBinBarChart data={this.props.archaealEnzymeDistribution} title='Archaeal Single Copy Genes'/>
-              <UBinBarChart data={this.props.bacterialEnzymeDistribution} title='Bacterial Single Copy Genes'/>
+              <div style={{height: '400px'}}>
+                <UBinBarChart data={this.props.archaealEnzymeDistribution} title='Archaeal Single Copy Genes' xName='name' yName='amount'/>
+              </div>
+              <div style={{height: '400px'}}>
+                <UBinBarChart data={this.props.bacterialEnzymeDistribution} title='Bacterial Single Copy Genes' xName='name' yName='amount'/>
+              </div>
             </div>
           </div>}
         </div>
@@ -115,7 +132,6 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
 const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
   bindActionCreators(
     {
-      // changeFilter: SamplesActions.setFilter,
       changePage: push,
       startDb: DBActions.startDatabase,
       refreshImports: DBActions.refreshImports,

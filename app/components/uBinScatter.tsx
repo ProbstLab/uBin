@@ -9,6 +9,7 @@ import {ISample} from '../utils/interfaces'
 // const getGeneCount = (data: IVisData[]) => data.map(value => value.y)
 
 interface IProps {
+
   data: ISample[]
   title?: string
 }
@@ -27,7 +28,8 @@ export class UBinScatter extends React.Component<IProps> {
       <VictoryChart containerComponent={<VictoryBrushContainer
                                         defaultBrushArea="disable"/>}
                     theme={VictoryTheme.material} domainPadding={20}
-                    height={400}
+                    height={600}
+                    width={400}
                     padding={{ left: 40, top: 40, right: 10, bottom: 150 }}>
         <VictoryAxis
           tickLabelComponent={<VictoryLabel style={{textAnchor:'end', fontSize: '10px'}} angle={-75}/>}

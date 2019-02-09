@@ -11,6 +11,8 @@ import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryLabel} from 
 interface IProps {
   data: IBarData[]
   title: string
+  xName?: string
+  yName?: string
 }
 
 export interface IBarCharState {
@@ -28,7 +30,7 @@ export class UBinBarChart extends React.Component<IProps> {
                     height={400}
                     padding={{ left: 40, top: 40, right: 10, bottom: 150 }}>
         <VictoryAxis
-          tickLabelComponent={<VictoryLabel style={{textAnchor:'end', fontSize: '10px'}} angle={-75}/>}
+          tickLabelComponent={<VictoryLabel style={{textAnchor:'end', fontSize: '8px'}} angle={-75}/>}
         />
         <VictoryAxis
           dependentAxis={true}
@@ -36,8 +38,8 @@ export class UBinBarChart extends React.Component<IProps> {
         />
         <VictoryBar
           data={this.props.data}
-          x="name"
-          y="amount"
+          x={this.props.xName || 'x'}
+          y={this.props.yName || 'y'}
         />
       </VictoryChart>
     )
