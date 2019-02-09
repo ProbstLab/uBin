@@ -10,7 +10,7 @@ import {
   getTaxonomyTreeFull,
   IImportRecord,
   getArchaealEnzymeDistributionForChart,
-  getBacterialEnzymeDistributionForChart, SamplesActions
+  getBacterialEnzymeDistributionForChart, SamplesActions, getSamples
 } from '../../controllers/samples'
 import {DBActions} from '../../controllers/database'
 import {Connection} from 'typeorm'
@@ -18,6 +18,7 @@ import {IBarData, ITaxonomyForSunburst} from '../../utils/interfaces'
 import {UBinSunburst} from "../../components/uBinSunburst"
 import {ThunkAction} from 'redux-thunk'
 import {UBinBarChart} from '../../components/uBinBarChart'
+import {UBinScatter} from '../../components/uBinScatter'
 
 interface IProps extends RouteComponentProps {
 }
@@ -28,6 +29,7 @@ interface IPropsFromState {
   taxonomyTreeFull: ITaxonomyForSunburst[] | undefined
   archaealEnzymeDistribution: IBarData[]
   bacterialEnzymeDistribution: IBarData[]
+  samples: any[]
 }
 
 interface IActionsFromState {
@@ -80,11 +82,26 @@ class CHome extends React.Component<TProps> {
               <Button icon='settings' text='Data Settings/Import' />
             </Popover>
           </div>
-          {this.props.taxonomyTreeFull && <UBinSunburst data={{ children: this.props.taxonomyTreeFull}} clickEvent={this.props.updateSelectedTaxonomy}/>}
-          <div style={{width: "400px", height: "400px"}}>
-            {this.props.archaealEnzymeDistribution && <UBinBarChart data={this.props.archaealEnzymeDistribution} title='Archaeal Single Copy Genes'/>}
-            {this.props.bacterialEnzymeDistribution && <UBinBarChart data={this.props.bacterialEnzymeDistribution} title='Bacterial Single Copy Genes'/>}
-          </div>
+          {this.props.taxonomyTreeFull &&
+          <div style={{width: '100%', display: 'flex'}}>
+            <div style={{width: '30%'}}>
+              <UBinScatter data={this.props.samples}/>
+            </div>
+            <div style={{width: '40%'}}>
+              <UBinSunburst data={{ children: this.props.taxonomyTreeFull}} clickEvent={this.props.updateSelectedTaxonomy}/>
+            </div>
+            <div style={{width: '30%', height: 'inherit'}}>
+              <UBinBarChart data={this.props.archaealEnzymeDistribution} title='Archaeal Single Copy Genes'/>
+              <UBinBarChart data={this.props.bacterialEnzymeDistribution} title='Bacterial Single Copy Genes'/>
+            </div>
+          </div>}
+          {/*{console.log("samples:", this.props.samples)}*/}
+          {/*<UBinScatter data={this.props.samples}/>*/}
+          {/*{this.props.taxonomyTreeFull && <UBinSunburst data={{ children: this.props.taxonomyTreeFull}} clickEvent={this.props.updateSelectedTaxonomy}/>}*/}
+          {/*<div style={{width: "400px", height: "400px"}}>*/}
+            {/*{this.props.archaealEnzymeDistribution.length && <UBinBarChart data={this.props.archaealEnzymeDistribution} title='Archaeal Single Copy Genes'/>}*/}
+            {/*{this.props.bacterialEnzymeDistribution.length && <UBinBarChart data={this.props.bacterialEnzymeDistribution} title='Bacterial Single Copy Genes'/>}*/}
+          {/*</div>*/}
         </div>
       </div>
 
@@ -96,6 +113,7 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   importRecords: getImportRecords(state),
   connection: state.database.connection,
   taxonomyTreeFull: getTaxonomyTreeFull(state),
+  samples: getSamples(state),
   archaealEnzymeDistribution: getArchaealEnzymeDistributionForChart(state),
   bacterialEnzymeDistribution: getBacterialEnzymeDistributionForChart(state)
 })
@@ -107,7 +125,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       changePage: push,
       startDb: DBActions.startDatabase,
       getImportData: recordId => DBActions.getImportData(recordId),
-      updateSelectedTaxonomy: taxonomyId => SamplesActions.updateSelectedTaxonomy(taxonomyId)
+      updateSelectedTaxonomy: taxonomyIds => SamplesActions.updateSelectedTaxonomy(taxonomyIds)
       // getTaxonomies: (connection, recordId) => DBActions.getTaxonomiesForImport(connection, recordId)
     },
     dispatch,

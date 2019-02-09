@@ -69,6 +69,26 @@ export class UBinSunburst extends React.Component<IProps> {
     clicked: false
   }
 
+  public getChildrenIds(datapoint: any): number[] {
+    let childrenIdArray: number[] = []
+    if (datapoint.hasOwnProperty('children')) {
+      if (datapoint.children.length) {
+        datapoint.children.forEach((datapoint: any) => {
+          childrenIdArray.push(...this.getChildrenIds(datapoint))
+        })
+      } else if (datapoint.hasOwnProperty('id')) {
+        childrenIdArray.push(datapoint.id)
+      }
+    }
+    return childrenIdArray
+  }
+
+  public selectTaxonomy(datapoint: any): void {
+    if (!this.state.clicked) {
+      this.props.clickEvent(this.getChildrenIds(datapoint))
+    }
+  }
+
   render(): JSX.Element {
     const {finalValue, clicked, namePathValue} = this.state
     return (
@@ -103,7 +123,7 @@ export class UBinSunburst extends React.Component<IProps> {
                 data: updateData(this.props.data, false)
               })
           }
-          onValueClick={(datapoint: any, event: MouseEvent<HTMLElement>) => { this.props.clickEvent(datapoint.id); this.setState({clicked: !clicked})}}
+          onValueClick={(datapoint: any, event: MouseEvent<HTMLElement>) => { this.selectTaxonomy(datapoint); this.setState({clicked: !clicked})}}
           style={{
             stroke: '#ddd',
             strokeOpacity: 0.3,

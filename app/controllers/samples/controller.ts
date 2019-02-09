@@ -1,6 +1,6 @@
 import {
   IGetEnzymeDistributionFulfilled,
-  IGetImportsFulfilled,
+  IGetImportsFulfilled, IGetSamplesFulfilled,
   IGetTaxonomiesForImportFulfilled,
   ISamplesState,
   ISetImportedRecord
@@ -35,5 +35,12 @@ export const setImportedRecord = (state: ISamplesState, action: ISetImportedReco
   return {
     ...state,
     recordId: action.recordId
+  }
+}
+export const getSamplesFulfilled = (state: ISamplesState, action: IGetSamplesFulfilled): ISamplesState => {
+  console.log("action", action)
+  return {
+    ...state,
+    samples: action.payload
   }
 }

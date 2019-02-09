@@ -14,10 +14,23 @@ export const getTaxonimiesForImportQuery = async (connection: Connection, record
     .getMany()
 }
 
-export const getEnzymeDistributionQuery = async (connection: Connection, recordId: number, taxonomyId?: number): Promise<any> => {
-  return await connection.getRepository('enzyme').createQueryBuilder('enzyme')
+export const getEnzymeDistributionQuery = async (connection: Connection, recordId: number, taxonomyIds?: number[]): Promise<any> => {
+  let query = connection.getRepository('enzyme').createQueryBuilder('enzyme')
     .leftJoin('enzyme.samples', 'samples')
     .loadRelationCountAndMap('enzyme.sampleCount', 'enzyme.samples')
     .where('samples.importRecordId = :recordId', {recordId})
-    .orderBy('enzyme.name').getMany()
+  if (taxonomyIds) {
+    query.andWhere('samples.taxonomyId IN (:...taxonomyIds)', {taxonomyIds})
+  }
+  return query.getMany()
+}
+
+export const getSamplesQuery = async (connection: Connection, recordId: number, taxonomyIds?: number[]): Promise<any> => {
+  let query = connection.getRepository('sample').createQueryBuilder('sample')
+    .select(['sample.id', 'sample.gc', 'sample.coverage', 'sample.length'])
+    .where('sample.importRecordId = :recordId', {recordId})
+  if (taxonomyIds) {
+    query.andWhere('sample.taxonomyId IN (:...taxonomyIds)', {taxonomyIds})
+  }
+  return query.getMany()
 }

@@ -1,6 +1,6 @@
 import * as React from "react"
-import { IBarData } from '../utils/interfaces'
-import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryLabel} from 'victory'
+import {VictoryAxis, VictoryScatter, VictoryChart, VictoryTheme, VictoryLabel, VictoryBrushContainer} from 'victory'
+import {ISample} from '../utils/interfaces'
 
 // const getLabelData = (data: IVisData[]) => data.map((value: IVisData, index: number): any => {
 //   return {x: value.x, y: value.y, label: value.x.toString()}
@@ -9,22 +9,24 @@ import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryLabel} from 
 // const getGeneCount = (data: IVisData[]) => data.map(value => value.y)
 
 interface IProps {
-  data: IBarData[]
-  title: string
+  data: ISample[]
+  title?: string
 }
 
-export interface IBarCharState {
+export interface IUBinScatterState {
   // labelData: any[]
   // geneCount: number
 }
 
-export class UBinBarChart extends React.Component<IProps> {
+export class UBinScatter extends React.Component<IProps> {
 
-  public state: IBarCharState = {}
+  public state: IUBinScatterState = {}
 
   public render(): JSX.Element {
     return (
-      <VictoryChart theme={VictoryTheme.material} domainPadding={20}
+      <VictoryChart containerComponent={<VictoryBrushContainer
+                                        defaultBrushArea="disable"/>}
+                    theme={VictoryTheme.material} domainPadding={20}
                     height={400}
                     padding={{ left: 40, top: 40, right: 10, bottom: 150 }}>
         <VictoryAxis
@@ -34,10 +36,12 @@ export class UBinBarChart extends React.Component<IProps> {
           dependentAxis={true}
           tickFormat={(t: number) => {return  t >= 1000 ? `${Math.round(t)/1000}k` : t}}
         />
-        <VictoryBar
+        <VictoryScatter
+          bubbleProperty="size"
+          maxBubbleSize={20}
           data={this.props.data}
-          x="name"
-          y="amount"
+          x={'gc'}
+          y={'coverage'}
         />
       </VictoryChart>
     )

@@ -3,7 +3,8 @@ import {
   IGetImportsFulfilled,
   IGetTaxonomiesForImportFulfilled,
   ISetImportedRecord,
-  samplesActions
+  samplesActions,
+  IGetSamplesFulfilled
 } from './interfaces'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
 import {IClientState} from '../index'
@@ -22,19 +23,23 @@ export class SamplesActions {
   static getEnzymeDistributionFulfilled(payload: any): IGetEnzymeDistributionFulfilled {
     return {type: samplesActions.getEnzymeDistributionFulfilled, payload}
   }
+  static getSamplesFulfilled(payload: any): IGetSamplesFulfilled {
+    return {type: samplesActions.getSamplesFulfilled, payload}
+  }
   static setImportedRecord(recordId: number): ISetImportedRecord {
     return {type: samplesActions.setImportedRecord, recordId}
   }
 
-  static updateSelectedTaxonomy(taxonomyId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
-    console.log("Update!", taxonomyId)
+  static updateSelectedTaxonomy(taxonomyIds: number[]): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
+    console.log("Update!", taxonomyIds)
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>(resolve => {
         let connection: Connection | undefined = getDBConnection(getState())
         let recordId: number | undefined = getState().samples.recordId
         if (connection && recordId) {
           Promise.all([
-            dispatch(DBActions.getEnzymeDistribution(connection, recordId, taxonomyId)),
+            dispatch(DBActions.getEnzymeDistribution(connection, recordId, taxonomyIds)),
+            dispatch(DBActions.getSamples(connection, recordId, taxonomyIds)),
           ]).then(() => resolve())
         } else {
           resolve()

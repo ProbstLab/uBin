@@ -3,7 +3,7 @@ import {
   IConnectDatabase,
   IConnectDatabaseFulfilled, IGetEnzymeDistribution, IGetEnzymeDistributionPending,
   IGetImports,
-  IGetImportsPending,
+  IGetImportsPending, IGetSamples, IGetSamplesPending,
   IGetTaxonomiesForImport, IGetTaxonomiesForImportPending,
 } from './interfaces'
 import {Connection} from 'typeorm'
@@ -11,7 +11,7 @@ import {ThunkAction, ThunkDispatch} from 'redux-thunk'
 import {AnyAction} from 'redux'
 import {getDBConnection} from './selectors'
 import {IClientState} from '../index'
-import {getTaxonimiesForImportQuery, getEnzymeDistributionQuery} from './queries'
+import {getTaxonimiesForImportQuery, getEnzymeDistributionQuery, getSamplesQuery} from './queries'
 import {SamplesActions} from '../samples'
 
 console.log('window: ', window)
@@ -36,11 +36,18 @@ export class DBActions {
     return {type: dbActions.getTaxonomiesForImportPending, importPending: true}
   }
 
-  static getEnzymeDistribution(connection: Connection, recordId: number, taxonomyId?: number): IGetEnzymeDistribution {
+  static getEnzymeDistribution(connection: Connection, recordId: number, taxonomyId?: number[]): IGetEnzymeDistribution {
     return {type: dbActions.getEnzymeDistribution, payload: getEnzymeDistributionQuery(connection, recordId, taxonomyId)}
   }
   static getEnzymeDistributionPending(payload: any): IGetEnzymeDistributionPending {
     return {type: dbActions.getEnzymeDistributionPending, enzymeDistributionPending: true}
+  }
+
+  static getSamples(connection: Connection, recordId: number, taxonomyId?: number[]): IGetSamples {
+    return {type: dbActions.getSamples, payload: getSamplesQuery(connection, recordId, taxonomyId)}
+  }
+  static getSamplesPending(payload: any): IGetSamplesPending {
+    return {type: dbActions.getSamplesPending, samplesPending: true}
   }
 
   static getImports(connection: Connection): IGetImports {
@@ -74,6 +81,7 @@ export class DBActions {
           Promise.all([
             dispatch(DBActions.getTaxonomiesForImport(connection, recordId)),
             dispatch(DBActions.getEnzymeDistribution(connection, recordId)),
+            dispatch(DBActions.getSamples(connection, recordId)),
             dispatch(SamplesActions.setImportedRecord(recordId)),
           ]).then(() => resolve())
         } else {
