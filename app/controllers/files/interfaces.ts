@@ -16,8 +16,8 @@ export enum fileTreeActions {
   populateFileTree = 'files.populate',
   initFileTree = 'files.init-filetree',
   importFile = 'files.import',
-  importFileFulfilled = 'files.import_FULFILLED',
   importFilePending = 'files.import_PENDING',
+  importFileFulfilled = 'files.import_FULFILLED',
 }
 
 export interface IOpenFile extends Action {
@@ -49,12 +49,12 @@ export interface IImportFile extends Action {
   type: fileTreeActions.importFile
   payload: Promise<any>
 }
-
-export interface IImportFileFulfilled extends Action {
-  type: fileTreeActions.importFileFulfilled
-  payload: any
-}
 export interface IImportFilePending extends Action {
   type: fileTreeActions.importFilePending
   payload: any
 }
+export interface IImportFileFulfilled extends Action {
+  type: fileTreeActions.importFileFulfilled
+  payload: any
+}
+

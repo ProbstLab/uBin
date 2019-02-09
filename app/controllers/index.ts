@@ -32,7 +32,7 @@ export const fileTreeReducer = createReducer(files.getInitialState(), {
 
 export const dbReducer = createReducer(db.getInitialState(), {
   [dbActions.connectDatabaseFulfilled]: db.connectDatabaseFulfilled,
-  [dbActions.getImportsPending]: db.getImportsPending,
+  [dbActions.getImportsPending]: db.getImportsPending
 })
 
 // Utils

@@ -11,7 +11,7 @@ import {ThunkAction, ThunkDispatch} from 'redux-thunk'
 import {AnyAction} from 'redux'
 import {getDBConnection} from './selectors'
 import {IClientState} from '../index'
-import {getTaxonimiesForImportQuery, getEnzymeDistributionQuery, getSamplesQuery} from './queries'
+import {getEnzymeDistributionQuery, getSamplesQuery, getTaxonimiesAndCountQuery} from './queries'
 import {SamplesActions} from '../samples'
 
 console.log('window: ', window)
@@ -30,7 +30,7 @@ export class DBActions {
   }
 
   static getTaxonomiesForImport(connection: Connection, recordId: number): IGetTaxonomiesForImport {
-    return {type: dbActions.getTaxonomiesForImport, payload: getTaxonimiesForImportQuery(connection, recordId)}
+    return {type: dbActions.getTaxonomiesForImport, payload: getTaxonimiesAndCountQuery(connection, recordId)}
   }
   static getTaxonomiesForImportPending(payload: any): IGetTaxonomiesForImportPending {
     return {type: dbActions.getTaxonomiesForImportPending, importPending: true}
@@ -83,6 +83,20 @@ export class DBActions {
             dispatch(DBActions.getEnzymeDistribution(connection, recordId)),
             dispatch(DBActions.getSamples(connection, recordId)),
             dispatch(SamplesActions.setImportedRecord(recordId)),
+          ]).then(() => resolve())
+        } else {
+          resolve()
+        }
+      })
+    }
+  }
+  static refreshImports(): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
+    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
+      return new Promise<void>(resolve => {
+        let connection: Connection | undefined = getDBConnection(getState())
+        if (connection) {
+          Promise.all([
+            dispatch(DBActions.getImports(connection)),
           ]).then(() => resolve())
         } else {
           resolve()

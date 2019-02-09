@@ -1,17 +1,24 @@
 import {IGenericAssociativeArray, ITaxonomy, ITaxonomyAssociativeArray, ITaxonomyForSunburst} from "./interfaces";
 import * as colorConvert from 'color-convert'
+import {KeyValueCreator} from './keyValueCreator'
 
 export class TreeCreator {
-  static createTree = (query: any[]): IGenericAssociativeArray => {
+  static createTree = (queries: any[]): IGenericAssociativeArray => {
+    const sampleCountArray: IGenericAssociativeArray = KeyValueCreator.createKeyValueObject(queries[1], 'taxonomy_id', 'sampleCount')
+    delete queries[1]
+    let query: any[] = queries[0]
     let tree: IGenericAssociativeArray = {}
+    // Iteration through all taxnomy relation (lowest level)
     query.forEach((value: ITaxonomy, index: number) => {
       if (value.parent) {
         let rootTaxonomy: ITaxonomy = TreeCreator.findRoot(value.parent as ITaxonomy, {
           id: value.id,
           name: value.name,
           order: value.order,
-          children: {}
+          children: {},
+          occurrences: value.id ? sampleCountArray[value.id] : 1
         } as ITaxonomy)
+        // console.log(rootTaxonomy)
         TreeCreator.addToTree(tree, rootTaxonomy)
       }
     })
@@ -23,44 +30,36 @@ export class TreeCreator {
     return tree
   }
 
+  // Finding "root" of taxonomy recursively. Basically just looking up parents and then adding children to it
   static findRoot = (taxonomy: ITaxonomy, child: ITaxonomy): ITaxonomy => {
     if (child.id) {
       taxonomy.children = {}
       taxonomy.children[child.id] = child
+      taxonomy.occurrences = child.occurrences
     }
     if (taxonomy.parent) {
       let taxonomyParent: ITaxonomy = {...taxonomy.parent as ITaxonomy}
       delete taxonomy.parent
+      taxonomyParent.occurrences = child.occurrences
       taxonomy = TreeCreator.findRoot(taxonomyParent, taxonomy)
     }
     return taxonomy
   }
 
+  // Adding children to their parents in proper tree structure. If node exists, add child, otherwise create node and add child
   static addToTree = (tree: ITaxonomyAssociativeArray, taxonomy: ITaxonomy) => {
     if (taxonomy.id) {
       if (!tree.hasOwnProperty(taxonomy.id)) {
-        taxonomy.occurrences = 1
         tree[taxonomy.id] = taxonomy
       } else if (taxonomy.children) {
-        let occurrences: number | undefined = tree[taxonomy.id].occurrences
-        tree[taxonomy.id].occurrences = (occurrences || 1) + 1
+        let occurrences: number | undefined = taxonomy.occurrences
+        tree[taxonomy.id].occurrences = (occurrences || 1) + (tree[taxonomy.id].occurrences || 0)
         tree[taxonomy.id] = TreeCreator.addToTaxonomy(tree[taxonomy.id], taxonomy)
       }
     }
   }
 
-  static treeToSunburstFormat = (taxonomy: ITaxonomy, hex?: string): ITaxonomyForSunburst => {
-    let children: ITaxonomyForSunburst[] = []
-    let numChildren: number = Object.keys(taxonomy.children).length
-    Object.keys(taxonomy.children).forEach((value: string, index: number) => {
-      const hexVal: string = TreeCreator.setColour(taxonomy.children[value], hex, index/(numChildren**2)+0.5)
-      taxonomy.children[value] = TreeCreator.treeToSunburstFormat(taxonomy.children[value], hexVal)
-      taxonomy.children[value].hex = hexVal
-      children.push(taxonomy.children[value])
-    })
-    return {id: taxonomy.id, name: taxonomy.name, children, value: taxonomy.occurrences || 1, order: taxonomy.order}
-  }
-
+  // If it has children, add them recursively
   static addToTaxonomy = (treeTaxonomy: ITaxonomy, taxonomy: ITaxonomy): ITaxonomy => {
     if (taxonomy.children) {
       let taxonomyKey: string = Object.keys(taxonomy.children)[0]
@@ -73,6 +72,19 @@ export class TreeCreator {
       }
     }
     return treeTaxonomy
+  }
+
+  // Generating colours
+  static treeToSunburstFormat = (taxonomy: ITaxonomy, hex?: string): ITaxonomyForSunburst => {
+    let children: ITaxonomyForSunburst[] = []
+    let numChildren: number = Object.keys(taxonomy.children).length
+    Object.keys(taxonomy.children).forEach((value: string, index: number) => {
+      const hexVal: string = TreeCreator.setColour(taxonomy.children[value], hex, index/(numChildren**2)+0.5)
+      taxonomy.children[value] = TreeCreator.treeToSunburstFormat(taxonomy.children[value], hexVal)
+      taxonomy.children[value].hex = hexVal
+      children.push(taxonomy.children[value])
+    })
+    return {id: taxonomy.id, name: taxonomy.name, children, value: taxonomy.occurrences || 1, order: taxonomy.order}
   }
 
   static setColour = (taxonomy: ITaxonomy, hex?: string, step?: number): string => {

@@ -37,6 +37,7 @@ interface IActionsFromState {
   startDb(): void
   getImportData(recordId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   updateSelectedTaxonomy(taxonomyId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
+  refreshImports(): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
 }
 
 const homeStyle = {
@@ -58,7 +59,7 @@ class CHome extends React.Component<TProps> {
   }
 
   public componentDidMount(): void {
-    // this.props.startDb()
+    this.props.refreshImports()
   }
 
   render(): JSX.Element {
@@ -95,13 +96,6 @@ class CHome extends React.Component<TProps> {
               <UBinBarChart data={this.props.bacterialEnzymeDistribution} title='Bacterial Single Copy Genes'/>
             </div>
           </div>}
-          {/*{console.log("samples:", this.props.samples)}*/}
-          {/*<UBinScatter data={this.props.samples}/>*/}
-          {/*{this.props.taxonomyTreeFull && <UBinSunburst data={{ children: this.props.taxonomyTreeFull}} clickEvent={this.props.updateSelectedTaxonomy}/>}*/}
-          {/*<div style={{width: "400px", height: "400px"}}>*/}
-            {/*{this.props.archaealEnzymeDistribution.length && <UBinBarChart data={this.props.archaealEnzymeDistribution} title='Archaeal Single Copy Genes'/>}*/}
-            {/*{this.props.bacterialEnzymeDistribution.length && <UBinBarChart data={this.props.bacterialEnzymeDistribution} title='Bacterial Single Copy Genes'/>}*/}
-          {/*</div>*/}
         </div>
       </div>
 
@@ -124,6 +118,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       // changeFilter: SamplesActions.setFilter,
       changePage: push,
       startDb: DBActions.startDatabase,
+      refreshImports: DBActions.refreshImports,
       getImportData: recordId => DBActions.getImportData(recordId),
       updateSelectedTaxonomy: taxonomyIds => SamplesActions.updateSelectedTaxonomy(taxonomyIds)
       // getTaxonomies: (connection, recordId) => DBActions.getTaxonomiesForImport(connection, recordId)

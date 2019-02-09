@@ -31,10 +31,10 @@ export class FileTreeActions {
   static importFile(addedFiles: IFile[], connection: Connection): IImportFile {
     return {type: fileTreeActions.importFile, payload: importFiles(addedFiles, connection)}
   }
-  static importFileFulfilled(payload: any): IImportFileFulfilled {
-    return {type: fileTreeActions.importFileFulfilled, payload}
-  }
   static importFilePending(payload: any): IImportFilePending {
     return {type: fileTreeActions.importFilePending, payload}
+  }
+  static importFileFulfilled(payload: any): IImportFileFulfilled {
+    return {type: fileTreeActions.importFileFulfilled, payload}
   }
 }

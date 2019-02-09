@@ -29,9 +29,7 @@ export class SamplesActions {
   static setImportedRecord(recordId: number): ISetImportedRecord {
     return {type: samplesActions.setImportedRecord, recordId}
   }
-
   static updateSelectedTaxonomy(taxonomyIds: number[]): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
-    console.log("Update!", taxonomyIds)
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>(resolve => {
         let connection: Connection | undefined = getDBConnection(getState())

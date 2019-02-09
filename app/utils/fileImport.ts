@@ -13,6 +13,7 @@ import * as csv from 'csv-parser'
 import {Connection} from "typeorm";
 import {IFile} from "files";
 import * as _ from 'lodash'
+import {Taxonomy} from '../db/entities/Taxonomy'
 
 export const importFiles = async (addedFiles: IFile[], connection: Connection) => {
   const taxonomyFile: IFile = addedFiles[0]
@@ -116,8 +117,12 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
         taxonomyPath.push(taxonomyKey)
         if (!keyNum){
           let taxonomy = _.get(taxonomyMap, taxonomyPath) as ITaxonomy
-          if (taxonomy.id) {
-            newTaxonomies = {id: taxonomy.id}
+          try {
+            if (taxonomy.id) {
+              newTaxonomies = {id: taxonomy.id}
+            }
+          } catch (e) {
+            console.log("error", e, taxonomyPath)
           }
         }
         taxonomyPath.push('children')
@@ -142,25 +147,37 @@ const saveTaxonomy = async (taxonomyMap: ITaxonomyAssociativeArray, connection: 
     let exists: number
     if (parent) {
       exists = await connection.getRepository('taxonomy').createQueryBuilder('taxonomy')
-        .select('id')
-        .where('taxonomy.name = :taxonomyName', {taxonomyName: taxonomyMap[key].name})
-        .andWhere('taxonomy.order = :order', {order: taxonomyMap[key].order})
-        .andWhere('taxonomy.parentId = :parentId', {parentId: parent.id})
-        .getCount()
-      console.log("exists:", exists)
+                                .select('taxonomy.id')
+                                .where('taxonomy.name = :taxonomyName', {taxonomyName: taxonomyMap[key].name})
+                                .andWhere('taxonomy.order = :order', {order: taxonomyMap[key].order})
+                                .andWhere('taxonomy.parentId = :parentId', {parentId: parent.id})
+                                .getCount()
+        console.log("exists:", exists)
       if (exists) {
-        taxonomyMap[key] = await connection.getRepository('taxonomy')
-          .findOne({where: {name: taxonomyMap[key].name, order: taxonomyMap[key].order, parent_id: parent.id}}) as ITaxonomy
+        let taxonomyId: Taxonomy = await connection.getRepository('taxonomy').createQueryBuilder('taxonomy')
+                                                    .select('taxonomy.id')
+                                                    .where('taxonomy.name = :taxonomyName', {taxonomyName: taxonomyMap[key].name})
+                                                    .andWhere('taxonomy.order = :order', {order: taxonomyMap[key].order})
+                                                    .andWhere('taxonomy.parentId = :parentId', {parentId: parent.id})
+                                                    .getOne() as Taxonomy
+        taxonomyMap[key].id = taxonomyId.id
       } else {
         taxonomyMap[key].parent = parent.id
         taxonomyMap[key] = await connection.getRepository('taxonomy').save(taxonomyMap[key]) as ITaxonomy
       }
     } else {
-      exists = await connection.getRepository('taxonomy')
-        .count({where: {name: taxonomyMap[key].name, order: taxonomyMap[key].order}})
+      exists = await connection.getRepository('taxonomy').createQueryBuilder('taxonomy')
+                                .select('taxonomy.id')
+                                .where('taxonomy.name = :taxonomyName', {taxonomyName: taxonomyMap[key].name})
+                                .andWhere('taxonomy.order = :order', {order: taxonomyMap[key].order})
+                                .getCount()
       if (exists) {
-        taxonomyMap[key] = await connection.getRepository('taxonomy')
-          .findOne({where: {name: taxonomyMap[key].name, order: taxonomyMap[key].order}}) as ITaxonomy
+        let taxonomyId: Taxonomy = await connection.getRepository('taxonomy').createQueryBuilder('taxonomy')
+                                            .select('taxonomy.id')
+                                            .where('taxonomy.name = :taxonomyName', {taxonomyName: taxonomyMap[key].name})
+                                            .andWhere('taxonomy.order = :order', {order: taxonomyMap[key].order})
+                                            .getOne() as Taxonomy
+        taxonomyMap[key].id = taxonomyId.id
       } else {
         taxonomyMap[key] = await connection.getRepository('taxonomy').save(taxonomyMap[key]) as ITaxonomy
       }

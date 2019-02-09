@@ -34,4 +34,6 @@ export class Taxonomy {
   @ManyToOne(type => Taxonomy, taxonomy => taxonomy.parent)
   @JoinTable()
   parent: Taxonomy
+
+  sampleCount: number
 }

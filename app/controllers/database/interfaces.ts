@@ -1,5 +1,5 @@
 import { IDatabase } from 'database'
-import {Action} from "redux";
+import {Action} from "redux"
 import {Connection} from "typeorm";
 
 export interface IDBState extends IDatabase {}
