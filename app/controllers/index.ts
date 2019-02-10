@@ -2,8 +2,8 @@ import {Action} from 'redux'
 import { RouterState } from 'connected-react-router'
 
 import { ISamplesState, Controller as samples, samplesActions } from './samples'
-import {Controller as files, fileTreeActions, IFileTreeState} from "./files";
-import {Controller as db, dbActions, IDBState} from "./database";
+import {Controller as files, fileTreeActions, IFileTreeState} from './files'
+import {Controller as db, dbActions, IDBState} from './database'
 
 export interface IClientState {
   fileTree: IFileTreeState
@@ -18,6 +18,8 @@ export const samplesReducer = createReducer(samples.getInitialState(), {
   [samplesActions.getEnzymeDistributionFulfilled]: samples.getEnzymeDistributionFulfilled,
   [samplesActions.setImportedRecord]: samples.setImportedRecord,
   [samplesActions.getSamplesFulfilled]: samples.getSamplesFulfilled,
+  [samplesActions.setScatterDomain]: samples.setScatterDomain,
+  [samplesActions.removeFilters]: samples.removeFilters,
 })
 
 export const fileTreeReducer = createReducer(files.getInitialState(), {
@@ -32,7 +34,7 @@ export const fileTreeReducer = createReducer(files.getInitialState(), {
 
 export const dbReducer = createReducer(db.getInitialState(), {
   [dbActions.connectDatabaseFulfilled]: db.connectDatabaseFulfilled,
-  [dbActions.getImportsPending]: db.getImportsPending
+  [dbActions.getImportsPending]: db.getImportsPending,
 })
 
 // Utils

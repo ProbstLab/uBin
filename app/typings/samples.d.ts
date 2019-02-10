@@ -8,13 +8,22 @@ declare module 'samples' {
     genomes: string[]
   }
 
-  interface ITaxonomy {
-    id: number
-    title: string
+  interface IAxisFilter {
+    range: number[]
+  }
+
+  // import {DomainPropType} from 'victory'
+
+  interface IScatterDomain {
+    x?: [number, number]
+    y?: [number, number]
   }
 
   interface ISampleFilter {
-    taxonomy: string[]
+    taxonomyIds?: number[]
+    scatterDomain?: IScatterDomain
+    gcLengthDomain?: IAxisFilter
+    gcCoverageDomain?: IAxisFilter
   }
 
   const enum samplesApiActions {

@@ -1,6 +1,7 @@
 import * as React from "react"
 import {VictoryAxis, VictoryScatter, VictoryChart, VictoryTheme, VictoryLabel, VictoryBrushContainer} from 'victory'
 import {ISample} from '../utils/interfaces'
+import {IScatterDomain} from 'samples'
 
 // const getLabelData = (data: IVisData[]) => data.map((value: IVisData, index: number): any => {
 //   return {x: value.x, y: value.y, label: value.x.toString()}
@@ -12,6 +13,7 @@ interface IProps {
 
   data: ISample[]
   title?: string
+  domainChangeHandler(scatterDomain: IScatterDomain): void
 }
 
 export interface IUBinScatterState {
@@ -23,10 +25,18 @@ export class UBinScatter extends React.Component<IProps> {
 
   public state: IUBinScatterState = {}
 
+  public handleDomainChange(domain: IScatterDomain): void {
+    // console.log(domain)
+    if (this.props.domainChangeHandler) {
+      this.props.domainChangeHandler(domain)
+    }
+  }
+
   public render(): JSX.Element {
     return (
       <VictoryChart containerComponent={<VictoryBrushContainer
-                                        defaultBrushArea="disable"/>}
+                                        defaultBrushArea="disable"
+                                        onBrushDomainChange={(domain: any, props: any) => this.handleDomainChange(domain)}/>}
                     theme={VictoryTheme.material} domainPadding={20}
                     height={600}
                     width={400}

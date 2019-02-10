@@ -1,8 +1,9 @@
 import { Action } from 'redux'
 // import { IValueMap } from 'common'
 // import { ISample } from 'samples'
-import {IGenericAssociativeArray, ITaxonomyForSunburst} from "../../utils/interfaces"
+import {IGenericAssociativeArray, ITaxonomyForSunburst} from '../../utils/interfaces'
 import {Enzyme} from '../../db/entities/Enzyme'
+import {ISampleFilter, IScatterDomain} from 'samples'
 
 export interface IImportRecord {
   id: number
@@ -10,6 +11,7 @@ export interface IImportRecord {
 }
 
 export interface ISamplesState {
+  filters: ISampleFilter
   samples?: any[]
   importRecords: IImportRecord[]
   taxonomyTreeFull?: IGenericAssociativeArray
@@ -24,6 +26,9 @@ export enum samplesActions {
   getEnzymeDistributionFulfilled = 'database.getEnzymeDistribution_FULFILLED',
   getSamplesFulfilled = 'database.getSamples_FULFILLED',
   setImportedRecord = 'database.setImportedRecord',
+  setScatterDomain = 'samples.setScatterDomain',
+  setTaxonomyIds = 'samples.setTaxonomyIds',
+  removeFilters = 'samples.removeFilters',
 }
 export interface IGetImportsFulfilled extends Action {
   type: samplesActions.getImportsFulfilled
@@ -41,7 +46,18 @@ export interface IGetSamplesFulfilled extends Action {
   type: samplesActions.getSamplesFulfilled
   payload: any
 }
+export interface IRemoveFilters extends Action {
+  type: samplesActions.removeFilters
+}
 export interface ISetImportedRecord extends Action {
   type: samplesActions.setImportedRecord
   recordId: number
+}
+export interface ISetTaxonomyIds extends Action {
+  type: samplesActions.setTaxonomyIds
+  taxonomyIds: number[]
+}
+export interface ISetScatterDomain extends Action {
+  type: samplesActions.setScatterDomain
+  scatterDomain: IScatterDomain
 }

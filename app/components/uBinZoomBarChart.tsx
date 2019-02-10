@@ -25,10 +25,12 @@ export class UBinZoomBarChart extends React.Component<IProps> {
   }
 
   public handleZoom(domain: any):void {
+    // console.log("domain handle zoom:", domain)
     this.setState({selectedDomain: domain})
   }
 
   public handleBrush(domain: any): void {
+    // console.log("domain handle brush:", domain)
     this.setState({zoomDomain: domain})
   }
 
@@ -62,7 +64,6 @@ export class UBinZoomBarChart extends React.Component<IProps> {
           />
           <VictoryAxis
             dependentAxis={true}
-            tickFormat={(t: number) => t >= 1000 ? `${Math.round(t)/1000}k` : t}
           />
           <VictoryBar
             data={this.getData()}
@@ -80,7 +81,6 @@ export class UBinZoomBarChart extends React.Component<IProps> {
                                    onBrushDomainChange={this.handleBrush.bind(this)}/>
           }>
           <VictoryAxis
-            tickFormat={(t: number) => !(t%5) ? (t >= 1000 ? `${Math.round(t)/1000}k` : t) : ``}
             tickLabelComponent={<VictoryLabel style={{textAnchor:'end', fontSize: '10px'}} angle={-75}/>}
           />
           <VictoryBar

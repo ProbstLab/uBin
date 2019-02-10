@@ -6,7 +6,7 @@ export type UBinTreeEventHandler<T = {}> = (
   node: IUBinTreeNode<T>,
   nodePath: number[],
   e: React.MouseEvent<HTMLElement>,
-) => void;
+) => void
 
 export interface IUBinTreeProps<T = {}>  {
   onNodeAdd?: UBinTreeEventHandler<T>

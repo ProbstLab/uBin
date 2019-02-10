@@ -7,8 +7,8 @@ import {FileTreeActions, getAddedFiles, getFileTreeAsArray} from '../../controll
 import {Callout, Classes, ITreeNode, Card, Button, Dialog, ProgressBar} from '@blueprintjs/core'
 import {IFile} from 'files'
 import {UBinTree} from '../../components/uBinTree'
-import {FileList} from "../../components/fileList/FileList";
-import {Connection} from "typeorm";
+import {FileList} from '../../components/fileList/FileList'
+import {Connection} from 'typeorm'
 
 interface IProps extends RouteComponentProps {
 }
@@ -82,7 +82,10 @@ class CFileManager extends React.Component<TProps> {
           {/*{ this.props.addedFiles.map((file: IFile, index: number) => (<p key={index}>{ file.label }</p>))}*/}
           <Card style={{ margin: '8px'}}>
             <h4>Import</h4>
-            <p>.csv/.txt zum Import hinzufügen ({2 - addedFiles.length} Dateien verbleibend)</p>
+            <Callout intent={'warning'}>
+              Add taxonomy file first, then .csv or .txt of second dataset ({2 - addedFiles.length} files remaining)
+            </Callout>
+            {/*<p>.csv/.txt zum Import hinzufügen ({2 - addedFiles.length} Dateien verbleibend)</p>*/}
             <FileList files={addedFiles} removeAddedFile={this.props.removeAddedFile}/>
             <Button icon='import' disabled={addedFiles.length !== 2} intent='primary'
                     onClick={() => this.toggleDialog(true)}>Import</Button>

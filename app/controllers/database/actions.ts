@@ -13,6 +13,7 @@ import {getDBConnection} from './selectors'
 import {IClientState} from '../index'
 import {getEnzymeDistributionQuery, getSamplesQuery, getTaxonimiesAndCountQuery} from './queries'
 import {SamplesActions} from '../samples'
+import {ISampleFilter} from 'samples'
 
 console.log('window: ', window)
 const orm = (window as any).typeorm
@@ -36,15 +37,15 @@ export class DBActions {
     return {type: dbActions.getTaxonomiesForImportPending, importPending: true}
   }
 
-  static getEnzymeDistribution(connection: Connection, recordId: number, taxonomyId?: number[]): IGetEnzymeDistribution {
-    return {type: dbActions.getEnzymeDistribution, payload: getEnzymeDistributionQuery(connection, recordId, taxonomyId)}
+  static getEnzymeDistribution(connection: Connection, recordId: number, taxonomyId?: number[], filter?: ISampleFilter): IGetEnzymeDistribution {
+    return {type: dbActions.getEnzymeDistribution, payload: getEnzymeDistributionQuery(connection, recordId, taxonomyId, filter)}
   }
   static getEnzymeDistributionPending(payload: any): IGetEnzymeDistributionPending {
     return {type: dbActions.getEnzymeDistributionPending, enzymeDistributionPending: true}
   }
 
-  static getSamples(connection: Connection, recordId: number, taxonomyId?: number[]): IGetSamples {
-    return {type: dbActions.getSamples, payload: getSamplesQuery(connection, recordId, taxonomyId)}
+  static getSamples(connection: Connection, recordId: number, taxonomyId?: number[], filter?: ISampleFilter): IGetSamples {
+    return {type: dbActions.getSamples, payload: getSamplesQuery(connection, recordId, taxonomyId, filter)}
   }
   static getSamplesPending(payload: any): IGetSamplesPending {
     return {type: dbActions.getSamplesPending, samplesPending: true}

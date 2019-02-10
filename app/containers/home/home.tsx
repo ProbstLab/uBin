@@ -4,22 +4,23 @@ import {AnyAction, bindActionCreators, Dispatch} from 'redux'
 import {connect} from 'react-redux'
 import {withRouter, RouteComponentProps} from 'react-router'
 import {IClientState} from '../../controllers'
-import {Button, Menu, MenuDivider, MenuItem, Popover, Position} from '@blueprintjs/core'
+import {Button, Menu, MenuDivider, MenuItem, Popover, Position, ButtonGroup} from '@blueprintjs/core'
 import {
   getImportRecords,
   getTaxonomyTreeFull,
   IImportRecord,
   getArchaealEnzymeDistributionForChart,
-  getBacterialEnzymeDistributionForChart, SamplesActions, getSamples
+  getBacterialEnzymeDistributionForChart, SamplesActions, getSamples,
 } from '../../controllers/samples'
 import {DBActions} from '../../controllers/database'
 import {Connection} from 'typeorm'
 import {IBarData, ITaxonomyForSunburst} from '../../utils/interfaces'
-import {UBinSunburst} from "../../components/uBinSunburst"
+import {UBinSunburst} from '../../components/uBinSunburst'
 import {ThunkAction} from 'redux-thunk'
 import {UBinBarChart} from '../../components/uBinBarChart'
 import {UBinScatter} from '../../components/uBinScatter'
 import {UBinZoomBarChart} from '../../components/uBinZoomBarChart'
+import {IScatterDomain} from 'samples'
 
 interface IProps extends RouteComponentProps {
 }
@@ -39,6 +40,9 @@ interface IActionsFromState {
   getImportData(recordId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   updateSelectedTaxonomy(taxonomyId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   refreshImports(): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
+  setScatterDomain(scatterDomain: IScatterDomain): void
+  applyFilters(): void
+  resetFilters(): void
 }
 
 const homeStyle = {
@@ -79,17 +83,21 @@ class CHome extends React.Component<TProps> {
     return (
       <div>
         <div style={homeStyle}>
-          <div style={{width: '100%'}}>
+          <div style={{width: '100%', display: 'flex'}}>
             <Popover content={sampleMenu} position={Position.RIGHT_BOTTOM}>
               <Button icon='settings' text='Data Settings/Import' />
             </Popover>
+            <ButtonGroup style={{marginLeft: '12px'}}>
+              <Button icon='filter' intent='success' text='Apply filters' onClick={() => this.props.applyFilters()}/>
+              <Button rightIcon='filter-remove' text='Reset filters' onClick={() => this.props.resetFilters()}/>
+            </ButtonGroup>
           </div>
           {this.props.taxonomyTreeFull &&
           <div style={{width: '100%', display: 'flex'}}>
             <div style={{width: '70%'}}>
               <div style={{width: '100%', display: 'flex'}}>
                 <div style={{width: '50%', height: '400px'}}>
-                  <UBinScatter data={this.props.samples}/>
+                  <UBinScatter data={this.props.samples} domainChangeHandler={this.props.setScatterDomain}/>
                 </div>
                 <div style={{width: '50%'}}>
                   <UBinSunburst data={{ children: this.props.taxonomyTreeFull}} clickEvent={this.props.updateSelectedTaxonomy}/>
@@ -126,7 +134,7 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   taxonomyTreeFull: getTaxonomyTreeFull(state),
   samples: getSamples(state),
   archaealEnzymeDistribution: getArchaealEnzymeDistributionForChart(state),
-  bacterialEnzymeDistribution: getBacterialEnzymeDistributionForChart(state)
+  bacterialEnzymeDistribution: getBacterialEnzymeDistributionForChart(state),
 })
 
 const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
@@ -136,7 +144,10 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       startDb: DBActions.startDatabase,
       refreshImports: DBActions.refreshImports,
       getImportData: recordId => DBActions.getImportData(recordId),
-      updateSelectedTaxonomy: taxonomyIds => SamplesActions.updateSelectedTaxonomy(taxonomyIds)
+      updateSelectedTaxonomy: taxonomyIds => SamplesActions.updateSelectedTaxonomy(taxonomyIds),
+      setScatterDomain: scatterDomain => SamplesActions.setScatterDomain(scatterDomain),
+      applyFilters: SamplesActions.applyFilters,
+      resetFilters: SamplesActions.resetFilters,
       // getTaxonomies: (connection, recordId) => DBActions.getTaxonomiesForImport(connection, recordId)
     },
     dispatch,

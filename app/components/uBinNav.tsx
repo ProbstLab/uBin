@@ -26,8 +26,8 @@ export class UBinNav extends React.Component<IProps> {
     return (
       <Navbar>
         <NavbarGroup align={Alignment.LEFT}>
-          <NavLink to={"/"}><Button active={!this.props.location.key || this.isActivePath("/")} className={Classes.MINIMAL} icon="home" text="Home"/></NavLink>
-          <NavLink to={"/files"}><Button active={this.isActivePath("/files")} className={Classes.MINIMAL} icon="document" text="Files"/></NavLink>
+          <NavLink to={"/"}><Button active={!this.props.location.key || this.isActivePath("/")} className={Classes.MINIMAL} icon="layout" text="Samples"/></NavLink>
+          <NavLink to={"/files"}><Button active={this.isActivePath("/files")} className={Classes.MINIMAL} icon="import" text="Import"/></NavLink>
         </NavbarGroup>
         <NavbarGroup align={Alignment.RIGHT}>
           <NavbarHeading>

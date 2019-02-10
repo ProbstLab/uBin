@@ -25,7 +25,8 @@ export class FileTree extends React.Component<IProps> {
         { !file.isDirectory &&
           <span style={{float: 'right'}}>
           {/*<Button icon='add' minimal={true} small={true}>Add</Button>*/}
-            <Icon icon='add' className='hoverIcon' iconSize={16}/>
+            // TODO: Add 'add' button to file list
+            {/*<Icon icon='add' className='hoverIcon' iconSize={16}/>*/}
           </span>
         }
         {childNodes && (<ul className='file-tree'>
