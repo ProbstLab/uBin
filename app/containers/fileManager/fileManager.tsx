@@ -75,7 +75,7 @@ class CFileManager extends React.Component<TProps> {
             onNodeExpand={this.handleNodeExpand}
             className={Classes.ELEVATION_0}
             onNodeDoubleClick={this.addNodeOnDoubleClick}
-          />this.props.openFile
+          />
         </Callout>
         <div style={fileImportStyle}>
           {/*{ console.log(this.props.addedFiles) }*/}
@@ -93,7 +93,7 @@ class CFileManager extends React.Component<TProps> {
           <Dialog isOpen={this.props.isImportingFiles} onClose={() => this.toggleDialog(false)} icon='import'
                   title='Importing Data'>
             <div className={Classes.DIALOG_BODY}>
-              <h4>Beep beep... importing... parsing... deleting...</h4>
+              <h4>Beep beep... importing files</h4>
               <ProgressBar intent='primary'/>
             </div>
           </Dialog>
