@@ -103,10 +103,10 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
   console.log("map before:", {...taxonomyMap})
   await saveTaxonomy(taxonomyMap, connection)
   console.log("map after:", taxonomyMap)
+  let itemList: ISample[] = []
   await Promise.all(Object.keys(sampleMap).map(async (key: string) => {
     let item = sampleMap[key] as ISample
-    let exists = await connection.getRepository('sample')
-      .count({where: {scaffold: item.scaffold}})
+    let exists = await connection.getRepository('sample').count({where: {scaffold: item.scaffold}})
     if (!exists) {
       let newTaxonomies: IdValuePair = {}
       let newEnzymes: IEnzyme[] = []
@@ -133,11 +133,14 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
       item.taxonomy = newTaxonomies
       item.enzymes = newEnzymes
       item.importRecord = importRecord
-      await connection.getRepository('sample').save(item).catch(reason => console.log("!!!!!! BROKE !!11", reason, item))
+      itemList.push(item)
     }
   }))
-
-  var t1 = performance.now();
+  if (itemList.length){
+    await connection.getRepository('sample').save([...itemList]).catch(reason => console.log("!!!!!! BROKE !!11", reason))
+    itemList = []
+  }
+  var t1 = performance.now()
   console.log("finished")
   console.log("import took " + (t1 - t0) + " milliseconds.");
 }
