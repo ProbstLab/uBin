@@ -10,7 +10,7 @@ import {
   ITaxonomyAssociativeArray,
 } from "./interfaces"
 import * as csv from 'csv-parser'
-import {Connection} from "typeorm";
+import {Connection, InsertResult} from "typeorm"
 import {IFile} from "files";
 import * as _ from 'lodash'
 import {Taxonomy} from '../db/entities/Taxonomy'
@@ -133,8 +133,20 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
       item.importRecord = importRecord
       // await connection.getRepository('sample').save(item).catch(reason => console.log("!!!!!! BROKE !!11", reason))
       itemList.push(item)
+      // console.log("itemList", itemList.length, itemList.length >= 100)
+      // if (itemList.length >= 100) {
+      //   console.log("save", itemList.length)
+      //   await connection.getRepository('sample').save([...itemList]).catch(reason => console.log("!!!!!! BROKE !!11", reason))
+      //   itemList = []
+      // }
     }
   }))
+  let samplePromises: Promise<InsertResult>[] = []
+  while (itemList.length >= 100) {
+    samplePromises.push(connection.createQueryBuilder().insert().into('sample').values([...itemList.splice(0, 100)]).execute())
+    // await connection.getRepository('sample').save([...itemList.splice(0, 1000)]).catch(reason => console.log("!!!!!! BROKE !!11", reason))
+  }
+  await Promise.all(samplePromises)
   if (itemList.length){
     await connection.getRepository('sample').save([...itemList]).catch(reason => console.log("!!!!!! BROKE !!11", reason))
     itemList = []
@@ -185,8 +197,8 @@ const saveTaxonomy = async (taxonomyMap: ITaxonomyAssociativeArray, connection: 
       }
     }
     if (taxonomyMap[key].id && taxonomyMap[key].children) {
-      // await saveTaxonomyChildren(taxonomyMap[key].children, connection, taxonomyMap[key])
-      return saveTaxonomy(taxonomyMap[key].children, connection, taxonomyMap[key])
+      await saveTaxonomyChildren(taxonomyMap[key].children, connection, taxonomyMap[key])
+      // return saveTaxonomy(taxonomyMap[key].children, connection, taxonomyMap[key])
     }
   }))
 }
