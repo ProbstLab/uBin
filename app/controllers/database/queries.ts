@@ -1,7 +1,7 @@
 import {Connection} from 'typeorm'
 import {ISampleFilter} from 'samples'
 
-export const getTaxonimyCountQuery = async (connection: Connection, recordId: number): Promise<any> => {
+export const getTaxonomyCountQuery = async (connection: Connection, recordId: number): Promise<any> => {
   return connection.getRepository('taxonomy')
     .createQueryBuilder('taxonomy')
     .select('taxonomy.id')
@@ -11,7 +11,7 @@ export const getTaxonimyCountQuery = async (connection: Connection, recordId: nu
     .groupBy('taxonomy.id').getRawMany()
 }
 
-export const getTaxonimiesForImportQuery = async (connection: Connection, recordId: number): Promise<any> => {
+export const getTaxonomiesForImportQuery = async (connection: Connection, recordId: number): Promise<any> => {
   return await connection.getRepository('taxonomy')
     .createQueryBuilder('taxonomy').select('taxonomy')
     .leftJoinAndSelect('taxonomy.parent', 'taxonomyParent')
@@ -24,8 +24,8 @@ export const getTaxonimiesForImportQuery = async (connection: Connection, record
     .getMany()
 }
 
-export const getTaxonimiesAndCountQuery = async (connection: Connection, recordId: number): Promise<any> => {
-  return Promise.all([getTaxonimiesForImportQuery(connection, recordId), getTaxonimyCountQuery(connection, recordId)])
+export const getTaxonomiesAndCountQuery = async (connection: Connection, recordId: number): Promise<any> => {
+  return Promise.all([getTaxonomiesForImportQuery(connection, recordId), getTaxonomyCountQuery(connection, recordId)])
 }
 
 export const getEnzymeDistributionQuery =

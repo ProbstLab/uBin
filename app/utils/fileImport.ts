@@ -8,7 +8,7 @@ import {
   ITaxonomy,
   IdValuePair,
   ITaxonomyAssociativeArray,
-} from "./interfaces";
+} from "./interfaces"
 import * as csv from 'csv-parser'
 import {Connection} from "typeorm";
 import {IFile} from "files";
@@ -25,7 +25,6 @@ export const importFiles = async (addedFiles: IFile[], connection: Connection) =
     fs.createReadStream(taxonomyFile.filePath)
       .pipe(csv({separator: '\t', mapHeaders: ({header, index}) => header.toLowerCase()}))
       .on('data', async (data: any) => {
-        console.log("start reading taxonomy")
         let taxonomies = data.taxonomy.split(';')
         let sample: ISample = {
           scaffold: data.scaffold,
@@ -122,7 +121,6 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
               newTaxonomies = {id: taxonomy.id}
             }
           } catch (e) {
-            console.log("error", e, taxonomyPath)
           }
         }
         taxonomyPath.push('children')
@@ -133,6 +131,7 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
       item.taxonomy = newTaxonomies
       item.enzymes = newEnzymes
       item.importRecord = importRecord
+      // await connection.getRepository('sample').save(item).catch(reason => console.log("!!!!!! BROKE !!11", reason))
       itemList.push(item)
     }
   }))
@@ -155,7 +154,7 @@ const saveTaxonomy = async (taxonomyMap: ITaxonomyAssociativeArray, connection: 
                                 .andWhere('taxonomy.order = :order', {order: taxonomyMap[key].order})
                                 .andWhere('taxonomy.parentId = :parentId', {parentId: parent.id})
                                 .getCount()
-        console.log("exists:", exists)
+      console.log("exists:", exists)
       if (exists) {
         let taxonomyId: Taxonomy = await connection.getRepository('taxonomy').createQueryBuilder('taxonomy')
                                                     .select('taxonomy.id')
@@ -186,7 +185,44 @@ const saveTaxonomy = async (taxonomyMap: ITaxonomyAssociativeArray, connection: 
       }
     }
     if (taxonomyMap[key].id && taxonomyMap[key].children) {
-      await saveTaxonomy(taxonomyMap[key].children, connection, taxonomyMap[key])
+      // await saveTaxonomyChildren(taxonomyMap[key].children, connection, taxonomyMap[key])
+      return saveTaxonomy(taxonomyMap[key].children, connection, taxonomyMap[key])
     }
+  }))
+}
+
+export const saveTaxonomyChildren = async (taxonomyMap: ITaxonomyAssociativeArray, connection: Connection, parent: ITaxonomy) => {
+  let existsArray: string[] = []
+  await Promise.all(Object.keys(taxonomyMap).map(async (key: string) => {
+    let exists: number = await connection.getRepository('taxonomy').createQueryBuilder('taxonomy')
+      .select('taxonomy.id')
+      .where('taxonomy.name = :taxonomyName', {taxonomyName: taxonomyMap[key].name})
+      .andWhere('taxonomy.order = :order', {order: taxonomyMap[key].order})
+      .andWhere('taxonomy.parentId = :parentId', {parentId: parent.id})
+      .getCount()
+    if (exists) {
+      existsArray.push(key)
+    }
+  }))
+  if (existsArray.length) {
+    let order: number = parent.order + 1
+    let query: Taxonomy[] = await connection.getRepository('taxonomy').createQueryBuilder('taxonomy')
+      .select(['taxonomy.id', 'taxonomy.name'])
+      .where('taxonomy.name IN (:...taxonomyNames)', {taxonomyNames: existsArray})
+      .andWhere('taxonomy.order = :order', {order})
+      .andWhere('taxonomy.parentId = :parentId', {parentId: parent.id})
+      .getMany() as Taxonomy[]
+    query.forEach((value: Taxonomy) => {
+      taxonomyMap[value.name] = {...taxonomyMap[value.name], id: value.id}
+    })
+  }
+  let newTaxonomies: string[] = Object.keys(taxonomyMap).filter(key => !existsArray.includes(key))
+  if (newTaxonomies.length) {
+    let saved = await connection.getRepository('taxonomy').save(newTaxonomies.map(
+                                                            value => {return {...taxonomyMap[value], parent: parent.id}})) as ITaxonomy[]
+    saved.forEach(value => taxonomyMap[value.name].id = value.id)
+  }
+  return Promise.all(Object.keys(taxonomyMap).map(async (key: string) => {
+    await saveTaxonomyChildren(taxonomyMap[key].children, connection, taxonomyMap[key])
   }))
 }

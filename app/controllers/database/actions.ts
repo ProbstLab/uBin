@@ -11,7 +11,7 @@ import {ThunkAction, ThunkDispatch} from 'redux-thunk'
 import {AnyAction} from 'redux'
 import {getDBConnection} from './selectors'
 import {IClientState} from '../index'
-import {getEnzymeDistributionQuery, getSamplesQuery, getTaxonimiesAndCountQuery} from './queries'
+import {getEnzymeDistributionQuery, getSamplesQuery, getTaxonomiesAndCountQuery} from './queries'
 import {SamplesActions} from '../samples'
 import {ISampleFilter} from 'samples'
 
@@ -31,7 +31,7 @@ export class DBActions {
   }
 
   static getTaxonomiesForImport(connection: Connection, recordId: number): IGetTaxonomiesForImport {
-    return {type: dbActions.getTaxonomiesForImport, payload: getTaxonimiesAndCountQuery(connection, recordId)}
+    return {type: dbActions.getTaxonomiesForImport, payload: getTaxonomiesAndCountQuery(connection, recordId)}
   }
   static getTaxonomiesForImportPending(payload: any): IGetTaxonomiesForImportPending {
     return {type: dbActions.getTaxonomiesForImportPending, importPending: true}
