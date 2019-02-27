@@ -6,11 +6,11 @@ import {
   IImportRecord,
   IEnzyme,
   ITaxonomy,
-  IdValuePair,
+  // IdValuePair,
   ITaxonomyAssociativeArray,
 } from "./interfaces"
 import * as csv from 'csv-parser'
-import {Connection, InsertResult} from "typeorm"
+import {Connection} from "typeorm"
 import {IFile} from "files";
 import * as _ from 'lodash'
 import {Taxonomy} from '../db/entities/Taxonomy'
@@ -100,35 +100,28 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
     }
   }))
   console.log("map before:", {...taxonomyMap})
+  console.time("taxonomymap")
   await saveTaxonomy(taxonomyMap, connection)
+  console.timeEnd("taxonomymap")
   console.log("map after:", taxonomyMap)
   let itemList: ISample[] = []
-  await Promise.all(Object.keys(sampleMap).map(async (key: string) => {
+  console.time("map samples")
+  Object.keys(sampleMap).map( (key: string) => {
     let item = sampleMap[key] as ISample
-    let exists = await connection.getRepository('sample').count({where: {scaffold: item.scaffold}})
-    if (!exists) {
-      let newTaxonomies: IdValuePair = {}
+    // let exists = await connection.getRepository('sample').count({where: {scaffold: item.scaffold}})
+    // if (!exists) {
       let newEnzymes: IEnzyme[] = []
-      let taxonomyPath: string[] = []
-      let keyNum: number = item.taxonomyKeys.length
-      for (let taxonomyKey of item.taxonomyKeys) {
-        keyNum--
-        taxonomyPath.push(taxonomyKey)
-        if (!keyNum){
-          let taxonomy = _.get(taxonomyMap, taxonomyPath) as ITaxonomy
-          try {
-            if (taxonomy.id) {
-              newTaxonomies = {id: taxonomy.id}
-            }
-          } catch (e) {
-          }
-        }
-        taxonomyPath.push('children')
+      for (let i: number = item.taxonomyKeys.length-1; i > 0; i--) {
+        item.taxonomyKeys.splice(i, 0, 'children')
+      }
+      try {
+        item.taxonomy = {id: _.get(taxonomyMap, item.taxonomyKeys).id}
+      } catch (e) {
+        console.log("nope", e)
       }
       for (let enzymeKey of item.enzymeKeys.map((e: number, i: number) => e === 1 ? i : 0).filter((x: number) => x > 0)) {
         newEnzymes.push(enzymeMap[enzymeList[enzymeKey]] as IEnzyme)
       }
-      item.taxonomy = newTaxonomies
       item.enzymes = newEnzymes
       item.importRecord = importRecord
       // await connection.getRepository('sample').save(item).catch(reason => console.log("!!!!!! BROKE !!11", reason))
@@ -139,18 +132,23 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
       //   await connection.getRepository('sample').save([...itemList]).catch(reason => console.log("!!!!!! BROKE !!11", reason))
       //   itemList = []
       // }
-    }
-  }))
-  let samplePromises: Promise<InsertResult>[] = []
-  while (itemList.length >= 100) {
-    samplePromises.push(connection.createQueryBuilder().insert().into('sample').values([...itemList.splice(0, 100)]).execute())
-    // await connection.getRepository('sample').save([...itemList.splice(0, 1000)]).catch(reason => console.log("!!!!!! BROKE !!11", reason))
+    // }
+  })
+  console.timeEnd("map samples")
+  console.time("save samples")
+  let samplePromises: Promise<ISample[]>[] = []
+  while (itemList.length > 0) {
+    // samplePromises.push(connection.createQueryBuilder().insert().into('sample').values([...itemList.splice(0, 100)]).execute())
+    await connection.getRepository('sample').save([...itemList.splice(0, 10000)])
+    console.log("saved", itemList.length, "left")
   }
   await Promise.all(samplePromises)
-  if (itemList.length){
-    await connection.getRepository('sample').save([...itemList]).catch(reason => console.log("!!!!!! BROKE !!11", reason))
+  // if (itemList.length){
+  //   await connection.getRepository('sample').save([...itemList]).catch(reason => console.log("!!!!!! BROKE !!11", reason))
+  // }
     itemList = []
-  }
+  // await connection.getRepository('sample').save(itemList).catch(reason => console.log("!!!!!! BROKE !!11", reason))
+  console.timeEnd("save samples")
   var t1 = performance.now()
   console.log("finished")
   console.log("import took " + (t1 - t0) + " milliseconds.");
