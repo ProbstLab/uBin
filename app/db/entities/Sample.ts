@@ -1,7 +1,7 @@
 import {Entity, PrimaryGeneratedColumn, Column, JoinTable, ManyToMany, ManyToOne, Unique} from 'typeorm'
-import {Taxonomy} from "./Taxonomy";
-import {Enzyme} from "./Enzyme";
-import {ImportRecord} from "./ImportRecord";
+import {Taxonomy} from './Taxonomy'
+import {Enzyme} from './Enzyme'
+import {ImportRecord} from './ImportRecord'
 
 @Entity()
 @Unique(['scaffold', 'importRecord'])
@@ -15,13 +15,13 @@ export class Sample {
   })
   scaffold: string
 
-  @Column("double")
+  @Column('double')
   gc: number
 
-  @Column("integer")
+  @Column('integer')
   coverage: number
 
-  @Column("integer")
+  @Column('integer')
   length: number
 
   @ManyToOne(type => Taxonomy, taxonomy => taxonomy.samples)

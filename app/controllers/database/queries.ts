@@ -30,6 +30,8 @@ export const getTaxonomiesAndCountQuery = async (connection: Connection, recordI
 
 export const getEnzymeDistributionQuery =
   async (connection: Connection, recordId: number, taxonomyIds?: number[], filter?: ISampleFilter): Promise<any> => {
+  console.time("build getEnzymeDistributionQuery")
+  // TODO: Do it the other way around
   let query = connection.getRepository('enzyme').createQueryBuilder('enzyme')
     .leftJoin('enzyme.samples', 'samples')
     .loadRelationCountAndMap('enzyme.sampleCount', 'enzyme.samples')
@@ -41,17 +43,15 @@ export const getEnzymeDistributionQuery =
       query.andWhere('samples.taxonomyId IN (:...taxonomyIds)', {taxonomyIds: filter.taxonomyIds})
     }
     if (filter.scatterDomain && filter.scatterDomain.x) {
-      console.log("filter gc", filter.scatterDomain.x)
       query.andWhere('samples.gc >= :gcLow AND samples.gc <= :gcHigh',
         {gcLow: filter.scatterDomain.x[0], gcHigh: filter.scatterDomain.x[1]})
     }
     if (filter.scatterDomain && filter.scatterDomain.y) {
-      console.log("filter.coverage", filter.scatterDomain.y)
       query.andWhere('samples.coverage >= :coverageLow AND samples.coverage <= :coverageHigh',
         {coverageLow: filter.scatterDomain.y[0], coverageHigh: filter.scatterDomain.y[1]})
     }
   }
-  console.log(query.getQueryAndParameters())
+  console.timeEnd("build getEnzymeDistributionQuery")
   return query.getMany()
 }
 

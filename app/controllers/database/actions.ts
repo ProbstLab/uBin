@@ -79,12 +79,14 @@ export class DBActions {
       return new Promise<void>(resolve => {
         let connection: Connection | undefined = getDBConnection(getState())
         if (connection) {
+          console.time("import data")
           Promise.all([
             dispatch(DBActions.getTaxonomiesForImport(connection, recordId)),
             dispatch(DBActions.getEnzymeDistribution(connection, recordId)),
             dispatch(DBActions.getSamples(connection, recordId)),
             dispatch(SamplesActions.setImportedRecord(recordId)),
-          ]).then(() => resolve())
+          ]).then(() => {resolve();
+            console.timeEnd("import data")})
         } else {
           resolve()
         }

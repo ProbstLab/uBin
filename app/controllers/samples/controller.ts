@@ -13,13 +13,15 @@ export const getInitialState = (): ISamplesState => ({
 })
 
 export const getImportsFulfilled = (state: ISamplesState, action: IGetImportsFulfilled): ISamplesState => {
+  console.log("got imports")
   return {
     ...state,
-    importRecords: [...state.importRecords.filter(value => value.id !== action.payload.id ), ...action.payload],
+    importRecords: [...action.payload],
   }
 }
 
 export const getTaxonomiesForImportFulfilled = (state: ISamplesState, action: IGetTaxonomiesForImportFulfilled): ISamplesState => {
+  console.log("got taxonomies")
   return {
     ...state,
     taxonomyTreeFull: TreeCreator.createTree(action.payload),
@@ -27,6 +29,7 @@ export const getTaxonomiesForImportFulfilled = (state: ISamplesState, action: IG
 }
 
 export const getEnzymeDistributionFulfilled = (state: ISamplesState, action: IGetEnzymeDistributionFulfilled): ISamplesState => {
+  console.log("got enzyme distribution")
   return {
     ...state,
     enzymeDistribution: action.payload,
@@ -39,6 +42,7 @@ export const setImportedRecord = (state: ISamplesState, action: ISetImportedReco
   }
 }
 export const getSamplesFulfilled = (state: ISamplesState, action: IGetSamplesFulfilled): ISamplesState => {
+  console.log("got samples")
   return {
     ...state,
     samples: action.payload,

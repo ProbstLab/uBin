@@ -22,13 +22,13 @@ export const getBacterialEnzymeDistributionForChart = createSelector(
   getSamplesState,
   (state: ISamplesState) => state.enzymeDistribution ?
     state.enzymeDistribution.filter(value => value.bacterial)
-      .map((value: Enzyme) => {return {name: value.name, amount: value.sampleCount, id: value.id}}) : []
+      .map((value: Enzyme) => {console.log("hello"); return {name: value.name, amount: value.sampleCount, id: value.id}}) : []
 )
 export const getArchaealEnzymeDistributionForChart = createSelector(
   getSamplesState,
   (state: ISamplesState) => state.enzymeDistribution ?
     state.enzymeDistribution.filter(value => value.archaeal)
-      .map((value: Enzyme) => {return {name: value.name, amount: value.sampleCount, id: value.id}}) : []
+      .map((value: Enzyme) => { console.log("hi"); return {name: value.name, amount: value.sampleCount, id: value.id}}) : []
 )
 
 export const getSamples = createSelector(
