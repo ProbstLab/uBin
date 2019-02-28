@@ -23,19 +23,10 @@ var Sample = /** @class */ (function () {
     __decorate([
         typeorm_1.Column({
             type: 'varchar',
-            length: 256,
-            unique: true,
+            length: 256
         }),
         __metadata("design:type", String)
     ], Sample.prototype, "scaffold", void 0);
-    __decorate([
-        typeorm_1.Column({
-            type: 'varchar',
-            length: 256,
-            nullable: true
-        }),
-        __metadata("design:type", String)
-    ], Sample.prototype, "name", void 0);
     __decorate([
         typeorm_1.Column("double"),
         __metadata("design:type", Number)
@@ -64,7 +55,8 @@ var Sample = /** @class */ (function () {
         __metadata("design:type", ImportRecord_1.ImportRecord)
     ], Sample.prototype, "importRecord", void 0);
     Sample = __decorate([
-        typeorm_1.Entity()
+        typeorm_1.Entity(),
+        typeorm_1.Unique(['scaffold', 'importRecord'])
     ], Sample);
     return Sample;
 }());

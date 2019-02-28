@@ -1,26 +1,19 @@
-import {Entity, PrimaryGeneratedColumn, Column, JoinTable, ManyToMany, ManyToOne} from 'typeorm'
+import {Entity, PrimaryGeneratedColumn, Column, JoinTable, ManyToMany, ManyToOne, Unique} from 'typeorm'
 import {Taxonomy} from "./Taxonomy";
 import {Enzyme} from "./Enzyme";
 import {ImportRecord} from "./ImportRecord";
 
 @Entity()
+@Unique(['scaffold', 'importRecord'])
 export class Sample {
   @PrimaryGeneratedColumn()
   id: number
 
   @Column({
     type: 'varchar',
-    length: 256,
-    unique: true,
+    length: 256
   })
   scaffold: string
-
-  @Column({
-    type: 'varchar',
-    length: 256,
-    nullable: true
-  })
-  name: string
 
   @Column("double")
   gc: number
