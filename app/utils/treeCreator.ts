@@ -9,6 +9,7 @@ export class TreeCreator {
     let query: any[] = queries[0]
     let tree: IGenericAssociativeArray = {}
     // Iteration through all taxnomy relation (lowest level)
+    console.log("step 1")
     query.forEach((value: ITaxonomy, index: number) => {
       if (value.parent) {
         let rootTaxonomy: ITaxonomy = TreeCreator.findRoot(value.parent as ITaxonomy, {
@@ -22,11 +23,13 @@ export class TreeCreator {
         TreeCreator.addToTree(tree, rootTaxonomy)
       }
     })
+    console.log("step 2")
     Object.keys(tree).forEach((value: string) => {
       const hexVal: string = TreeCreator.setColour(tree[value])
       tree[value] = TreeCreator.treeToSunburstFormat(tree[value], hexVal)
       tree[value].hex = hexVal
     })
+    console.log("step 3 - return")
     return tree
   }
 

@@ -38,10 +38,11 @@
     "moduleDirectories": [
       "node_modules",
       "app/node_modules"
-    ],  "name": "uBin-dev",
-  "productName": "uBin",
-  "version": "0.1.0",
-  "description": "uBin development version",
+    ],
+    "name": "uBin-dev",
+    "productName": "uBin",
+    "version": "0.1.0",
+    "description": "uBin development version",
     "transform": {
       "^.+\\.(ts|tsx)$": "<rootDir>/test/preprocessor.js"
     },
@@ -97,11 +98,7 @@
     "type": "git",
     "url": "git+https://github.com/Shin--/uBin.git"
   },
-  "author": {
-    "name": "Tim Burg",
-    "email": "tim.burg@protonmail.com",
-    "url": "https://github.com/Shin--"
-  },
+  "author": "Tim Burg <tim.burg@protonmail.com> (https://github.com/Shin--)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Shin--/uBin/issues"
@@ -124,7 +121,6 @@
     "@types/lodash": "^4.14.119",
     "@types/mime-types": "^2.1.0",
     "@types/node": "^8.0.2",
-    "@types/redux-promise-middleware": "^0.0.11",
     "@types/react": "^16.0.5",
     "@types/react-dom": "16.0.3",
     "@types/react-hot-loader": "^3.0.4",
@@ -132,8 +128,9 @@
     "@types/react-router": "^4.0.11",
     "@types/react-router-dom": "^4.0.7",
     "@types/redux-logger": "^3.0.0",
+    "@types/redux-promise-middleware": "^0.0.11",
     "@types/sinon": "^4.0.0",
-    "@types/victory":"^31.0.6",
+    "@types/victory": "^31.0.6",
     "asar": "^0.14.6",
     "boiler-room-custodian": "^0.6.2",
     "concurrently": "^3.1.0",
@@ -141,23 +138,23 @@
     "css-loader": "^0.28.4",
     "css-modules-require-hook": "^4.0.6",
     "devtron": "^1.4.0",
-    "electron": "^4.0.1",
+    "electron": "^4.0.6",
     "electron-builder": "^20.38.5",
     "electron-builder-http": "^19.27.5",
-    "electron-devtools-installer": "^2.0.1",
-    "electron-rebuild": "^1.8.2",
+    "electron-devtools-installer": "^2.2.4",
+    "electron-rebuild": "^1.8.4",
     "enzyme": "^3.0.0",
+    "enzyme-adapter-react-16": "^1.0.0",
     "express": "^4.14.0",
     "extract-text-webpack-plugin": "^3.0.0",
     "file-loader": "^1.1.5",
     "html-webpack-plugin": "^2.24.1",
     "identity-obj-proxy": "^3.0.0",
-    "jest": "^22.0.4",
+    "jest": "^24.1.0",
     "json-loader": "^0.5.4",
     "node-sass": "^4.1.1",
     "react-hot-loader": "^3.0.0-beta.6",
     "react-test-renderer": "^16.0.0",
-    "enzyme-adapter-react-16": "^1.0.0",
     "redux-logger": "^3.0.6",
     "sass-loader": "^6.0.6",
     "sinon": "^4.0.0",
@@ -168,15 +165,17 @@
     "tslint": "^5.4.3",
     "typescript": "^2.4.1",
     "url-loader": "^0.6.1",
-    "webpack": "^3.3.0",
+    "webpack": "^3.12.0",
+    "webpack-cli": "^3.2.3",
     "webpack-dev-middleware": "^2.0.3",
     "webpack-hot-middleware": "^2.13.2",
     "webpack-merge": "^4.1.1"
   },
   "dependencies": {
-    "@blueprintjs/core": "^3.11.0",
+    "@blueprintjs/core": "^3.14.0",
     "color-convert": "^1.9.3",
     "connected-react-router": "^6.2.1",
+    "crossfilter2": "^1.4.6",
     "csv-parser": "^2.1.0",
     "electron-debug": "^2.0.0",
     "history": "^4.7.2",
@@ -195,11 +194,14 @@
     "reselect": "^4.0.0",
     "sqlite3": "^4.0.6",
     "source-map-support": "^0.5.10",
-    "typeorm": "^0.2.12",
-    "victory": "^31.2.0"
+    "typeorm": "^0.2.14",
+    "victory": "^32.0.0"
   },
   "devEngines": {
     "node": ">=6.x",
     "npm": ">=3.x"
+  },
+  "directories": {
+    "test": "test"
   }
 }

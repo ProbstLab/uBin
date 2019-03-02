@@ -31,7 +31,7 @@ module.exports = merge(baseConfig, {
     //     exclude: /node_modules/
     //   }
     // ],
-    loaders: [
+    rules: [
       {
         test: /\.global\.css$/,
         loaders: [

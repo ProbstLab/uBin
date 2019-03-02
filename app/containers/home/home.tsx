@@ -103,6 +103,7 @@ class CHome extends React.Component<TProps> {
                   <UBinSunburst data={{ children: this.props.taxonomyTreeFull}} clickEvent={this.props.updateSelectedTaxonomy}/>
                 </div>
               </div>
+              { false &&
               <div style={{width: '100%', display: 'flex'}}>
                 <div style={{width: '50%', height: '500px'}}>
                   <UBinZoomBarChart data={this.props.samples} title='GC/Length' xName='gc' yName='length'/>
@@ -110,8 +111,9 @@ class CHome extends React.Component<TProps> {
                 <div style={{width: '50%', height: '500px'}}>
                   <UBinZoomBarChart data={this.props.samples} title='Coverage/Length' xName='coverage' yName='length'/>
                 </div>
-              </div>
+              </div> }
             </div>
+            { false &&
             <div style={{width: '30%', height: 'inherit'}}>
               <div style={{height: '400px'}}>
                 <UBinBarChart data={this.props.archaealEnzymeDistribution} title='Archaeal Single Copy Genes' xName='name' yName='amount'/>
@@ -119,7 +121,7 @@ class CHome extends React.Component<TProps> {
               <div style={{height: '400px'}}>
                 <UBinBarChart data={this.props.bacterialEnzymeDistribution} title='Bacterial Single Copy Genes' xName='name' yName='amount'/>
               </div>
-            </div>
+            </div> }
           </div>}
         </div>
       </div>
