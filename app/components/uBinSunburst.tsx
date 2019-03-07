@@ -80,6 +80,7 @@ export class UBinSunburst extends React.Component<IProps> {
         childrenIdArray.push(datapoint.id)
       }
     }
+    console.log("hi")
     return childrenIdArray
   }
 

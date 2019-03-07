@@ -130,7 +130,7 @@
     "@types/redux-logger": "^3.0.0",
     "@types/redux-promise-middleware": "^0.0.11",
     "@types/sinon": "^4.0.0",
-    "@types/victory": "^31.0.6",
+    "@types/victory": "^31.0.10",
     "asar": "^0.14.6",
     "boiler-room-custodian": "^0.6.2",
     "concurrently": "^3.1.0",

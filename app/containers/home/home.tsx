@@ -4,13 +4,13 @@ import {AnyAction, bindActionCreators, Dispatch} from 'redux'
 import {connect} from 'react-redux'
 import {withRouter, RouteComponentProps} from 'react-router'
 import {IClientState} from '../../controllers'
-import {Button, Menu, MenuDivider, MenuItem, Popover, Position, ButtonGroup} from '@blueprintjs/core'
+import {Button, Menu, MenuDivider, MenuItem, Popover, Position, ButtonGroup, Spinner} from '@blueprintjs/core'
 import {
   getImportRecords,
   getTaxonomyTreeFull,
   IImportRecord,
   getArchaealEnzymeDistributionForChart,
-  getBacterialEnzymeDistributionForChart, SamplesActions, getSamples,
+  getBacterialEnzymeDistributionForChart, SamplesActions, getSamples, getScatterDomain,
 } from '../../controllers/samples'
 import {DBActions} from '../../controllers/database'
 import {Connection} from 'typeorm'
@@ -28,10 +28,11 @@ interface IProps extends RouteComponentProps {
 interface IPropsFromState {
   connection: Connection | undefined
   importRecords: IImportRecord[]
-  taxonomyTreeFull: ITaxonomyForSunburst[] | undefined
+  taxonomyTreeFull?: ITaxonomyForSunburst[]
   archaealEnzymeDistribution: IBarData[]
   bacterialEnzymeDistribution: IBarData[]
   samples: any[]
+  scatterDomain?: IScatterDomain
 }
 
 interface IActionsFromState {
@@ -97,7 +98,9 @@ class CHome extends React.Component<TProps> {
             <div style={{width: '70%'}}>
               <div style={{width: '100%', display: 'flex'}}>
                 <div style={{width: '50%', height: '400px'}}>
-                  <UBinScatter data={this.props.samples} domainChangeHandler={this.props.setScatterDomain}/>
+                  {this.props.samples.length &&
+                  <UBinScatter data={this.props.samples} domainChangeHandler={this.props.setScatterDomain} domain={this.props.scatterDomain}/>}
+                  {!this.props.samples.length && <Spinner size={50}/>}
                 </div>
                 <div style={{width: '50%'}}>
                   <UBinSunburst data={{ children: this.props.taxonomyTreeFull}} clickEvent={this.props.updateSelectedTaxonomy}/>
@@ -135,6 +138,7 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   connection: state.database.connection,
   taxonomyTreeFull: getTaxonomyTreeFull(state),
   samples: getSamples(state),
+  scatterDomain: getScatterDomain(state),
   archaealEnzymeDistribution: getArchaealEnzymeDistributionForChart(state),
   bacterialEnzymeDistribution: getBacterialEnzymeDistributionForChart(state),
 })
