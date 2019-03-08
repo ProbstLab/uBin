@@ -23,35 +23,49 @@ interface IScatterDetails {
 export interface IUBinScatterState {
   // labelData: any[]
   // geneCount: number
-  data: ISample[]
+  // data: ISample[]
   cf: Crossfilter<ISample>
-  combDim: Dimension<ISample, string> | undefined
-  covDim: Dimension<ISample, number> | undefined
-  gcDim: Dimension<ISample, number> | undefined
-  xAxis: {min: number, max: number} | undefined
-  yAxis: {min: number, max: number} | undefined
+  combDim?: Dimension<ISample, string>
+  covDim?: Dimension<ISample, number>
+  gcDim?: Dimension<ISample, number>
+  originalDomain?: IScatterDomain
 }
 
-export class UBinScatter extends React.Component<IProps> {
+export class UBinScatter extends React.PureComponent<IProps> {
+
+  xAxis?: [number, number]
+  yAxis?: [number, number]
+  zoom?: number
 
   public state: IUBinScatterState = {
-    data: this.props.data,
     cf: crossfilter(this.props.data),
-    combDim: undefined,
-    covDim: undefined,
-    gcDim: undefined,
-    xAxis: undefined,
-    yAxis: undefined,
   }
 
-  public componentDidMount(): void {
-    console.log("Scatter Plot mounted!")
+  public componentWillMount(): void {
     this.setState({
       combDim: this.state.cf.dimension((d: ISample) => d.gc+":"+Math.round(d.coverage)),
       covDim: this.state.cf.dimension((d: ISample) => d.coverage),
       gcDim: this.state.cf.dimension((d: ISample) => d.gc),
     })
   }
+
+  public componentDidMount(): void {
+    let { covDim, gcDim } = this.state
+    if (covDim && gcDim) {
+      console.log(...gcDim.bottom(3), ...gcDim.top(3))
+      this.setState({originalDomain: {x: [gcDim.bottom(1)[0].gc, gcDim.top(1)[0].gc],
+                                            y: [covDim.bottom(1)[0].coverage, covDim.top(1)[0].coverage]}})
+    }
+  }
+
+  // public shouldComponentUpdate(nextProps: IProps, nextState: IUBinScatterState): boolean {
+  //   if (this.props.domain) {
+  //     if (nextState.xAxis !== this.props.domain.x || nextState.yAxis !== this.props.domain.y) {
+  //       return false
+  //     }
+  //   }
+  //   return true
+  // }
 
   public reduceInitial(): any {
     return {xSum: 0, ySum: 0, count: 0}
@@ -71,49 +85,65 @@ export class UBinScatter extends React.Component<IProps> {
     return p
   }
 
+  public round(num: number, x: number, o: number): number {
+    return Math.round((o + Math.ceil((num - o)/ x ) * x)*10)/10
+  }
+
   public getData(): any {
-    let { covDim, gcDim, combDim, xAxis, yAxis } = this.state
+    let { covDim, gcDim, combDim, originalDomain } = this.state
     let { domain } = this.props
-    // console.log("domain", this.props.domain)
+
+    if (domain && domain.x && domain.y && originalDomain && originalDomain.x && originalDomain.y) {
+      let origSize: number = Math.sqrt((originalDomain.x[1] - originalDomain.x[0])**2) * Math.sqrt((originalDomain.y[1] - originalDomain.y[0])**2)
+      let currentSize: number = Math.sqrt((domain.x[1] - domain.x[0])**2) * Math.sqrt((domain.y[1] - domain.y[0])**2)
+      if (origSize && currentSize) {
+        let roundedStepSize: number = Math.round(currentSize/origSize * 10)/10
+        if (this.zoom !== roundedStepSize) {
+          this.zoom = roundedStepSize
+          // let newCombDim: Dimension<ISample, string> =
+          //   this.state.cf.dimension((d: ISample) => d.gc + ":" + this.round(d.coverage, this.zoom || 0.1, 0).toString())
+          this.setState({combDim: this.state.cf.dimension((d: ISample) => d.gc + ":" + this.round(d.coverage, this.zoom || 0.1, 0).toString())})
+        }
+      }
+    }
+
     if (gcDim && covDim && combDim) {
-      if (xAxis) {
-        gcDim.filter([xAxis.min, xAxis.max])
-      }
-      if (yAxis) {
-        covDim.filter([yAxis.min, yAxis.max])
-      }
       if (domain) {
-        console.log("filter by", domain)
         if (domain.x && domain.y) {
           gcDim.filterRange(domain.x)
           covDim.filterRange(domain.y)
         }
-        console.log(gcDim)
       }
-      // combDim.group().all().filter(value => value.value).map(value => value.key.toString().split(':'))
-      // console.log(combDim.group().reduce(this.reduceAdd, this.reduceRemove, this.reduceInitial).all())
+      let basePointSize: number = 1/(this.zoom !== undefined ? this.zoom || 0.1 : 1)
       let returnVals: any = combDim.group().reduce(this.reduceAdd, this.reduceRemove, this.reduceInitial).all().
                               filter((value: any) => value.value.count).map((value: any) => {
         let valObj: IScatterDetails = value.value
-        return {gc: valObj.xSum/valObj.count, coverage: valObj.ySum/valObj.count, size: Math.log(valObj.count)+1}
+        return {gc: valObj.xSum/valObj.count, coverage: valObj.ySum/valObj.count, size: Math.log(valObj.count)+basePointSize}
       })
-      console.log("return vals", returnVals)
       return returnVals
     }
     return []
 }
 
-  public handleDomainChange(domain: IScatterDomain): void {
+  public handleDomainChangeEnd(): void {
     if (this.props.domainChangeHandler) {
-      this.props.domainChangeHandler(domain)
+      let { xAxis, yAxis } = this
+      this.props.domainChangeHandler({x: xAxis, y: yAxis})
     }
   }
 
+  public handleDomainChange(domain: IScatterDomain): void {
+    this.xAxis = domain.x
+    this.yAxis = domain.y
+  }
+
   public render(): JSX.Element {
+    console.log("render scatter")
     return (
       <VictoryChart containerComponent={<VictoryBrushContainer
                                         defaultBrushArea="disable"
-                                        onBrushDomainChangeEnd={(domain: any, props: any) => this.handleDomainChange(domain)}/>}
+                                        onBrushDomainChange={(domain: any, props: any) => this.handleDomainChange(domain)}
+                                        onBrushDomainChangeEnd={() => this.handleDomainChangeEnd()}/>}
                     theme={VictoryTheme.material} domainPadding={20}
                     height={600}
                     width={400}

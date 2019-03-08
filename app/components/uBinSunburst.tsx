@@ -61,7 +61,7 @@ export interface ISunburstState {
   clicked: boolean
 }
 
-export class UBinSunburst extends React.Component<IProps> {
+export class UBinSunburst extends React.PureComponent<IProps> {
 
   public state: ISunburstState = {
     namePathValue: '',
@@ -92,6 +92,7 @@ export class UBinSunburst extends React.Component<IProps> {
 
   render(): JSX.Element {
     const {finalValue, clicked, namePathValue} = this.state
+    console.log("render sunburst")
     return (
       <div>
         <Sunburst
