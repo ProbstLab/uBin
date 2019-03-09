@@ -21,9 +21,6 @@ interface IScatterDetails {
 }
 
 export interface IUBinScatterState {
-  // labelData: any[]
-  // geneCount: number
-  // data: ISample[]
   cf: Crossfilter<ISample>
   combDim?: Dimension<ISample, string>
   covDim?: Dimension<ISample, number>
@@ -52,20 +49,10 @@ export class UBinScatter extends React.PureComponent<IProps> {
   public componentDidMount(): void {
     let { covDim, gcDim } = this.state
     if (covDim && gcDim) {
-      console.log(...gcDim.bottom(3), ...gcDim.top(3))
       this.setState({originalDomain: {x: [gcDim.bottom(1)[0].gc, gcDim.top(1)[0].gc],
                                             y: [covDim.bottom(1)[0].coverage, covDim.top(1)[0].coverage]}})
     }
   }
-
-  // public shouldComponentUpdate(nextProps: IProps, nextState: IUBinScatterState): boolean {
-  //   if (this.props.domain) {
-  //     if (nextState.xAxis !== this.props.domain.x || nextState.yAxis !== this.props.domain.y) {
-  //       return false
-  //     }
-  //   }
-  //   return true
-  // }
 
   public reduceInitial(): any {
     return {xSum: 0, ySum: 0, count: 0}
@@ -117,6 +104,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
       let returnVals: any = combDim.group().reduce(this.reduceAdd, this.reduceRemove, this.reduceInitial).all().
                               filter((value: any) => value.value.count).map((value: any) => {
         let valObj: IScatterDetails = value.value
+        console.log("basepointsize", basePointSize)
         return {gc: valObj.xSum/valObj.count, coverage: valObj.ySum/valObj.count, size: Math.log(valObj.count/2)+basePointSize}
       })
       return returnVals
@@ -127,7 +115,6 @@ export class UBinScatter extends React.PureComponent<IProps> {
   public handleDomainChangeEnd(): void {
     if (this.props.domainChangeHandler) {
       let { xAxis, yAxis } = this
-      console.log(this.props.domainChangeHandler)
       this.props.domainChangeHandler({x: xAxis, y: yAxis})
     }
   }

@@ -18,6 +18,8 @@ declare module 'samples' {
     x?: [number, number]
     y?: [number, number]
   }
+  interface IBarChartDomain extends IScatterDomain {
+  }
 
   interface ISampleFilter {
     taxonomyIds?: number[]
