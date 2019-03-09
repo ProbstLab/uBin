@@ -1,18 +1,33 @@
 import {Connection} from 'typeorm'
 import {ISampleFilter} from 'samples'
 
-export const getTaxonomyCountQuery = async (connection: Connection, recordId: number): Promise<any> => {
-  return connection.getRepository('taxonomy')
+export const scatterFilter = (query: any, filter?: ISampleFilter): any => {
+  if (filter) {
+    if (filter.scatterDomain && filter.scatterDomain.x) {
+      query.andWhere('samples.gc >= :gcLow AND samples.gc <= :gcHigh',
+        {gcLow: filter.scatterDomain.x[0], gcHigh: filter.scatterDomain.x[1]})
+    }
+    if (filter.scatterDomain && filter.scatterDomain.y) {
+      query.andWhere('samples.coverage >= :coverageLow AND samples.coverage <= :coverageHigh',
+        {coverageLow: filter.scatterDomain.y[0], coverageHigh: filter.scatterDomain.y[1]})
+    }
+  }
+  return query
+}
+
+export const getTaxonomyCountQuery = async (connection: Connection, recordId: number, filter?: ISampleFilter): Promise<any> => {
+  let query = connection.getRepository('taxonomy')
     .createQueryBuilder('taxonomy')
     .select('taxonomy.id')
     .addSelect('count(samples.id)', 'sampleCount')
     .leftJoin('taxonomy.samples', 'samples')
     .where('samples.importRecordId = :recordId', {recordId})
-    .groupBy('taxonomy.id').getRawMany()
+  query = scatterFilter(query, filter)
+  return query.groupBy('taxonomy.id').getRawMany()
 }
 
-export const getTaxonomiesForImportQuery = async (connection: Connection, recordId: number): Promise<any> => {
-  return await connection.getRepository('taxonomy')
+export const getTaxonomiesForImportQuery = async (connection: Connection, recordId: number, filter?: ISampleFilter): Promise<any> => {
+  let query = connection.getRepository('taxonomy')
     .createQueryBuilder('taxonomy').select('taxonomy')
     .leftJoinAndSelect('taxonomy.parent', 'taxonomyParent')
     .leftJoinAndSelect('taxonomyParent.parent', 'taxonomyParent2')
@@ -21,11 +36,12 @@ export const getTaxonomiesForImportQuery = async (connection: Connection, record
     .leftJoinAndSelect('taxonomyParent4.parent', 'taxonomyParent5')
     .leftJoin('taxonomy.samples', 'samples')
     .where('samples.importRecordId = :recordId', {recordId})
-    .getMany()
+  query = scatterFilter(query, filter)
+  return query.getMany()
 }
 
-export const getTaxonomiesAndCountQuery = async (connection: Connection, recordId: number): Promise<any> => {
-  return Promise.all([getTaxonomiesForImportQuery(connection, recordId), getTaxonomyCountQuery(connection, recordId)])
+export const getTaxonomiesAndCountQuery = async (connection: Connection, recordId: number, filter?: ISampleFilter): Promise<any> => {
+  return Promise.all([getTaxonomiesForImportQuery(connection, recordId, filter), getTaxonomyCountQuery(connection, recordId, filter)])
 }
 
 export const getEnzymeDistributionQuery =
@@ -42,14 +58,7 @@ export const getEnzymeDistributionQuery =
     if (filter.taxonomyIds) {
       query.andWhere('samples.taxonomyId IN (:...taxonomyIds)', {taxonomyIds: filter.taxonomyIds})
     }
-    if (filter.scatterDomain && filter.scatterDomain.x) {
-      query.andWhere('samples.gc >= :gcLow AND samples.gc <= :gcHigh',
-        {gcLow: filter.scatterDomain.x[0], gcHigh: filter.scatterDomain.x[1]})
-    }
-    if (filter.scatterDomain && filter.scatterDomain.y) {
-      query.andWhere('samples.coverage >= :coverageLow AND samples.coverage <= :coverageHigh',
-        {coverageLow: filter.scatterDomain.y[0], coverageHigh: filter.scatterDomain.y[1]})
-    }
+    query = scatterFilter(query, filter)
   }
   console.timeEnd("build getEnzymeDistributionQuery")
   return query.getMany()

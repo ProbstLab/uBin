@@ -41,6 +41,7 @@ interface IActionsFromState {
   getImportData(recordId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   updateSelectedTaxonomy(taxonomyId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   refreshImports(): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
+  updateScatterDomain(scatterDomain: IScatterDomain): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   setScatterDomain(scatterDomain: IScatterDomain): void
   applyFilters(): void
   resetFilters(): void
@@ -99,7 +100,7 @@ class CHome extends React.Component<TProps> {
               <div style={{width: '100%', display: 'flex'}}>
                 <div style={{width: '50%', height: '400px'}}>
                   {this.props.samples.length &&
-                  <UBinScatter data={this.props.samples} domainChangeHandler={this.props.setScatterDomain} domain={this.props.scatterDomain}/>}
+                  <UBinScatter data={this.props.samples} domainChangeHandler={this.props.updateScatterDomain} domain={this.props.scatterDomain}/>}
                   {!this.props.samples.length && <Spinner size={50}/>}
                 </div>
                 <div style={{width: '50%'}}>
@@ -152,6 +153,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       getImportData: recordId => DBActions.getImportData(recordId),
       updateSelectedTaxonomy: taxonomyIds => SamplesActions.updateSelectedTaxonomy(taxonomyIds),
       setScatterDomain: scatterDomain => SamplesActions.setScatterDomain(scatterDomain),
+      updateScatterDomain: scatterDomain => SamplesActions.updateScatterDomain(scatterDomain),
       applyFilters: SamplesActions.applyFilters,
       resetFilters: SamplesActions.resetFilters,
       // getTaxonomies: (connection, recordId) => DBActions.getTaxonomiesForImport(connection, recordId)

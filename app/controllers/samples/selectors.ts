@@ -13,6 +13,11 @@ export const getImportRecords = createSelector(
   (state: ISamplesState) => state.importRecords
 )
 
+export const getImportRecordId = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.recordId
+)
+
 export const getTaxonomyTreeFull = createSelector(
   getSamplesState,
   (state: ISamplesState) => state.taxonomyTreeFull ? Object.keys(state.taxonomyTreeFull).map(value => state.taxonomyTreeFull ? state.taxonomyTreeFull[value] : null) : undefined

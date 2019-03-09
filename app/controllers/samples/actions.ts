@@ -13,6 +13,7 @@ import {Connection} from 'typeorm'
 import {getDBConnection} from '../database/selectors'
 import {DBActions} from '../database'
 import {ISampleFilter, IScatterDomain} from 'samples'
+import {getImportRecordId} from './selectors'
 
 export class SamplesActions {
   static getImportsFulfilled(payload: any): IGetImportsFulfilled {
@@ -58,6 +59,30 @@ export class SamplesActions {
       })
     }
   }
+
+  static updateScatterDomain(scatterDomain: IScatterDomain): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
+    console.log("updateScatterDomain")
+    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
+      return new Promise<void>(resolve => {
+        let connection: Connection | undefined = getDBConnection(getState())
+
+        Promise.all([dispatch(SamplesActions.setScatterDomain(scatterDomain))]).then(
+          () => {
+            let filters: ISampleFilter = getState().samples.filters
+            let recordId = getImportRecordId(getState())
+            console.log("then do more things", recordId, connection)
+            if (connection && recordId) {
+              console.log("then get taxonomies")
+              Promise.all([dispatch(DBActions.getTaxonomiesForImport(connection, recordId, filters))]).then(() => resolve())
+            } else {
+              resolve()
+            }
+          }
+        )
+      })
+    }
+  }
+
   static applyFilters(): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>(resolve => {

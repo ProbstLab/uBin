@@ -127,6 +127,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
   public handleDomainChangeEnd(): void {
     if (this.props.domainChangeHandler) {
       let { xAxis, yAxis } = this
+      console.log(this.props.domainChangeHandler)
       this.props.domainChangeHandler({x: xAxis, y: yAxis})
     }
   }

@@ -30,8 +30,8 @@ export class DBActions {
     return {type: dbActions.connectDatabaseFulfilled, payload: connection}
   }
 
-  static getTaxonomiesForImport(connection: Connection, recordId: number): IGetTaxonomiesForImport {
-    return {type: dbActions.getTaxonomiesForImport, payload: getTaxonomiesAndCountQuery(connection, recordId)}
+  static getTaxonomiesForImport(connection: Connection, recordId: number, filter?: ISampleFilter): IGetTaxonomiesForImport {
+    return {type: dbActions.getTaxonomiesForImport, payload: getTaxonomiesAndCountQuery(connection, recordId, filter)}
   }
   static getTaxonomiesForImportPending(payload: any): IGetTaxonomiesForImportPending {
     return {type: dbActions.getTaxonomiesForImportPending, importPending: true}

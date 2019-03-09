@@ -66,7 +66,7 @@ export class UBinSunburst extends React.PureComponent<IProps> {
   public state: ISunburstState = {
     namePathValue: '',
     finalValue: 'Taxonomy',
-    clicked: false
+    clicked: false,
   }
 
   public getChildrenIds(datapoint: any): number[] {
@@ -80,7 +80,6 @@ export class UBinSunburst extends React.PureComponent<IProps> {
         childrenIdArray.push(datapoint.id)
       }
     }
-    console.log("hi")
     return childrenIdArray
   }
 
@@ -92,12 +91,10 @@ export class UBinSunburst extends React.PureComponent<IProps> {
 
   render(): JSX.Element {
     const {finalValue, clicked, namePathValue} = this.state
-    console.log("render sunburst")
     return (
       <div>
         <Sunburst
-          animation
-          className="basic-sunburst-example"
+          className='uBin-sunburst'
           hideRootNode
           onValueMouseOver={node => {
             if (clicked) {
@@ -112,7 +109,7 @@ export class UBinSunburst extends React.PureComponent<IProps> {
             }, {});
             this.setState({
               finalValue: namePath[namePath.length - 1],
-              pathValue: namePath.join(' > '),
+              namePathValue: namePath.slice(1).join(' > '),
               data: updateData(this.props.data, pathAsMap)
             });
           }}
@@ -121,15 +118,15 @@ export class UBinSunburst extends React.PureComponent<IProps> {
               ? () => {}
               : this.setState({
                 pathValue: false,
-                finalValue: false,
-                data: updateData(this.props.data, false)
+                finalValue: 'Taxonomy',
+                data: updateData(this.props.data, false),
               })
           }
           onValueClick={(datapoint: any, event: MouseEvent<HTMLElement>) => { this.selectTaxonomy(datapoint); this.setState({clicked: !clicked})}}
           style={{
             stroke: '#ddd',
             strokeOpacity: 0.3,
-            strokeWidth: '0.5'
+            strokeWidth: '0.5',
           }}
           colorType="literal"
           getSize={(d: any) => d.value}
@@ -144,7 +141,7 @@ export class UBinSunburst extends React.PureComponent<IProps> {
             />
           )}
         </Sunburst>
-        <div className="basic-sunburst-example-path-name">{namePathValue}</div>
+        <div className='uBin-sunburst'>{namePathValue}</div>
       </div>
     )
   }
