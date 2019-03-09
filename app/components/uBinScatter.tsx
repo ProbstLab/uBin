@@ -97,11 +97,9 @@ export class UBinScatter extends React.PureComponent<IProps> {
       let origSize: number = Math.sqrt((originalDomain.x[1] - originalDomain.x[0])**2) * Math.sqrt((originalDomain.y[1] - originalDomain.y[0])**2)
       let currentSize: number = Math.sqrt((domain.x[1] - domain.x[0])**2) * Math.sqrt((domain.y[1] - domain.y[0])**2)
       if (origSize && currentSize) {
-        let roundedStepSize: number = Math.round(currentSize/origSize * 10)/10
+        let roundedStepSize: number = Math.round(currentSize/origSize * 100)/100
         if (this.zoom !== roundedStepSize) {
           this.zoom = roundedStepSize
-          // let newCombDim: Dimension<ISample, string> =
-          //   this.state.cf.dimension((d: ISample) => d.gc + ":" + this.round(d.coverage, this.zoom || 0.1, 0).toString())
           this.setState({combDim: this.state.cf.dimension((d: ISample) => d.gc + ":" + this.round(d.coverage, this.zoom || 0.1, 0).toString())})
         }
       }
@@ -114,11 +112,12 @@ export class UBinScatter extends React.PureComponent<IProps> {
           covDim.filterRange(domain.y)
         }
       }
-      let basePointSize: number = 1/(this.zoom !== undefined ? this.zoom || 0.1 : 1)
+      let logFactor: number = 10/Math.log(100)
+      let basePointSize: number = 10-Math.log((this.zoom !== undefined ? this.zoom || 0.01 : 1)*100)*logFactor
       let returnVals: any = combDim.group().reduce(this.reduceAdd, this.reduceRemove, this.reduceInitial).all().
                               filter((value: any) => value.value.count).map((value: any) => {
         let valObj: IScatterDetails = value.value
-        return {gc: valObj.xSum/valObj.count, coverage: valObj.ySum/valObj.count, size: Math.log(valObj.count)+basePointSize}
+        return {gc: valObj.xSum/valObj.count, coverage: valObj.ySum/valObj.count, size: Math.log(valObj.count/2)+basePointSize}
       })
       return returnVals
     }
@@ -138,7 +137,6 @@ export class UBinScatter extends React.PureComponent<IProps> {
   }
 
   public render(): JSX.Element {
-    console.log("render scatter")
     return (
       <VictoryChart containerComponent={<VictoryBrushContainer
                                         defaultBrushArea="disable"
