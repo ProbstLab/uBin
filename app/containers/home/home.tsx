@@ -82,6 +82,14 @@ class CHome extends React.Component<TProps> {
       </Menu>
     )
 
+    const showScatter = (isReady: boolean): any => {
+      if (isReady) {
+        return <UBinScatter data={this.props.samples} domainChangeHandler={this.props.updateScatterDomain} domain={this.props.scatterDomain}/>
+      } else {
+        return <Spinner size={20}/>
+      }
+    }
+
     return (
       <div>
         <div style={homeStyle}>
@@ -94,17 +102,15 @@ class CHome extends React.Component<TProps> {
               <Button rightIcon='filter-remove' text='Reset filters' onClick={() => this.props.resetFilters()}/>
             </ButtonGroup>
           </div>
-          {this.props.taxonomyTreeFull &&
           <div style={{width: '100%', display: 'flex'}}>
             <div style={{width: '70%'}}>
               <div style={{width: '100%', display: 'flex'}}>
                 <div style={{width: '50%', height: '400px'}}>
-                  {this.props.samples.length &&
-                  <UBinScatter data={this.props.samples} domainChangeHandler={this.props.updateScatterDomain} domain={this.props.scatterDomain}/>}
-                  {!this.props.samples.length && <Spinner size={50}/>}
+                  {showScatter(!!this.props.samples.length)}
                 </div>
                 <div style={{width: '50%'}}>
-                  <UBinSunburst data={{ children: this.props.taxonomyTreeFull}} clickEvent={this.props.updateSelectedTaxonomy}/>
+                  {this.props.taxonomyTreeFull &&
+                  <UBinSunburst data={{ children: this.props.taxonomyTreeFull}} clickEvent={this.props.updateSelectedTaxonomy}/>}
                 </div>
               </div>
               { this.props.samples.length &&
@@ -126,7 +132,7 @@ class CHome extends React.Component<TProps> {
                 <UBinBarChart data={this.props.bacterialEnzymeDistribution} title='Bacterial Single Copy Genes' xName='name' yName='amount'/>
               </div>
             </div> }
-          </div>}
+          </div>
         </div>
       </div>
 

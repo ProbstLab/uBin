@@ -104,7 +104,6 @@ export class UBinScatter extends React.PureComponent<IProps> {
       let returnVals: any = combDim.group().reduce(this.reduceAdd, this.reduceRemove, this.reduceInitial).all().
                               filter((value: any) => value.value.count).map((value: any) => {
         let valObj: IScatterDetails = value.value
-        console.log("basepointsize", basePointSize)
         return {gc: valObj.xSum/valObj.count, coverage: valObj.ySum/valObj.count, size: Math.log(valObj.count/2)+basePointSize}
       })
       return returnVals
