@@ -115,9 +115,9 @@ class CHome extends React.Component<TProps> {
               </div>
               { this.props.samples.length &&
               <div style={{width: '100%', display: 'flex'}}>
-                {/*<div style={{width: '50%', height: '500px'}}>*/}
-                  {/*<UBinZoomBarChart data={this.props.samples} title='GC/Length' xName='gc' yName='length'/>*/}
-                {/*</div>*/}
+                <div style={{width: '50%', height: '500px'}}>
+                  <UBinZoomBarChart data={this.props.samples} title='GC/Length' xName='gc' yName='length'/>
+                </div>
                 <div style={{width: '50%', height: '500px'}}>
                   <UBinZoomBarChart data={this.props.samples} title='Coverage/Length' xName='coverage' yName='length'/>
                 </div>

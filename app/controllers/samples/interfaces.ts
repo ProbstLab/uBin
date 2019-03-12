@@ -18,9 +18,12 @@ export interface ISamplesState {
   enzymeDistribution?: Enzyme[]
   selectedTaxonomy?: ITaxonomyForSunburst
   recordId?: number
+  importRecordsPending: boolean
+  importsLoaded: boolean
 }
 
 export enum samplesActions {
+  getImportsPending = 'database.getImports_PENDING',
   getImportsFulfilled = 'database.getImports_FULFILLED',
   getTaxonomiesForImportFulfilled = 'database.getTaxonomiesForImport_FULFILLED',
   getEnzymeDistributionFulfilled = 'database.getEnzymeDistribution_FULFILLED',
@@ -30,10 +33,15 @@ export enum samplesActions {
   setTaxonomyIds = 'samples.setTaxonomyIds',
   removeFilters = 'samples.removeFilters',
 }
+export interface IGetImportsPending extends Action {
+  type: samplesActions.getImportsPending
+  payload: any
+}
 export interface IGetImportsFulfilled extends Action {
   type: samplesActions.getImportsFulfilled
   payload: any
 }
+
 export interface IGetTaxonomiesForImportFulfilled extends Action {
   type: samplesActions.getTaxonomiesForImportFulfilled
   payload: any

@@ -1,6 +1,6 @@
 import {
   IGetEnzymeDistributionFulfilled,
-  IGetImportsFulfilled, IGetSamplesFulfilled,
+  IGetImportsFulfilled, IGetImportsPending, IGetSamplesFulfilled,
   IGetTaxonomiesForImportFulfilled, IRemoveFilters,
   ISamplesState,
   ISetImportedRecord, ISetScatterDomain, ISetTaxonomyIds
@@ -10,12 +10,21 @@ import {TreeCreator} from "../../utils/treeCreator";
 export const getInitialState = (): ISamplesState => ({
   filters: {},
   importRecords: [],
+  importsLoaded: false,
+  importRecordsPending: false,
 })
 
-export const getImportsFulfilled = (state: ISamplesState, action: IGetImportsFulfilled): ISamplesState => {
-  console.log("got imports")
+export const getImportsPending = (state: ISamplesState, action: IGetImportsPending): ISamplesState => {
   return {
     ...state,
+    importRecordsPending: true,
+  }
+}
+export const getImportsFulfilled = (state: ISamplesState, action: IGetImportsFulfilled): ISamplesState => {
+  return {
+    ...state,
+    importsLoaded: true,
+    importRecordsPending: false,
     importRecords: [...action.payload],
   }
 }

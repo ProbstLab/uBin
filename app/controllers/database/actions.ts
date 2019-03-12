@@ -3,8 +3,8 @@ import {
   IConnectDatabase,
   IConnectDatabaseFulfilled, IGetEnzymeDistribution, IGetEnzymeDistributionPending,
   IGetImports,
-  IGetImportsPending, IGetSamples, IGetSamplesPending,
-  IGetTaxonomiesForImport, IGetTaxonomiesForImportPending,
+  IGetSamples, IGetSamplesPending, IGetSamplesPendingDone,
+  IGetTaxonomiesForImport, IGetTaxonomiesForImportPending, IGetTaxonomiesForImportPendingDone,
 } from './interfaces'
 import {Connection} from 'typeorm'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
@@ -34,7 +34,10 @@ export class DBActions {
     return {type: dbActions.getTaxonomiesForImport, payload: getTaxonomiesAndCountQuery(connection, recordId, filter)}
   }
   static getTaxonomiesForImportPending(payload: any): IGetTaxonomiesForImportPending {
-    return {type: dbActions.getTaxonomiesForImportPending, importPending: true}
+    return {type: dbActions.getTaxonomiesForImportPending, taxonomiesPending: true}
+  }
+  static getTaxonomiesForImportPendingDone(): IGetTaxonomiesForImportPendingDone {
+    return {type: dbActions.getTaxonomiesForImportPendingDone, taxonomiesPending: false}
   }
 
   static getEnzymeDistribution(connection: Connection, recordId: number, taxonomyId?: number[], filter?: ISampleFilter): IGetEnzymeDistribution {
@@ -47,16 +50,18 @@ export class DBActions {
   static getSamples(connection: Connection, recordId: number, taxonomyId?: number[], filter?: ISampleFilter): IGetSamples {
     return {type: dbActions.getSamples, payload: getSamplesQuery(connection, recordId, taxonomyId, filter)}
   }
+  // TODO: Maybe combine both cases
   static getSamplesPending(payload: any): IGetSamplesPending {
     return {type: dbActions.getSamplesPending, samplesPending: true}
+  }
+  static getSamplesPendingDone(): IGetSamplesPendingDone {
+    return {type: dbActions.getSamplesPendingDone, samplesPending: false}
   }
 
   static getImports(connection: Connection): IGetImports {
     return {type: dbActions.getImports, payload: connection.getRepository('import_record').find()}
   }
-  static getImportsPending(payload: any): IGetImportsPending {
-    return {type: dbActions.getImportsPending, payload}
-  }
+
   static startDatabase(): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>((resolve) => {
@@ -74,6 +79,7 @@ export class DBActions {
       })
     }
   }
+
   static getImportData(recordId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>(resolve => {
@@ -81,17 +87,29 @@ export class DBActions {
         if (connection) {
           Promise.all([
             dispatch(DBActions.getTaxonomiesForImport(connection, recordId)),
-            dispatch(DBActions.getEnzymeDistribution(connection, recordId)),
+            // dispatch(DBActions.getEnzymeDistribution(connection, recordId)),
             dispatch(DBActions.getSamples(connection, recordId)),
             dispatch(SamplesActions.setImportedRecord(recordId)),
-          ]).then(() => {resolve();
-            console.timeEnd("import data")})
+          ]).then(() =>
+              Promise.all([dispatch(DBActions.setImportDataFinished())]).then(() => resolve()))
         } else {
-          resolve()
+          Promise.all([DBActions.setImportDataFinished()]).then(() => resolve())
         }
       })
     }
   }
+
+  static setImportDataFinished(): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
+    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
+      return new Promise<void>(resolve => {
+        Promise.all([
+          dispatch(DBActions.getSamplesPendingDone()),
+          dispatch(DBActions.getTaxonomiesForImportPendingDone()),
+        ]).then(() => resolve())
+      })
+    }
+  }
+
   static refreshImports(): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>(resolve => {

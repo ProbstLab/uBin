@@ -13,6 +13,7 @@ export interface IClientState {
 }
 
 export const samplesReducer = createReducer(samples.getInitialState(), {
+  [samplesActions.getImportsPending]: samples.getImportsPending,
   [samplesActions.getImportsFulfilled]: samples.getImportsFulfilled,
   [samplesActions.getTaxonomiesForImportFulfilled]: samples.getTaxonomiesForImportFulfilled,
   [samplesActions.getEnzymeDistributionFulfilled]: samples.getEnzymeDistributionFulfilled,
@@ -34,7 +35,10 @@ export const fileTreeReducer = createReducer(files.getInitialState(), {
 
 export const dbReducer = createReducer(db.getInitialState(), {
   [dbActions.connectDatabaseFulfilled]: db.connectDatabaseFulfilled,
-  [dbActions.getImportsPending]: db.getImportsPending,
+  [dbActions.getSamplesPending]: db.getSamplesPending,
+  [dbActions.getSamplesPendingDone]: db.getSamplesPending,
+  [dbActions.getTaxonomiesForImportPending]: db.getTaxonomiesPending,
+  [dbActions.getTaxonomiesForImportPendingDone]: db.getTaxonomiesPending,
 })
 
 // Utils

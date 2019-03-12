@@ -4,7 +4,7 @@ import {
   IGetTaxonomiesForImportFulfilled,
   ISetImportedRecord,
   samplesActions,
-  IGetSamplesFulfilled, ISetScatterDomain, ISetTaxonomyIds, IRemoveFilters
+  IGetSamplesFulfilled, ISetScatterDomain, ISetTaxonomyIds, IRemoveFilters, IGetImportsPending
 } from './interfaces'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
 import {IClientState} from '../index'
@@ -16,6 +16,9 @@ import {ISampleFilter, IScatterDomain} from 'samples'
 import {getImportRecordId} from './selectors'
 
 export class SamplesActions {
+  static getImportsPending(payload: any): IGetImportsPending {
+    return {type: samplesActions.getImportsPending, payload}
+  }
   static getImportsFulfilled(payload: any): IGetImportsFulfilled {
     return {type: samplesActions.getImportsFulfilled, payload}
   }

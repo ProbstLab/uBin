@@ -4,5 +4,8 @@ declare module 'database' {
   interface IDatabase {
     id: string
     connection?: Connection
+    importsPending: boolean
+    samplesPending: boolean
+    taxonomiesPending: boolean
   }
 }
