@@ -4,23 +4,24 @@ import {AnyAction, bindActionCreators, Dispatch} from 'redux'
 import {connect} from 'react-redux'
 import {withRouter, RouteComponentProps} from 'react-router'
 import {IClientState} from '../../controllers'
-import {Button, Menu, MenuDivider, MenuItem, Popover, Position, ButtonGroup, Spinner} from '@blueprintjs/core'
+import {Button, Popover, Position, ButtonGroup, Spinner, Icon} from '@blueprintjs/core'
 import {
   getImportRecords,
   getTaxonomyTreeFull,
   IImportRecord,
   getArchaealEnzymeDistributionForChart,
-  getBacterialEnzymeDistributionForChart, SamplesActions, getSamples, getScatterDomain,
+  getBacterialEnzymeDistributionForChart, SamplesActions, getSamples, getScatterDomain, getImportRecordsState,
 } from '../../controllers/samples'
-import {DBActions} from '../../controllers/database'
+import {DBActions, getSamplesStatePending} from '../../controllers/database'
 import {Connection} from 'typeorm'
 import {IBarData, ITaxonomyForSunburst} from '../../utils/interfaces'
 import {UBinSunburst} from '../../components/uBinSunburst'
 import {ThunkAction} from 'redux-thunk'
 import {UBinBarChart} from '../../components/uBinBarChart'
 import {UBinScatter} from '../../components/uBinScatter'
-import {UBinZoomBarChart} from '../../components/uBinZoomBarChart'
 import {IScatterDomain} from 'samples'
+import {SampleMenu} from '../../components/sampleMenu'
+import {EnzymeDistributionBarCharts} from '../../components/enzymeDistributionBarCharts'
 
 interface IProps extends RouteComponentProps {
 }
@@ -33,6 +34,8 @@ interface IPropsFromState {
   bacterialEnzymeDistribution: IBarData[]
   samples: any[]
   scatterDomain?: IScatterDomain
+  importRecordsState: {pending: boolean, loaded: boolean}
+  samplesPending: boolean
 }
 
 interface IActionsFromState {
@@ -59,28 +62,11 @@ type TProps = IProps & IPropsFromState & IActionsFromState
 
 class CHome extends React.Component<TProps> {
 
-  public loadSampleData(recordId: number): void {
-    if (this.props.connection) {
-      this.props.getImportData(recordId)
-    }
-  }
-
   public componentDidMount(): void {
     this.props.refreshImports()
   }
 
   render(): JSX.Element {
-    const sampleMenu = (
-      <Menu>
-        <MenuItem icon='menu' text='Menu' disabled={true}/>
-        <MenuDivider />
-        <MenuItem icon='database' text='Import Records'>
-          { this.props.importRecords.length ? this.props.importRecords.map((record: IImportRecord, index: number) =>
-            <MenuItem key={index} icon='pulse' text={record.name} onClick={() => this.loadSampleData(record.id)} />) :
-            <MenuItem text='No samples imported yet'/>}
-        </MenuItem>
-      </Menu>
-    )
 
     const showScatter = (isReady: boolean): any => {
       if (isReady) {
@@ -89,12 +75,57 @@ class CHome extends React.Component<TProps> {
         return <Spinner size={20}/>
       }
     }
+    const getCharts = (): JSX.Element => {
+
+      if (this.props.samplesPending) {
+        return (
+          <div style={{alignItems: 'center', justifyContent: 'center', display: 'flex', height: '80vh', width: '100%'}}>
+            <Spinner size={100}/>
+          </div>
+        )
+      } else if (!this.props.samples.length) {
+        return (
+          <div style={{alignItems: 'center', justifyContent: 'center', display: 'flex', height: '80vh', width: '100%'}}>
+            <h2>Click on <span style={{backgroundColor: '#efefef', borderRadius: '4px', padding: '6px', margin: '6px', fontSize: 'initial', fontWeight: 400}}>
+              <Icon icon={'import'}/> Import</span> to import your datasets and get started!</h2>
+          </div>
+        )
+      }
+      return (
+        <>
+          <div style={{width: '70%'}}>
+            <div style={{width: '100%', display: 'flex'}}>
+              <div style={{width: '50%', height: '400px'}}>
+                {showScatter(!!this.props.samples.length)}
+              </div>
+              <div style={{width: '50%'}}>
+                {this.props.taxonomyTreeFull &&
+                <UBinSunburst data={{ children: this.props.taxonomyTreeFull}} clickEvent={this.props.updateSelectedTaxonomy}/>}
+              </div>
+            </div>
+            <EnzymeDistributionBarCharts samples={this.props.samples} samplesPending={this.props.samplesPending}
+                                         connection={this.props.connection}/>
+          </div>
+          { false &&
+          <div style={{width: '30%', height: 'inherit'}}>
+              <div style={{height: '400px'}}>
+                  <UBinBarChart data={this.props.archaealEnzymeDistribution} title='Archaeal Single Copy Genes' xName='name' yName='amount'/>
+              </div>
+              <div style={{height: '400px'}}>
+                  <UBinBarChart data={this.props.bacterialEnzymeDistribution} title='Bacterial Single Copy Genes' xName='name' yName='amount'/>
+              </div>
+          </div> }
+        </>
+      )
+    }
 
     return (
       <div>
         <div style={homeStyle}>
           <div style={{width: '100%', display: 'flex'}}>
-            <Popover content={sampleMenu} position={Position.RIGHT_BOTTOM}>
+            <Popover content={<SampleMenu importRecords={this.props.importRecords} importRecordsState={this.props.importRecordsState}
+                                          connection={this.props.connection} getImportData={this.props.getImportData}/>}
+                     position={Position.RIGHT_BOTTOM}>
               <Button icon='settings' text='Data Settings/Import' />
             </Popover>
             <ButtonGroup style={{marginLeft: '12px'}}>
@@ -102,36 +133,9 @@ class CHome extends React.Component<TProps> {
               <Button rightIcon='filter-remove' text='Reset filters' onClick={() => this.props.resetFilters()}/>
             </ButtonGroup>
           </div>
+
           <div style={{width: '100%', display: 'flex'}}>
-            <div style={{width: '70%'}}>
-              <div style={{width: '100%', display: 'flex'}}>
-                <div style={{width: '50%', height: '400px'}}>
-                  {showScatter(!!this.props.samples.length)}
-                </div>
-                <div style={{width: '50%'}}>
-                  {this.props.taxonomyTreeFull &&
-                  <UBinSunburst data={{ children: this.props.taxonomyTreeFull}} clickEvent={this.props.updateSelectedTaxonomy}/>}
-                </div>
-              </div>
-              { this.props.samples.length &&
-              <div style={{width: '100%', display: 'flex'}}>
-                <div style={{width: '50%', height: '500px'}}>
-                  <UBinZoomBarChart data={this.props.samples} title='GC/Length' xName='gc' yName='length'/>
-                </div>
-                <div style={{width: '50%', height: '500px'}}>
-                  <UBinZoomBarChart data={this.props.samples} title='Coverage/Length' xName='coverage' yName='length'/>
-                </div>
-              </div> }
-            </div>
-            { false &&
-            <div style={{width: '30%', height: 'inherit'}}>
-              <div style={{height: '400px'}}>
-                <UBinBarChart data={this.props.archaealEnzymeDistribution} title='Archaeal Single Copy Genes' xName='name' yName='amount'/>
-              </div>
-              <div style={{height: '400px'}}>
-                <UBinBarChart data={this.props.bacterialEnzymeDistribution} title='Bacterial Single Copy Genes' xName='name' yName='amount'/>
-              </div>
-            </div> }
+            {getCharts()}
           </div>
         </div>
       </div>
@@ -145,6 +149,8 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   connection: state.database.connection,
   taxonomyTreeFull: getTaxonomyTreeFull(state),
   samples: getSamples(state),
+  samplesPending: getSamplesStatePending(state),
+  importRecordsState: getImportRecordsState(state),
   scatterDomain: getScatterDomain(state),
   archaealEnzymeDistribution: getArchaealEnzymeDistributionForChart(state),
   bacterialEnzymeDistribution: getBacterialEnzymeDistributionForChart(state),

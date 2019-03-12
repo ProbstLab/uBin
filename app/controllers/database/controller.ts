@@ -2,7 +2,6 @@ import {IConnectDatabaseFulfilled, IDBState, IGetSamplesPending, IGetTaxonomiesF
 
 export const getInitialState = (): IDBState => ({
   id: 'default-db',
-  importsPending: false,
   samplesPending: false,
   taxonomiesPending: false,
 })

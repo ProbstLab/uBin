@@ -49,3 +49,8 @@ export const getScatterDomain = createSelector(
   getSamplesState,
   (state: ISamplesState) => state.filters.scatterDomain
 )
+
+export const getImportRecordsState = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => {return {pending: state.importRecordsPending, loaded: state.importsLoaded}},
+)
