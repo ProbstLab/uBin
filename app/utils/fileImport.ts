@@ -99,40 +99,29 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
       enzymeMap[value] = await connection.getRepository('enzyme').save({ name: value, archaeal: index <= 50, bacterial: index > 50 } ) as IEnzyme
     }
   }))
-  console.log("map before:", {...taxonomyMap})
   console.time("taxonomymap")
   await saveTaxonomy(taxonomyMap, connection)
   console.timeEnd("taxonomymap")
-  console.log("map after:", taxonomyMap)
   let itemList: ISample[] = []
-  console.time("map samples")
   Object.keys(sampleMap).map( (key: string) => {
     let item = sampleMap[key] as ISample
-    // let exists = await connection.getRepository('sample').count({where: {scaffold: item.scaffold}})
-    // if (!exists) {
-      let newEnzymes: IEnzyme[] = []
-      for (let i: number = item.taxonomyKeys.length-1; i > 0; i--) {
-        item.taxonomyKeys.splice(i, 0, 'children')
-      }
-      try {
-        item.taxonomy = {id: _.get(taxonomyMap, item.taxonomyKeys).id}
-      } catch (e) {
-        console.log("nope", e)
-      }
-      for (let enzymeKey of item.enzymeKeys.map((e: number, i: number) => e === 1 ? i : 0).filter((x: number) => x > 0)) {
-        newEnzymes.push(enzymeMap[enzymeList[enzymeKey]] as IEnzyme)
-      }
-      item.enzymes = newEnzymes
-      item.importRecord = importRecord
-      // await connection.getRepository('sample').save(item).catch(reason => console.log("!!!!!! BROKE !!11", reason))
-      itemList.push(item)
-      // console.log("itemList", itemList.length, itemList.length >= 100)
-      // if (itemList.length >= 100) {
-      //   console.log("save", itemList.length)
-      //   await connection.getRepository('sample').save([...itemList]).catch(reason => console.log("!!!!!! BROKE !!11", reason))
-      //   itemList = []
-      // }
-    // }
+    let newEnzymes: IEnzyme[] = []
+    for (let i: number = item.taxonomyKeys.length-1; i > 0; i--) {
+      item.taxonomyKeys.splice(i, 0, 'children')
+    }
+    try {
+      item.taxonomy = {id: _.get(taxonomyMap, item.taxonomyKeys).id}
+    } catch (e) {
+      console.log("nope", e)
+    }
+    console.log("item enzymekeys", item.enzymeKeys)
+    for (let enzymeKey of item.enzymeKeys.map((e: number, i: number) => e === 1 ? i : 0).filter((x: number) => x > 0)) {
+      newEnzymes.push(enzymeMap[enzymeList[enzymeKey]] as IEnzyme)
+    }
+    item.enzymes = newEnzymes
+    item.importRecord = importRecord
+    console.log("item", item)
+    itemList.push(item)
   })
   console.timeEnd("map samples")
   console.time("save samples")

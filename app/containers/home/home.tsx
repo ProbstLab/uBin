@@ -14,14 +14,16 @@ import {
 } from '../../controllers/samples'
 import {DBActions, getSamplesStatePending} from '../../controllers/database'
 import {Connection} from 'typeorm'
-import {IBarData, ITaxonomyForSunburst} from '../../utils/interfaces'
+import {IBarData, ISample, ITaxonomyForSunburst} from '../../utils/interfaces'
 import {UBinSunburst} from '../../components/uBinSunburst'
 import {ThunkAction} from 'redux-thunk'
-import {UBinBarChart} from '../../components/uBinBarChart'
 import {UBinScatter} from '../../components/uBinScatter'
 import {IScatterDomain} from 'samples'
 import {SampleMenu} from '../../components/sampleMenu'
+import {GCCoverageBarCharts} from '../../components/gCCoverageBarCharts'
 import {EnzymeDistributionBarCharts} from '../../components/enzymeDistributionBarCharts'
+import {Crossfilter} from 'crossfilter2'
+import * as crossfilter from 'crossfilter2'
 
 interface IProps extends RouteComponentProps {
 }
@@ -50,6 +52,10 @@ interface IActionsFromState {
   resetFilters(): void
 }
 
+interface IHomeState {
+  cf?: Crossfilter<ISample>
+}
+
 const homeStyle = {
   display: 'flex',
   flexDirection: 'row',
@@ -58,19 +64,30 @@ const homeStyle = {
   margin: '0',
 } as React.CSSProperties
 
-type TProps = IProps & IPropsFromState & IActionsFromState
+type TProps = IProps & IPropsFromState & IActionsFromState & IHomeState
 
 class CHome extends React.Component<TProps> {
+
+  importRecordsState: {pending: boolean, loaded: boolean} = {pending: false, loaded: false}
 
   public componentDidMount(): void {
     this.props.refreshImports()
   }
+  public state: IHomeState = {}
+  public componentWillReceiveProps(nextProps: IPropsFromState): void {
+    let { samples, samplesPending } = nextProps
+    if (this.props.samplesPending && !samplesPending && samples.length) {
+      this.setState({cf: crossfilter(nextProps.samples)})
+    }
+  }
 
   render(): JSX.Element {
 
+    let { cf } = this.state
+
     const showScatter = (isReady: boolean): any => {
-      if (isReady) {
-        return <UBinScatter data={this.props.samples} domainChangeHandler={this.props.updateScatterDomain} domain={this.props.scatterDomain}/>
+      if (isReady && cf) {
+        return <UBinScatter cf={cf} domainChangeHandler={this.props.updateScatterDomain} domain={this.props.scatterDomain}/>
       } else {
         return <Spinner size={20}/>
       }
@@ -86,11 +103,13 @@ class CHome extends React.Component<TProps> {
       } else if (!this.props.samples.length) {
         return (
           <div style={{alignItems: 'center', justifyContent: 'center', display: 'flex', height: '80vh', width: '100%'}}>
-            <h2>Click on <span style={{backgroundColor: '#efefef', borderRadius: '4px', padding: '6px', margin: '6px', fontSize: 'initial', fontWeight: 400}}>
+            <h2>Click on <span style={{backgroundColor: '#efefef', borderRadius: '4px',
+                                      padding: '6px', margin: '6px', fontSize: 'initial', fontWeight: 400}}>
               <Icon icon={'import'}/> Import</span> to import your datasets and get started!</h2>
           </div>
         )
       }
+
       return (
         <>
           <div style={{width: '70%'}}>
@@ -103,18 +122,11 @@ class CHome extends React.Component<TProps> {
                 <UBinSunburst data={{ children: this.props.taxonomyTreeFull}} clickEvent={this.props.updateSelectedTaxonomy}/>}
               </div>
             </div>
-            <EnzymeDistributionBarCharts samples={this.props.samples} samplesPending={this.props.samplesPending}
-                                         connection={this.props.connection}/>
+            <GCCoverageBarCharts cf={cf} samplesPending={this.props.samplesPending}
+                                 connection={this.props.connection}/>
           </div>
-          { false &&
-          <div style={{width: '30%', height: 'inherit'}}>
-              <div style={{height: '400px'}}>
-                  <UBinBarChart data={this.props.archaealEnzymeDistribution} title='Archaeal Single Copy Genes' xName='name' yName='amount'/>
-              </div>
-              <div style={{height: '400px'}}>
-                  <UBinBarChart data={this.props.bacterialEnzymeDistribution} title='Bacterial Single Copy Genes' xName='name' yName='amount'/>
-              </div>
-          </div> }
+          <EnzymeDistributionBarCharts samples={this.props.samples} samplesPending={this.props.samplesPending}
+                                       connection={this.props.connection}/>
         </>
       )
     }

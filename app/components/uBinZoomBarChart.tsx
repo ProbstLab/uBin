@@ -2,11 +2,9 @@ import * as React from 'react'
 import {ISample} from '../utils/interfaces'
 import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryLabel, VictoryZoomContainer} from 'victory'
 import {Crossfilter, Dimension} from 'crossfilter2'
-import * as crossfilter from 'crossfilter2'
-
 
 interface IProps {
-  data: ISample[]
+  cf: Crossfilter<ISample>
   title: string
   xName?: 'gc' | 'length' | 'coverage'
   yName?: 'gc' | 'length' | 'coverage'
@@ -15,7 +13,6 @@ interface IProps {
 export interface IBarCharState {
   selectedDomain?: any
   zoomDomain?: any
-  cf: Crossfilter<ISample>
   groupDim?: Dimension<ISample, number>
   filterDim?: Dimension<ISample, number>
   originalXDomain?: [number, number]
@@ -29,22 +26,21 @@ export class UBinZoomBarChart extends React.Component<IProps> {
   yMax: number = 0
   zoom?: number
 
-  public state: IBarCharState = {
-    cf: crossfilter(this.props.data),
-  }
+  public state: IBarCharState = {}
 
   public componentWillMount(): void {
     if (this.props.xName !== undefined) {
+      let {cf} = this.props
       if (this.props.xName === 'coverage') {
         this.setState({
-          filterDim: this.state.cf.dimension((d: ISample) => Math.round(d.coverage)),
-          groupDim: this.state.cf.dimension((d: ISample) => Math.round(d.coverage)),
+          filterDim: cf.dimension((d: ISample) => Math.round(d.coverage)),
+          groupDim: cf.dimension((d: ISample) => Math.round(d.coverage)),
         })
       }
       else if (this.props.xName === 'gc') {
         this.setState({
-          filterDim: this.state.cf.dimension((d: ISample) => Math.round(d.gc)),
-          groupDim: this.state.cf.dimension((d: ISample) => Math.round(d.gc)),
+          filterDim: cf.dimension((d: ISample) => Math.round(d.gc)),
+          groupDim: cf.dimension((d: ISample) => Math.round(d.gc)),
         })
       }
     }
@@ -167,12 +163,13 @@ export class UBinZoomBarChart extends React.Component<IProps> {
           let roundedStepSize: number = Math.round(currentDistance / 100)
           if (this.zoom !== roundedStepSize) {
             this.zoom = roundedStepSize
+            let {cf} = this.props
             switch (this.props.xName) {
               case ('coverage'):
-                this.setState({groupDim: this.state.cf.dimension((d: ISample) => this.roundLarge(d.coverage, this.zoom || 0.1, 0))})
+                this.setState({groupDim: cf.dimension((d: ISample) => this.roundLarge(d.coverage, this.zoom || 0.1, 0))})
                 break
               case ('gc'):
-                this.setState({groupDim: this.state.cf.dimension((d: ISample) => this.roundSmall(d.gc, this.zoom || 0.1, 0))})
+                this.setState({groupDim: cf.dimension((d: ISample) => this.roundSmall(d.gc, this.zoom || 0.1, 0))})
                 break
             }
           }
