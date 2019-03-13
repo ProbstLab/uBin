@@ -1,31 +1,29 @@
 
 import * as React from 'react'
-import {Connection} from 'typeorm'
 import {UBinZoomBarChart} from './uBinZoomBarChart'
 import {Crossfilter} from 'crossfilter2'
 import {ISample} from '../utils/interfaces'
-import {Spinner} from '@blueprintjs/core'
+import * as crossfilter from 'crossfilter2'
 
 interface IProps {
-  cf: Crossfilter<ISample> | undefined
+  samples: any[]
   samplesPending: boolean
 }
 
-interface IActionsFromState {}
-
-interface IPropsFromState {
-  connection: Connection | undefined
+interface IGCCoverageBarChartsState {
+  cf: Crossfilter<ISample>
 }
 
-type TProps = IProps & IPropsFromState & IActionsFromState
+type TProps = IProps
 
 export class GCCoverageBarCharts extends React.PureComponent<TProps> {
 
+  public state: IGCCoverageBarChartsState = {
+    cf: crossfilter(this.props.samples),
+  }
+
   render(): JSX.Element {
-    let {cf} = this.props
-    if (!cf) {
-      return (<Spinner size={20}/>)
-    }
+    let {cf} = this.state
     return (
       <div style={{width: '100%', display: 'flex'}}>
         <div style={{width: '50%', height: '500px'}}>
