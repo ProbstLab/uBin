@@ -46,6 +46,8 @@ interface IActionsFromState {
   refreshImports(): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   updateScatterDomain(scatterDomain: IScatterDomain): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   setScatterDomain(scatterDomain: IScatterDomain): void
+  setScatterDomainX(domain: [number, number]): void
+  setScatterDomainY(domain: [number, number]): void
   applyFilters(): void
   resetFilters(): void
 }
@@ -95,15 +97,17 @@ class CHome extends React.Component<TProps> {
         <>
           <div style={{width: '70%'}}>
             <div style={{width: '100%', display: 'flex'}}>
-              <div style={{width: '50%', height: '400px'}}>
+              <div style={{width: '50%'}}>
                 {showScatter(!!this.props.samples.length)}
               </div>
-              <div style={{width: '50%'}}>
+              <div style={{width: '40%'}}>
                 {this.props.taxonomyTreeFull &&
                 <UBinSunburst data={{ children: this.props.taxonomyTreeFull}} clickEvent={this.props.updateSelectedTaxonomy}/>}
               </div>
             </div>
-            <GCCoverageBarCharts samples={this.props.samples} samplesPending={this.props.samplesPending}/>
+            <GCCoverageBarCharts samples={this.props.samples} samplesPending={this.props.samplesPending} scatterDomain={this.props.scatterDomain}
+                                 setScatterDomainX={this.props.setScatterDomainX} setScatterDomainY={this.props.setScatterDomainY}
+                                 domainChangeHandler={this.props.updateScatterDomain}/>
           </div>
           <EnzymeDistributionBarCharts samples={this.props.samples} samplesPending={this.props.samplesPending}
                                        connection={this.props.connection}/>
@@ -157,6 +161,8 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       getImportData: recordId => DBActions.getImportData(recordId),
       updateSelectedTaxonomy: taxonomyIds => SamplesActions.updateSelectedTaxonomy(taxonomyIds),
       setScatterDomain: scatterDomain => SamplesActions.setScatterDomain(scatterDomain),
+      setScatterDomainX: scatterDomainX => SamplesActions.setScatterDomainX(scatterDomainX),
+      setScatterDomainY: scatterDomainY => SamplesActions.setScatterDomainY(scatterDomainY),
       updateScatterDomain: scatterDomain => SamplesActions.updateScatterDomain(scatterDomain),
       applyFilters: SamplesActions.applyFilters,
       resetFilters: SamplesActions.resetFilters,

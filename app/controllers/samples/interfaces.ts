@@ -30,6 +30,8 @@ export enum samplesActions {
   getSamplesFulfilled = 'database.getSamples_FULFILLED',
   setImportedRecord = 'database.setImportedRecord',
   setScatterDomain = 'samples.setScatterDomain',
+  setScatterDomainX = 'samples.setScatterDomainX',
+  setScatterDomainY = 'samples.setScatterDomainY',
   setTaxonomyIds = 'samples.setTaxonomyIds',
   removeFilters = 'samples.removeFilters',
 }
@@ -65,7 +67,16 @@ export interface ISetTaxonomyIds extends Action {
   type: samplesActions.setTaxonomyIds
   taxonomyIds: number[]
 }
+
 export interface ISetScatterDomain extends Action {
   type: samplesActions.setScatterDomain
   scatterDomain: IScatterDomain
+}
+export interface ISetScatterDomainX extends Action {
+  type: samplesActions.setScatterDomainX
+  domain: [number, number]
+}
+export interface ISetScatterDomainY extends Action {
+  type: samplesActions.setScatterDomainY
+  domain: [number, number]
 }

@@ -20,6 +20,8 @@ export const samplesReducer = createReducer(samples.getInitialState(), {
   [samplesActions.setImportedRecord]: samples.setImportedRecord,
   [samplesActions.getSamplesFulfilled]: samples.getSamplesFulfilled,
   [samplesActions.setScatterDomain]: samples.setScatterDomain,
+  [samplesActions.setScatterDomainX]: samples.setScatterDomainX,
+  [samplesActions.setScatterDomainY]: samples.setScatterDomainY,
   [samplesActions.removeFilters]: samples.removeFilters,
 })
 

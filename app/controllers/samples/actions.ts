@@ -4,7 +4,7 @@ import {
   IGetTaxonomiesForImportFulfilled,
   ISetImportedRecord,
   samplesActions,
-  IGetSamplesFulfilled, ISetScatterDomain, ISetTaxonomyIds, IRemoveFilters, IGetImportsPending
+  IGetSamplesFulfilled, ISetScatterDomain, ISetTaxonomyIds, IRemoveFilters, IGetImportsPending, ISetScatterDomainX, ISetScatterDomainY
 } from './interfaces'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
 import {IClientState} from '../index'
@@ -44,6 +44,12 @@ export class SamplesActions {
   static setScatterDomain(scatterDomain: IScatterDomain): ISetScatterDomain {
     return {type: samplesActions.setScatterDomain, scatterDomain}
   }
+  static setScatterDomainX(domain: [number, number]): ISetScatterDomainX {
+    return {type: samplesActions.setScatterDomainX, domain}
+  }
+  static setScatterDomainY(domain: [number, number]): ISetScatterDomainY {
+    return {type: samplesActions.setScatterDomainY, domain}
+  }
 
   static updateSelectedTaxonomy(taxonomyIds: number[]): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
@@ -73,9 +79,7 @@ export class SamplesActions {
           () => {
             let filters: ISampleFilter = getState().samples.filters
             let recordId = getImportRecordId(getState())
-            console.log("then do more things", recordId, connection)
             if (connection && recordId) {
-              console.log("then get taxonomies")
               Promise.all([dispatch(DBActions.getTaxonomiesForImport(connection, recordId, filters))]).then(() => resolve())
             } else {
               resolve()

@@ -33,7 +33,6 @@ export class UBinBarChart extends React.Component<IProps> {
 
   public componentWillUpdate(): void {
     if (this.props.domain) {
-      console.log("will update")
       this.setState({
         filterDim: this.state.cf.dimension((d: ISample) => Math.round(d.gc)),
         groupDim: this.state.cf.dimension((d: ISample) => Math.round(d.gc)),

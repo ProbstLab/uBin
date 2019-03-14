@@ -3,9 +3,9 @@ import {
   IGetImportsFulfilled, IGetImportsPending, IGetSamplesFulfilled,
   IGetTaxonomiesForImportFulfilled, IRemoveFilters,
   ISamplesState,
-  ISetImportedRecord, ISetScatterDomain, ISetTaxonomyIds
+  ISetImportedRecord, ISetScatterDomain, ISetScatterDomainX, ISetTaxonomyIds, ISetScatterDomainY
 } from './interfaces'
-import {TreeCreator} from "../../utils/treeCreator";
+import {TreeCreator} from "../../utils/treeCreator"
 
 export const getInitialState = (): ISamplesState => ({
   filters: {},
@@ -71,6 +71,26 @@ export const setScatterDomain = (state: ISamplesState, action: ISetScatterDomain
     ...state,
     filters: {
       scatterDomain: action.scatterDomain,
+    },
+  }
+}
+export const setScatterDomainX = (state: ISamplesState, action: ISetScatterDomainX): ISamplesState => {
+  return {
+    ...state,
+    filters: {
+      scatterDomain: {
+        x: action.domain,
+      },
+    },
+  }
+}
+export const setScatterDomainY = (state: ISamplesState, action: ISetScatterDomainY): ISamplesState => {
+  return {
+    ...state,
+    filters: {
+      scatterDomain: {
+        y: action.domain,
+      },
     },
   }
 }

@@ -92,10 +92,16 @@ export class UBinScatter extends React.PureComponent<IProps> {
       }
     }
 
+    console.log("get data")
+
     if (gcDim && covDim && combDim) {
+      console.log("domain:", domain)
       if (domain) {
-        if (domain.x && domain.y) {
+        console.log("domain!")
+        if (domain.x) {
           gcDim.filterRange(domain.x)
+        }
+        if (domain.y) {
           covDim.filterRange(domain.y)
         }
       }
@@ -106,10 +112,11 @@ export class UBinScatter extends React.PureComponent<IProps> {
         let valObj: IScatterDetails = value.value
         return {gc: valObj.xSum/valObj.count, coverage: valObj.ySum/valObj.count, size: Math.log(valObj.count/2)+basePointSize}
       })
+      console.log("num vals", returnVals.length)
       return returnVals
     }
     return []
-}
+  }
 
   public handleDomainChangeEnd(): void {
     if (this.props.domainChangeHandler) {
@@ -130,15 +137,16 @@ export class UBinScatter extends React.PureComponent<IProps> {
                                         onBrushDomainChange={(domain: any, props: any) => this.handleDomainChange(domain)}
                                         onBrushDomainChangeEnd={() => this.handleDomainChangeEnd()}/>}
                     theme={VictoryTheme.material} domainPadding={20}
-                    height={600}
+                    height={500}
                     width={400}
-                    padding={{ left: 40, top: 40, right: 10, bottom: 150 }}>
+                    padding={{ left: 40, top: 40, right: 10, bottom: 40 }}>
         <VictoryAxis
+          tickFormat={(t: number) => Math.round(t*10)/10}
           tickLabelComponent={<VictoryLabel style={{textAnchor:'end', fontSize: '10px'}} angle={-75}/>}
         />
         <VictoryAxis
           dependentAxis={true}
-          tickFormat={(t: number) => {return  t >= 1000 ? `${Math.round(t)/1000}k` : t}}
+          tickFormat={(t: number) => {return  t >= 1000 ? `${Math.round(t)/1000}k` : Math.round(t)}}
         />
         <VictoryScatter
           bubbleProperty="size"
