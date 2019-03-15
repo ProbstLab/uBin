@@ -92,12 +92,8 @@ export class UBinScatter extends React.PureComponent<IProps> {
       }
     }
 
-    console.log("get data")
-
     if (gcDim && covDim && combDim) {
-      console.log("domain:", domain)
       if (domain) {
-        console.log("domain!")
         if (domain.x) {
           gcDim.filterRange(domain.x)
         }
@@ -112,7 +108,6 @@ export class UBinScatter extends React.PureComponent<IProps> {
         let valObj: IScatterDetails = value.value
         return {gc: valObj.xSum/valObj.count, coverage: valObj.ySum/valObj.count, size: Math.log(valObj.count/2)+basePointSize}
       })
-      console.log("num vals", returnVals.length)
       return returnVals
     }
     return []

@@ -16,6 +16,7 @@ export interface ISamplesState {
   importRecords: IImportRecord[]
   taxonomyTreeFull?: IGenericAssociativeArray
   enzymeDistribution?: Enzyme[]
+  enzymeTypes?: Enzyme[]
   selectedTaxonomy?: ITaxonomyForSunburst
   recordId?: number
   importRecordsPending: boolean
@@ -27,6 +28,7 @@ export enum samplesActions {
   getImportsFulfilled = 'database.getImports_FULFILLED',
   getTaxonomiesForImportFulfilled = 'database.getTaxonomiesForImport_FULFILLED',
   getEnzymeDistributionFulfilled = 'database.getEnzymeDistribution_FULFILLED',
+  getAllEnzymeTypesFulfilled = 'database.getAllEnzymeTypes_FULFILLED',
   getSamplesFulfilled = 'database.getSamples_FULFILLED',
   setImportedRecord = 'database.setImportedRecord',
   setScatterDomain = 'samples.setScatterDomain',
@@ -50,6 +52,10 @@ export interface IGetTaxonomiesForImportFulfilled extends Action {
 }
 export interface IGetEnzymeDistributionFulfilled extends Action {
   type: samplesActions.getEnzymeDistributionFulfilled
+  payload: any
+}
+export interface IGetAllEnzymeTypesFulfilled extends Action {
+  type: samplesActions.getAllEnzymeTypesFulfilled
   payload: any
 }
 export interface IGetSamplesFulfilled extends Action {

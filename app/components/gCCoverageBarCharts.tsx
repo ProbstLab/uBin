@@ -1,10 +1,10 @@
 
 import * as React from 'react'
-import {UBinZoomBarChart} from './uBinZoomBarChart'
 import {Crossfilter} from 'crossfilter2'
 import {ISample} from '../utils/interfaces'
 import * as crossfilter from 'crossfilter2'
 import {IScatterDomain} from "samples"
+import {UBinSelectBarChart} from './uBinSelectBarChart'
 
 interface IProps {
   samples: any[]
@@ -33,11 +33,11 @@ export class GCCoverageBarCharts extends React.PureComponent<TProps> {
     return (
       <div style={{width: '100%', display: 'flex'}}>
         <div style={{width: '50%', height: '360px'}}>
-          <UBinZoomBarChart cf={cf} title='GC/Length' xName='gc' yName='length' worldDomain={scatterDomain ? scatterDomain.x : undefined}
+          <UBinSelectBarChart cf={cf} title='GC/Length' xName='gc' yName='length' worldDomain={scatterDomain ? scatterDomain.x : undefined}
                             setWorldDomain={setScatterDomainX} domainChangeHandler={domainChangeHandler}/>
         </div>
         <div style={{width: '50%', height: '360px'}}>
-          <UBinZoomBarChart cf={cf} title='Coverage/Length' xName='coverage' yName='length' worldDomain={scatterDomain ? scatterDomain.y : undefined}
+          <UBinSelectBarChart cf={cf} title='Coverage/Length' xName='coverage' yName='length' worldDomain={scatterDomain ? scatterDomain.y : undefined}
                             setWorldDomain={setScatterDomainY} domainChangeHandler={domainChangeHandler}/>
         </div>
       </div>

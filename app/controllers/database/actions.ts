@@ -1,7 +1,7 @@
 import {
   dbActions,
   IConnectDatabase,
-  IConnectDatabaseFulfilled, IGetEnzymeDistribution, IGetEnzymeDistributionPending,
+  IConnectDatabaseFulfilled, IGetAllEnzymeTypes, IGetEnzymeDistribution, IGetEnzymeDistributionPending,
   IGetImports,
   IGetSamples, IGetSamplesPending, IGetSamplesPendingDone,
   IGetTaxonomiesForImport, IGetTaxonomiesForImportPending, IGetTaxonomiesForImportPendingDone,
@@ -11,7 +11,7 @@ import {ThunkAction, ThunkDispatch} from 'redux-thunk'
 import {AnyAction} from 'redux'
 import {getDBConnection} from './selectors'
 import {IClientState} from '../index'
-import {getEnzymeDistributionQuery, getSamplesQuery, getTaxonomiesAndCountQuery} from './queries'
+import {getAllEnzymeTypesQuery, getEnzymeDistributionQuery, getSamplesQuery, getTaxonomiesAndCountQuery} from './queries'
 import {SamplesActions} from '../samples'
 import {ISampleFilter} from 'samples'
 
@@ -45,6 +45,10 @@ export class DBActions {
   }
   static getEnzymeDistributionPending(payload: any): IGetEnzymeDistributionPending {
     return {type: dbActions.getEnzymeDistributionPending, enzymeDistributionPending: true}
+  }
+
+  static getAllEnzymeTypes(connection: Connection): IGetAllEnzymeTypes {
+    return {type: dbActions.getAllEnzymeTypes, payload: getAllEnzymeTypesQuery(connection)}
   }
 
   static getSamples(connection: Connection, recordId: number, taxonomyId?: number[], filter?: ISampleFilter): IGetSamples {

@@ -83,3 +83,7 @@ export const getSamplesQuery = async (connection: Connection, recordId: number, 
   }
   return query.getMany()
 }
+
+export const getAllEnzymeTypesQuery = async(connection: Connection): Promise<any> => {
+  return connection.getRepository('enzyme').createQueryBuilder('enzyme').getMany()
+}

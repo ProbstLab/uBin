@@ -9,12 +9,16 @@ import {
   getImportRecords,
   getTaxonomyTreeFull,
   IImportRecord,
-  getArchaealEnzymeDistributionForChart,
-  getBacterialEnzymeDistributionForChart, SamplesActions, getSamples, getScatterDomain, getImportRecordsState,
+  SamplesActions,
+  getSamples,
+  getScatterDomain,
+  getImportRecordsState,
+  getBacterialEnzymeTypes,
+  getArchaealEnzymeTypes,
 } from '../../controllers/samples'
 import {DBActions, getSamplesStatePending} from '../../controllers/database'
 import {Connection} from 'typeorm'
-import {IBarData, ITaxonomyForSunburst} from '../../utils/interfaces'
+import {ITaxonomyForSunburst} from '../../utils/interfaces'
 import {UBinSunburst} from '../../components/uBinSunburst'
 import {ThunkAction} from 'redux-thunk'
 import {UBinScatter} from '../../components/uBinScatter'
@@ -30,8 +34,8 @@ interface IPropsFromState {
   connection: Connection | undefined
   importRecords: IImportRecord[]
   taxonomyTreeFull?: ITaxonomyForSunburst[]
-  archaealEnzymeDistribution: IBarData[]
-  bacterialEnzymeDistribution: IBarData[]
+  archaealEnzymeTypes: string[]
+  bacterialEnzymeTypes: string[]
   samples: any[]
   scatterDomain?: IScatterDomain
   importRecordsState: {pending: boolean, loaded: boolean}
@@ -109,8 +113,9 @@ class CHome extends React.Component<TProps> {
                                  setScatterDomainX={this.props.setScatterDomainX} setScatterDomainY={this.props.setScatterDomainY}
                                  domainChangeHandler={this.props.updateScatterDomain}/>
           </div>
-          <EnzymeDistributionBarCharts samples={this.props.samples} samplesPending={this.props.samplesPending}
-                                       connection={this.props.connection}/>
+          <EnzymeDistributionBarCharts samples={this.props.samples} samplesPending={this.props.samplesPending} domain={this.props.scatterDomain}
+                                       connection={this.props.connection} archaealLabels={this.props.archaealEnzymeTypes}
+                                       bacterialLabels={this.props.bacterialEnzymeTypes}/>
         </>
       )
     }
@@ -148,8 +153,8 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   samplesPending: getSamplesStatePending(state),
   importRecordsState: getImportRecordsState(state),
   scatterDomain: getScatterDomain(state),
-  archaealEnzymeDistribution: getArchaealEnzymeDistributionForChart(state),
-  bacterialEnzymeDistribution: getBacterialEnzymeDistributionForChart(state),
+  archaealEnzymeTypes: getBacterialEnzymeTypes(state),
+  bacterialEnzymeTypes: getArchaealEnzymeTypes(state),
 })
 
 const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>

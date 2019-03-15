@@ -36,6 +36,19 @@ export const getArchaealEnzymeDistributionForChart = createSelector(
       .map((value: Enzyme) => {return {name: value.name, amount: value.sampleCount, id: value.id}}) : []
 )
 
+export const getBacterialEnzymeTypes = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.enzymeTypes ?
+    state.enzymeTypes.filter(value => value.bacterial)
+      .map((value: Enzyme) => value.name) : []
+)
+export const getArchaealEnzymeTypes = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.enzymeTypes ?
+    state.enzymeTypes.filter(value => value.archaeal)
+      .map((value: Enzyme) => value.name) : []
+)
+
 export const getSamples = createSelector(
   getSamplesState,
   (state: ISamplesState) => state.samples ? state.samples.map((value: any) => {

@@ -4,7 +4,14 @@ import {
   IGetTaxonomiesForImportFulfilled,
   ISetImportedRecord,
   samplesActions,
-  IGetSamplesFulfilled, ISetScatterDomain, ISetTaxonomyIds, IRemoveFilters, IGetImportsPending, ISetScatterDomainX, ISetScatterDomainY
+  IGetSamplesFulfilled,
+  ISetScatterDomain,
+  ISetTaxonomyIds,
+  IRemoveFilters,
+  IGetImportsPending,
+  ISetScatterDomainX,
+  ISetScatterDomainY,
+  IGetAllEnzymeTypesFulfilled
 } from './interfaces'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
 import {IClientState} from '../index'
@@ -27,6 +34,9 @@ export class SamplesActions {
   }
   static getEnzymeDistributionFulfilled(payload: any): IGetEnzymeDistributionFulfilled {
     return {type: samplesActions.getEnzymeDistributionFulfilled, payload}
+  }
+  static getAllEnzymeTypesFulfilled(payload: any): IGetAllEnzymeTypesFulfilled {
+    return {type: samplesActions.getAllEnzymeTypesFulfilled, payload}
   }
   static getSamplesFulfilled(payload: any): IGetSamplesFulfilled {
     return {type: samplesActions.getSamplesFulfilled, payload}
