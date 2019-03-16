@@ -26,12 +26,13 @@ export class EnzymeDistributionBarCharts extends React.PureComponent<TProps> {
     return (
       <div style={{width: '30%', height: 'inherit'}}>
         <div style={{height: '400px'}}>
-          <UBinBarChart data={this.props.samples} title='Archaeal Single Copy Genes' xName='name' xLabels={this.props.archaealLabels} yName='amount'
-                        domain={this.props.domain}/>
+          <UBinBarChart data={this.props.samples} title='Bacterial Single Copy Genes' xName='name' xLabels={this.props.bacterialLabels} yName='amount'
+                        domain={this.props.domain} filterBoolName={'bacterial'} />
         </div>
-        {/*<div style={{height: '400px'}}>*/}
-          {/*<UBinBarChart data={this.props.bacterialEnzymeDistribution} title='Bacterial Single Copy Genes' xName='name' yName='amount'/>*/}
-        {/*</div>*/}
+        <div style={{height: '400px'}}>
+          <UBinBarChart data={this.props.samples} title='Archaeal Single Copy Genes' xName='name' xLabels={this.props.archaealLabels} yName='amount'
+                        domain={this.props.domain} filterBoolName={'archaeal'}/>
+        </div>
       </div>
     )}
   }

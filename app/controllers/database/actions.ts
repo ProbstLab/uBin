@@ -91,7 +91,7 @@ export class DBActions {
         if (connection) {
           Promise.all([
             dispatch(DBActions.getTaxonomiesForImport(connection, recordId)),
-            dispatch(DBActions.getEnzymeDistribution(connection, recordId)),
+            dispatch(DBActions.getAllEnzymeTypes(connection)),
             dispatch(DBActions.getSamples(connection, recordId)),
             dispatch(SamplesActions.setImportedRecord(recordId)),
           ]).then(() =>

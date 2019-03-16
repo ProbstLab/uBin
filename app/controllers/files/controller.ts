@@ -56,78 +56,10 @@ export const generateFileTreeObject = (dir: string): IFile[] => {
       }
     } catch (e) {}
   })
-
-  // fs.readdir(dir, (err, items) => {
-  //   if (!err) {
-  //     items.map((label: string) => {
-  //       const fullPath = dir + label
-  //       fs.stat(fullPath, (err, stats) => {
-  //         if (!err) {
-  //           nodes.push({ id: stats.ino, isDirectory: stats.isDirectory(), label: label, filePath: fullPath })
-  //         }
-  //       })
-  //     })
-  //   } else {
-  //     console.log('err: ', err)
-  //   }
-  // })
   return files
 }
 
-// export const generateFileTreeObjectAsync = (dir: string): Promise<IFile[]> => {
-//   dir = dir.endsWith('/') ? dir : dir + '/'
-//   return readDirAsync(dir)
-//     .then((fileNamesArr: any[]) => {
-//       const fileStatPromises = fileNamesArr.map((fileName: string) => {
-//         const fullPath = dir + fileName
-//         return statAsync(fullPath)
-//           .then((stats: Stats) => {
-//             let file: IFile = {
-//               filePath: '', isDirectory: stats.isDirectory(),
-//               label: fileName, id: stats.gid.toString() }
-//             fs.access(fullPath, fs.constants.R_OK, generateFileTreeObjectErr => {
-//               file.readPerm = !generateFileTreeObjectErr
-//             })
-//             return file
-//           })
-//       })
-//       return Promise.all(fileStatPromises)
-//     })
-// }
-
-// const generateFileTreeObject = (dir: string) : Promise<any[]> => {
-//   dir = dir.endsWith('/') ? dir : dir + '/'
-//   return readDirAsync(dir)
-//     .then((fileNamesArr : any[]) => {
-//       const fileStatPromises = fileNamesArr.map((label : string) => {
-//         const fullPath = dir + label;
-//         return statAsync(fullPath)
-//           .then((stats : Stats) : any => {
-//             fs.access(fullPath, fs.constants.R_OK, (err) => {
-//               if (!err) {
-//                 const file: IFile = {
-//                   id: fullPath, filePath: fullPath,
-//                   isFile: stats.isFile(), nodes: [], label: label
-//                 }
-//                 if (!file.isFile) {
-//                   return generateFileTreeObject(file.filePath)
-//                     .then(fileNamesSubArr => {
-//                       file.nodes = fileNamesSubArr
-//                     })
-//                 }
-//                 return file
-//               }
-//             })
-//           })IPopulate{FileTree
-//       })
-//       return Promise.all(fileStatPromises)
-//     })
-// }
-
 export const initFileTree = (state: IFileTreeState, action: IInitFileTree): IFileTreeState => {
-  // const nodes: Promise<IFile[]> = generateFileTreeObjectAsync(action.dir)
-  // console.log('Val: ', nodes.then((val: IFile[]) => ({ val })))
-  // console.log('Stuff: ', generateFileTreeObject(action.dir))
   return {
     ...state,
     fileTree: {
@@ -168,12 +100,12 @@ export const removeAddedFiles = (state: IFileTreeState, action: IRemoveAddedFile
 export const importFilePending = (state: IFileTreeState, action: IImportFileFulfilled): IFileTreeState => {
   return {
     ...state,
-    isImportingFiles: true
+    isImportingFiles: true,
   }
 }
 export const importFileFulfilled = (state: IFileTreeState, action: IImportFileFulfilled): IFileTreeState => {
   return {
     ...state,
-    isImportingFiles: false
+    isImportingFiles: false,
   }
 }

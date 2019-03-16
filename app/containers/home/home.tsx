@@ -62,6 +62,7 @@ const homeStyle = {
   flexWrap: 'wrap',
   justifyContent: 'left',
   margin: '0',
+  marginTop: '64px',
 } as React.CSSProperties
 
 type TProps = IProps & IPropsFromState & IActionsFromState
@@ -104,7 +105,7 @@ class CHome extends React.Component<TProps> {
               <div style={{width: '50%'}}>
                 {showScatter(!!this.props.samples.length)}
               </div>
-              <div style={{width: '40%'}}>
+              <div style={{width: '40%', marginTop: '30px'}}>
                 {this.props.taxonomyTreeFull &&
                 <UBinSunburst data={{ children: this.props.taxonomyTreeFull}} clickEvent={this.props.updateSelectedTaxonomy}/>}
               </div>
@@ -130,7 +131,7 @@ class CHome extends React.Component<TProps> {
               <Button icon='settings' text='Data Settings/Import' />
             </Popover>
             <ButtonGroup style={{marginLeft: '12px'}}>
-              <Button icon='filter' intent='success' text='Apply filters' onClick={() => this.props.applyFilters()}/>
+              {/*<Button icon='filter' intent='success' text='Apply filters' onClick={() => this.props.applyFilters()}/>*/}
               <Button rightIcon='filter-remove' text='Reset filters' onClick={() => this.props.resetFilters()}/>
             </ButtonGroup>
           </div>
@@ -153,8 +154,8 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   samplesPending: getSamplesStatePending(state),
   importRecordsState: getImportRecordsState(state),
   scatterDomain: getScatterDomain(state),
-  archaealEnzymeTypes: getBacterialEnzymeTypes(state),
-  bacterialEnzymeTypes: getArchaealEnzymeTypes(state),
+  archaealEnzymeTypes: getArchaealEnzymeTypes(state),
+  bacterialEnzymeTypes: getBacterialEnzymeTypes(state),
 })
 
 const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>

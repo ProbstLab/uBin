@@ -100,6 +100,10 @@ export class UBinScatter extends React.PureComponent<IProps> {
         if (domain.y) {
           covDim.filterRange(domain.y)
         }
+      } else {
+        gcDim.filterAll()
+        covDim.filterAll()
+        this.zoom = undefined
       }
       let logFactor: number = 10/Math.log(100)
       let basePointSize: number = 10-Math.log((this.zoom !== undefined ? this.zoom || 0.01 : 1)*100)*logFactor
@@ -141,7 +145,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
         />
         <VictoryAxis
           dependentAxis={true}
-          tickFormat={(t: number) => {return  t >= 1000 ? `${Math.round(t)/1000}k` : Math.round(t)}}
+          tickFormat={(t: number) => {return  t >= 1000 ? `${Math.round(t)/1000}k` : t >= 100 ? Math.round(t) : Math.round(t*10)/10}}
         />
         <VictoryScatter
           bubbleProperty="size"

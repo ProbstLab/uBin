@@ -125,8 +125,6 @@ export class SamplesActions {
         if (connection && recordId) {
           Promise.all([
             dispatch(SamplesActions.removeFilters()),
-            dispatch(DBActions.getEnzymeDistribution(connection, recordId, undefined, undefined)),
-            dispatch(DBActions.getSamples(connection, recordId, undefined, undefined)),
           ]).then(() => resolve())
         } else {
           resolve()

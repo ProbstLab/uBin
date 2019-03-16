@@ -36,12 +36,14 @@ const fileManagerStyle = {
   flexWrap: 'wrap',
   justifyContent: 'left',
   margin: '0',
+  marginTop: '64px',
+  height: 'calc(100vh - 74px)',
 } as React.CSSProperties
 
 const fileTreeStyle = {
   minWidth: '400px',
   maxWidth: '40%',
-  height: '100vh',
+  height: '100%',
   overflow: 'scroll',
 } as React.CSSProperties
 
@@ -52,6 +54,8 @@ const fileImportStyle = {
 type TProps = IProps & IPropsFromState & IActionsFromState
 
 class CFileManager extends React.Component<TProps> {
+
+  importingFiles: boolean = false
 
   public state: IFileManagerState = {}
 
@@ -64,10 +68,7 @@ class CFileManager extends React.Component<TProps> {
     const { addedFiles } = this.props
     return (
       <div style={fileManagerStyle}>
-        <Callout title={'Files!'} style={fileTreeStyle}>
-          {/*{ fileTree && (<ul className='file-tree'> {fileTree.map((file: IFile) => (*/}
-            {/*<FileTree key={file.id} file={file} openFile={this.props.openFile}/>*/}
-          {/*))} </ul>)}*/}
+        <Callout title={'Files'} style={fileTreeStyle}>
           <UBinTree
             contents={fileTree}
             onNodeClick={this.handleNodeClick}
@@ -78,14 +79,11 @@ class CFileManager extends React.Component<TProps> {
           />
         </Callout>
         <div style={fileImportStyle}>
-          {/*{ console.log(this.props.addedFiles) }*/}
-          {/*{ this.props.addedFiles.map((file: IFile, index: number) => (<p key={index}>{ file.label }</p>))}*/}
           <Card style={{ margin: '8px'}}>
             <h4>Import</h4>
             <Callout intent={'warning'}>
               Add taxonomy file first, then .csv or .txt of second dataset ({2 - addedFiles.length} files remaining)
             </Callout>
-            {/*<p>.csv/.txt zum Import hinzufügen ({2 - addedFiles.length} Dateien verbleibend)</p>*/}
             <FileList files={addedFiles} removeAddedFile={this.props.removeAddedFile}/>
             <Button icon='import' disabled={addedFiles.length !== 2} intent='primary'
                     onClick={() => this.toggleDialog(true)}>Import</Button>
@@ -93,7 +91,7 @@ class CFileManager extends React.Component<TProps> {
           <Dialog isOpen={this.props.isImportingFiles} onClose={() => this.toggleDialog(false)} icon='import'
                   title='Importing Data'>
             <div className={Classes.DIALOG_BODY}>
-              <h4>Beep beep... importing files</h4>
+              <h4>Importing Files...</h4>
               <ProgressBar intent='primary'/>
             </div>
           </Dialog>

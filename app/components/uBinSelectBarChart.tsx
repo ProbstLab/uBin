@@ -80,14 +80,6 @@ export class UBinSelectBarChart extends React.Component<IProps> {
 
   public handleBrushChangeEnd(): void {
     this.props.setWorldDomain(this.currentDomain)
-    switch (this.props.xName) {
-      case 'gc':
-        this.props.domainChangeHandler({x: this.currentDomain})
-        break
-      case 'coverage':
-        this.props.domainChangeHandler({y: this.currentDomain})
-        break
-    }
   }
 
   public getStepSize(distance: number): number {
@@ -111,17 +103,6 @@ export class UBinSelectBarChart extends React.Component<IProps> {
   }
 
   public getXLabels(adjustScale?: boolean): number[] {
-    // let { originalXDomain } = this.state
-    // let stepsArray: number[] = []
-    // if (originalXDomain) {
-    //   let xDistance: number = Math.sqrt((originalXDomain[1] - originalXDomain[0]) ** 2)
-    //   let stepSize: number = this.getStepSize(xDistance)
-    //   console.log("xdistance", xDistance, "stepsize", stepSize)
-    //   for (let i: number = 0; i < this.roundLarge(xDistance, stepSize, 0);
-    //        i += !adjustScale || !this.currentDomain ? stepSize : this.getStepSize(Math.sqrt((this.currentDomain.x[1] - this.currentDomain.x[0])**2))) {
-    //     stepsArray.push(i)
-    //   }
-    // }
     let stepsArray: number[] = []
     let domain: [number, number] = this.currentDomain || this.state.originalXDomain
     if (domain) {
@@ -169,6 +150,8 @@ export class UBinSelectBarChart extends React.Component<IProps> {
       let { worldDomain } = this.props
       if (worldDomain) {
         filterDim.filterRange(worldDomain)
+      } else {
+        filterDim.filterAll()
       }
       if (xName) {
         this.yMax = 0
