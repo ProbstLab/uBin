@@ -1,11 +1,15 @@
 
 import * as React from 'react'
 import {Connection} from 'typeorm'
-import {UBinZoomBarChart} from './uBinZoomBarChart'
+import {UBinBarChart} from './uBinBarChart'
+import {IScatterDomain} from 'samples'
 
 interface IProps {
   samples: any[]
   samplesPending: boolean
+  archaealLabels: string[]
+  bacterialLabels: string[]
+  domain?: IScatterDomain
 }
 
 interface IActionsFromState {}
@@ -20,12 +24,14 @@ export class EnzymeDistributionBarCharts extends React.PureComponent<TProps> {
 
   render(): JSX.Element {
     return (
-      <div style={{width: '100%', display: 'flex'}}>
-        <div style={{width: '50%', height: '500px'}}>
-          <UBinZoomBarChart data={this.props.samples} title='GC/Length' xName='gc' yName='length'/>
+      <div style={{width: '30%', height: 'inherit'}}>
+        <div style={{height: '400px'}}>
+          <UBinBarChart data={this.props.samples} title='Bacterial Single Copy Genes' xName='name' xLabels={this.props.bacterialLabels} yName='amount'
+                        domain={this.props.domain} filterBoolName={'bacterial'} />
         </div>
-        <div style={{width: '50%', height: '500px'}}>
-          <UBinZoomBarChart data={this.props.samples} title='Coverage/Length' xName='coverage' yName='length'/>
+        <div style={{height: '400px'}}>
+          <UBinBarChart data={this.props.samples} title='Archaeal Single Copy Genes' xName='name' xLabels={this.props.archaealLabels} yName='amount'
+                        domain={this.props.domain} filterBoolName={'archaeal'}/>
         </div>
       </div>
     )}

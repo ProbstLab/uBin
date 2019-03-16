@@ -4,14 +4,13 @@ import {KeyValueCreator} from './keyValueCreator'
 
 export class TreeCreator {
   static createTree = (queries: any[]): IGenericAssociativeArray => {
-    console.log("queries[1]", queries[1])
+    // console.log("queries[1]", queries[1])
     const sampleCountArray: IGenericAssociativeArray = KeyValueCreator.createKeyValueObject(queries[1], 'taxonomy_id', 'sampleCount')
-    console.log("sampleCountArray", sampleCountArray)
+    // console.log("sampleCountArray", sampleCountArray)
     delete queries[1]
     let query: any[] = queries[0]
     let tree: IGenericAssociativeArray = {}
     // Iteration through all taxnomy relation (lowest level)
-    console.log("step 1")
     query.forEach((value: ITaxonomy, index: number) => {
       if (value.parent) {
         let rootTaxonomy: ITaxonomy = TreeCreator.findRoot(value.parent as ITaxonomy, {

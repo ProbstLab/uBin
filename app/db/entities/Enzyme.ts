@@ -15,13 +15,13 @@ export class Enzyme {
 
   @Column({
     type: 'boolean',
-    default: false
+    default: false,
   })
   bacterial: boolean
 
   @Column({
     type: 'boolean',
-    default: false
+    default: false,
   })
   archaeal: boolean
 

@@ -1,13 +1,17 @@
 import * as React from 'react'
 import {ISample} from '../utils/interfaces'
-import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryLabel, VictoryZoomContainer} from 'victory'
+import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryLabel, VictoryBrushContainer} from 'victory'
 import {Crossfilter, Dimension} from 'crossfilter2'
+import {IScatterDomain} from "samples"
 
 interface IProps {
   cf: Crossfilter<ISample>
   title: string
+  worldDomain?: [number, number]
   xName?: 'gc' | 'length' | 'coverage'
   yName?: 'gc' | 'length' | 'coverage'
+  setWorldDomain(domain: [number, number]): void
+  domainChangeHandler(scatterDomain: IScatterDomain): void
 }
 
 export interface IBarCharState {
@@ -18,13 +22,10 @@ export interface IBarCharState {
   originalXDomain?: [number, number]
 }
 
-export class UBinZoomBarChart extends React.Component<IProps> {
+export class UBinSelectBarChart extends React.Component<IProps> {
 
-  currentDomain?: any
-  currentFilter?: [number, number]
-  currentOffset?: number
   yMax: number = 0
-  zoom?: number
+  currentDomain?: any
 
   public state: IBarCharState = {}
 
@@ -60,18 +61,27 @@ export class UBinZoomBarChart extends React.Component<IProps> {
     }
   }
 
+  public componentDidUpdate(): void {
+    let { worldDomain } = this.props
+    if (worldDomain && this.currentDomain !== worldDomain) {
+      this.currentDomain = worldDomain
+    }
+  }
+
   public handleZoom(domain: any):void {
     this.setState({selectedDomain: domain})
     this.currentDomain = domain
     this.currentDomain.y = this.getYRange()
   }
 
-  public handleBrush(domain: any): void {
-    this.setState({zoomDomain: domain})
-    this.currentDomain = domain
-    this.currentDomain.y = this.getYRange()
+  public handleBrushChange(domain: any): void {
+    this.currentDomain = domain.x
   }
-  
+
+  public handleBrushChangeEnd(): void {
+    this.props.setWorldDomain(this.currentDomain)
+  }
+
   public getStepSize(distance: number): number {
     if (distance < 1) {
       return 0.1
@@ -93,32 +103,14 @@ export class UBinZoomBarChart extends React.Component<IProps> {
   }
 
   public getXLabels(adjustScale?: boolean): number[] {
-    let { originalXDomain } = this.state
     let stepsArray: number[] = []
-    if (originalXDomain) {
-      let xDistance: number = Math.sqrt((originalXDomain[1] - originalXDomain[0]) ** 2)
+    let domain: [number, number] = this.currentDomain || this.state.originalXDomain
+    if (domain) {
+      let xDistance: number = Math.sqrt((domain[1] - domain[0]) ** 2)
       let stepSize: number = this.getStepSize(xDistance)
-      console.log("xdistance", xDistance, "stepsize", stepSize)
-      for (let i: number = 0; i < this.roundLarge(xDistance, stepSize, 0);
-           i += !adjustScale || !this.currentDomain ? stepSize : this.getStepSize(Math.sqrt((this.currentDomain.x[1] - this.currentDomain.x[0])**2))) {
+      for (let i: number = this.roundLarge(domain[0], stepSize, 0); i < this.roundLarge(xDistance, stepSize, 0); i += stepSize) {
         stepsArray.push(i)
       }
-    }
-    return stepsArray
-  }
-
-  public getYLabels(): number[] {
-    let stepsArray: number[] = []
-    let { groupDim } = this.state
-    let { yName } = this.props
-    if ( groupDim && yName ) {
-      let yDistance: number = Math.sqrt((groupDim.top(1)[0][yName] - groupDim.bottom(1)[0][yName])**2)
-      let stepSize: number = this.getStepSize(yDistance)
-      for (let i: number = 0; i < this.roundLarge(yDistance, stepSize, 0); i += stepSize) {
-        stepsArray.push(i)
-      }
-    } else {
-      stepsArray = [0, 25, 50, 75, 100]
     }
     return stepsArray
   }
@@ -152,40 +144,14 @@ export class UBinZoomBarChart extends React.Component<IProps> {
   }
 
   public getData(): any[] {
-    let { groupDim, filterDim, originalXDomain } = this.state
+    let { groupDim, filterDim } = this.state
     if (groupDim && filterDim) {
       let {xName, yName} = this.props
-      if (originalXDomain && this.currentDomain) {
-        let originalDistance: number = Math.sqrt((originalXDomain[1] - originalXDomain[0]) ** 2)
-        let currentDistance: number = Math.sqrt((this.currentDomain.x[1] - this.currentDomain.x[0]) ** 2)
-        this.currentOffset = currentDistance / (originalDistance * 10)
-        if (originalDistance > currentDistance) {
-          let roundedStepSize: number = Math.round(currentDistance / 100)
-          if (this.zoom !== roundedStepSize) {
-            this.zoom = roundedStepSize
-            let {cf} = this.props
-            switch (this.props.xName) {
-              case ('coverage'):
-                this.setState({groupDim: cf.dimension((d: ISample) => this.roundLarge(d.coverage, this.zoom || 0.1, 0))})
-                break
-              case ('gc'):
-                this.setState({groupDim: cf.dimension((d: ISample) => this.roundSmall(d.gc, this.zoom || 0.1, 0))})
-                break
-            }
-          }
-        }
-      }
-      if (this.currentDomain && this.currentDomain.x && this.currentOffset) {
-        if (!this.currentFilter) {
-          this.currentFilter = this.calcOffset(this.currentDomain, this.currentOffset)
-          filterDim.filterRange(this.currentFilter)
-        } else {
-          if (this.currentFilter[0] > this.currentDomain.x[0] || this.currentFilter[0] + this.currentOffset * 0.8 < this.currentDomain.x[0] ||
-            this.currentFilter[1] > this.currentDomain.x[1] || this.currentFilter[1] + this.currentOffset * 0.8 < this.currentDomain.x[1]) {
-            this.currentFilter = this.calcOffset(this.currentDomain, this.currentOffset)
-            filterDim.filterRange(this.currentFilter)
-          }
-        }
+      let { worldDomain } = this.props
+      if (worldDomain) {
+        filterDim.filterRange(worldDomain)
+      } else {
+        filterDim.filterAll()
       }
       if (xName) {
         this.yMax = 0
@@ -215,22 +181,6 @@ export class UBinZoomBarChart extends React.Component<IProps> {
     return []
   }
 
-  public getAllData(): any[] {
-    let { groupDim, filterDim } = this.state
-    if (groupDim && filterDim) {
-      let { xName, yName } = this.props
-      filterDim.filterAll()
-      let arr: any[] = groupDim.group().all().map((value: any) => {
-        let obj: any = {}
-        obj[xName || 'x'] = value.key
-        obj[yName || 'x'] = value.value
-        return obj
-      })
-      return arr
-    }
-    return []
-  }
-
   public getYRange(): [number, number] {
     if (this.yMax) {
       return [0, Math.round(this.yMax*1.1)]
@@ -239,54 +189,37 @@ export class UBinZoomBarChart extends React.Component<IProps> {
   }
 
 
+
   public render(): JSX.Element {
     return (
       <div>
         <VictoryChart theme={VictoryTheme.material} domainPadding={20}
-                      height={400}
+                      height={300}
                       width={400}
-                      // domain={this.currentDomain || {x: [0, 100], y: [0, 10]}}
-                      padding={{ left: 40, top: 40, right: 10, bottom: 60 }}
+                      padding={{ left: 40, top: 20, right: 10, bottom: 40 }}
                       containerComponent={
-                        <VictoryZoomContainer responsive={false}
-                                              zoomDimension='x'
-                                              zoomDomain={this.state.zoomDomain}
-                                              onZoomDomainChange={this.handleZoom.bind(this)}/>}>
+                      <VictoryBrushContainer
+                        brushDimension='x'
+                        onBrushDomainChange={(domain: any, props: any) => this.handleBrushChange(domain)}
+                        onBrushDomainChangeEnd={() => this.handleBrushChangeEnd()}
+                        />
+                      }>
           <VictoryAxis
             tickValues={this.getXLabels(true)}
             tickFormat={(t: number) => {return  t >= 1000 ? `${Math.round(t)/1000}k` : Math.round(t*100)/100}}
             tickLabelComponent={<VictoryLabel style={{textAnchor:'end', fontSize: '8px'}} angle={-75}/>}
           />
           <VictoryAxis
-            // tickValues={this.getYLabels()}
             tickFormat={(t: number) => {return  t >= 1000000 ? `${Math.round(t)/1000000}M` : t >= 1000 ? `${Math.round(t)/1000}K` : t}}
             dependentAxis={true}
           />
           <VictoryBar
+            barRatio={0.4}
             data={this.getData()}
             x={this.props.xName || 'x'}
             y={this.props.yName || 'y'}
           />
         </VictoryChart>
-        {/*<VictoryChart*/}
-          {/*padding={{top: 0, left: 50, right: 50, bottom: 40}}*/}
-          {/*width={400} height={90}*/}
-          {/*containerComponent={*/}
-            {/*<VictoryBrushContainer responsive={false}*/}
-                                   {/*brushDimension='x'*/}
-                                   {/*brushDomain={this.state.selectedDomain}*/}
-                                   {/*onBrushDomainChange={this.handleBrush.bind(this)}/>*/}
-          {/*}>*/}
-          {/*<VictoryAxis*/}
-            {/*tickValues={this.getXLabels()}*/}
-            {/*tickLabelComponent={<VictoryLabel style={{textAnchor:'end', fontSize: '10px'}} angle={-75}/>}*/}
-          {/*/>*/}
-          {/*<VictoryBar*/}
-            {/*data={this.getAllData()}*/}
-            {/*x={this.props.xName || 'x'}*/}
-            {/*y={this.props.yName || 'y'}*/}
-          {/*/>*/}
-        {/*</VictoryChart>*/}
       </div>
     )
   }

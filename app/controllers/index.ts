@@ -17,9 +17,12 @@ export const samplesReducer = createReducer(samples.getInitialState(), {
   [samplesActions.getImportsFulfilled]: samples.getImportsFulfilled,
   [samplesActions.getTaxonomiesForImportFulfilled]: samples.getTaxonomiesForImportFulfilled,
   [samplesActions.getEnzymeDistributionFulfilled]: samples.getEnzymeDistributionFulfilled,
+  [samplesActions.getAllEnzymeTypesFulfilled]: samples.getAllEnzymeTypesFulfilled,
   [samplesActions.setImportedRecord]: samples.setImportedRecord,
   [samplesActions.getSamplesFulfilled]: samples.getSamplesFulfilled,
   [samplesActions.setScatterDomain]: samples.setScatterDomain,
+  [samplesActions.setScatterDomainX]: samples.setScatterDomainX,
+  [samplesActions.setScatterDomainY]: samples.setScatterDomainY,
   [samplesActions.removeFilters]: samples.removeFilters,
 })
 

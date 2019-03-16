@@ -9,18 +9,22 @@ import {
   getImportRecords,
   getTaxonomyTreeFull,
   IImportRecord,
-  getArchaealEnzymeDistributionForChart,
-  getBacterialEnzymeDistributionForChart, SamplesActions, getSamples, getScatterDomain, getImportRecordsState,
+  SamplesActions,
+  getSamples,
+  getScatterDomain,
+  getImportRecordsState,
+  getBacterialEnzymeTypes,
+  getArchaealEnzymeTypes,
 } from '../../controllers/samples'
 import {DBActions, getSamplesStatePending} from '../../controllers/database'
 import {Connection} from 'typeorm'
-import {IBarData, ITaxonomyForSunburst} from '../../utils/interfaces'
+import {ITaxonomyForSunburst} from '../../utils/interfaces'
 import {UBinSunburst} from '../../components/uBinSunburst'
 import {ThunkAction} from 'redux-thunk'
-import {UBinBarChart} from '../../components/uBinBarChart'
 import {UBinScatter} from '../../components/uBinScatter'
 import {IScatterDomain} from 'samples'
 import {SampleMenu} from '../../components/sampleMenu'
+import {GCCoverageBarCharts} from '../../components/gCCoverageBarCharts'
 import {EnzymeDistributionBarCharts} from '../../components/enzymeDistributionBarCharts'
 
 interface IProps extends RouteComponentProps {
@@ -30,8 +34,8 @@ interface IPropsFromState {
   connection: Connection | undefined
   importRecords: IImportRecord[]
   taxonomyTreeFull?: ITaxonomyForSunburst[]
-  archaealEnzymeDistribution: IBarData[]
-  bacterialEnzymeDistribution: IBarData[]
+  archaealEnzymeTypes: string[]
+  bacterialEnzymeTypes: string[]
   samples: any[]
   scatterDomain?: IScatterDomain
   importRecordsState: {pending: boolean, loaded: boolean}
@@ -46,6 +50,8 @@ interface IActionsFromState {
   refreshImports(): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   updateScatterDomain(scatterDomain: IScatterDomain): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   setScatterDomain(scatterDomain: IScatterDomain): void
+  setScatterDomainX(domain: [number, number]): void
+  setScatterDomainY(domain: [number, number]): void
   applyFilters(): void
   resetFilters(): void
 }
@@ -56,6 +62,7 @@ const homeStyle = {
   flexWrap: 'wrap',
   justifyContent: 'left',
   margin: '0',
+  marginTop: '64px',
 } as React.CSSProperties
 
 type TProps = IProps & IPropsFromState & IActionsFromState
@@ -95,26 +102,21 @@ class CHome extends React.Component<TProps> {
         <>
           <div style={{width: '70%'}}>
             <div style={{width: '100%', display: 'flex'}}>
-              <div style={{width: '50%', height: '400px'}}>
+              <div style={{width: '50%'}}>
                 {showScatter(!!this.props.samples.length)}
               </div>
-              <div style={{width: '50%'}}>
+              <div style={{width: '40%', marginTop: '30px'}}>
                 {this.props.taxonomyTreeFull &&
                 <UBinSunburst data={{ children: this.props.taxonomyTreeFull}} clickEvent={this.props.updateSelectedTaxonomy}/>}
               </div>
             </div>
-            <EnzymeDistributionBarCharts samples={this.props.samples} samplesPending={this.props.samplesPending}
-                                         connection={this.props.connection}/>
+            <GCCoverageBarCharts samples={this.props.samples} samplesPending={this.props.samplesPending} scatterDomain={this.props.scatterDomain}
+                                 setScatterDomainX={this.props.setScatterDomainX} setScatterDomainY={this.props.setScatterDomainY}
+                                 domainChangeHandler={this.props.updateScatterDomain}/>
           </div>
-          { false &&
-          <div style={{width: '30%', height: 'inherit'}}>
-              <div style={{height: '400px'}}>
-                  <UBinBarChart data={this.props.archaealEnzymeDistribution} title='Archaeal Single Copy Genes' xName='name' yName='amount'/>
-              </div>
-              <div style={{height: '400px'}}>
-                  <UBinBarChart data={this.props.bacterialEnzymeDistribution} title='Bacterial Single Copy Genes' xName='name' yName='amount'/>
-              </div>
-          </div> }
+          <EnzymeDistributionBarCharts samples={this.props.samples} samplesPending={this.props.samplesPending} domain={this.props.scatterDomain}
+                                       connection={this.props.connection} archaealLabels={this.props.archaealEnzymeTypes}
+                                       bacterialLabels={this.props.bacterialEnzymeTypes}/>
         </>
       )
     }
@@ -129,7 +131,7 @@ class CHome extends React.Component<TProps> {
               <Button icon='settings' text='Data Settings/Import' />
             </Popover>
             <ButtonGroup style={{marginLeft: '12px'}}>
-              <Button icon='filter' intent='success' text='Apply filters' onClick={() => this.props.applyFilters()}/>
+              {/*<Button icon='filter' intent='success' text='Apply filters' onClick={() => this.props.applyFilters()}/>*/}
               <Button rightIcon='filter-remove' text='Reset filters' onClick={() => this.props.resetFilters()}/>
             </ButtonGroup>
           </div>
@@ -152,8 +154,8 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   samplesPending: getSamplesStatePending(state),
   importRecordsState: getImportRecordsState(state),
   scatterDomain: getScatterDomain(state),
-  archaealEnzymeDistribution: getArchaealEnzymeDistributionForChart(state),
-  bacterialEnzymeDistribution: getBacterialEnzymeDistributionForChart(state),
+  archaealEnzymeTypes: getArchaealEnzymeTypes(state),
+  bacterialEnzymeTypes: getBacterialEnzymeTypes(state),
 })
 
 const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
@@ -165,6 +167,8 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       getImportData: recordId => DBActions.getImportData(recordId),
       updateSelectedTaxonomy: taxonomyIds => SamplesActions.updateSelectedTaxonomy(taxonomyIds),
       setScatterDomain: scatterDomain => SamplesActions.setScatterDomain(scatterDomain),
+      setScatterDomainX: scatterDomainX => SamplesActions.setScatterDomainX(scatterDomainX),
+      setScatterDomainY: scatterDomainY => SamplesActions.setScatterDomainY(scatterDomainY),
       updateScatterDomain: scatterDomain => SamplesActions.updateScatterDomain(scatterDomain),
       applyFilters: SamplesActions.applyFilters,
       resetFilters: SamplesActions.resetFilters,

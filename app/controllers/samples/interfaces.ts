@@ -16,6 +16,7 @@ export interface ISamplesState {
   importRecords: IImportRecord[]
   taxonomyTreeFull?: IGenericAssociativeArray
   enzymeDistribution?: Enzyme[]
+  enzymeTypes?: Enzyme[]
   selectedTaxonomy?: ITaxonomyForSunburst
   recordId?: number
   importRecordsPending: boolean
@@ -27,9 +28,12 @@ export enum samplesActions {
   getImportsFulfilled = 'database.getImports_FULFILLED',
   getTaxonomiesForImportFulfilled = 'database.getTaxonomiesForImport_FULFILLED',
   getEnzymeDistributionFulfilled = 'database.getEnzymeDistribution_FULFILLED',
+  getAllEnzymeTypesFulfilled = 'database.getAllEnzymeTypes_FULFILLED',
   getSamplesFulfilled = 'database.getSamples_FULFILLED',
   setImportedRecord = 'database.setImportedRecord',
   setScatterDomain = 'samples.setScatterDomain',
+  setScatterDomainX = 'samples.setScatterDomainX',
+  setScatterDomainY = 'samples.setScatterDomainY',
   setTaxonomyIds = 'samples.setTaxonomyIds',
   removeFilters = 'samples.removeFilters',
 }
@@ -50,6 +54,10 @@ export interface IGetEnzymeDistributionFulfilled extends Action {
   type: samplesActions.getEnzymeDistributionFulfilled
   payload: any
 }
+export interface IGetAllEnzymeTypesFulfilled extends Action {
+  type: samplesActions.getAllEnzymeTypesFulfilled
+  payload: any
+}
 export interface IGetSamplesFulfilled extends Action {
   type: samplesActions.getSamplesFulfilled
   payload: any
@@ -65,7 +73,16 @@ export interface ISetTaxonomyIds extends Action {
   type: samplesActions.setTaxonomyIds
   taxonomyIds: number[]
 }
+
 export interface ISetScatterDomain extends Action {
   type: samplesActions.setScatterDomain
   scatterDomain: IScatterDomain
+}
+export interface ISetScatterDomainX extends Action {
+  type: samplesActions.setScatterDomainX
+  domain: [number, number]
+}
+export interface ISetScatterDomainY extends Action {
+  type: samplesActions.setScatterDomainY
+  domain: [number, number]
 }

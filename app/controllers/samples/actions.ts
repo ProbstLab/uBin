@@ -4,7 +4,14 @@ import {
   IGetTaxonomiesForImportFulfilled,
   ISetImportedRecord,
   samplesActions,
-  IGetSamplesFulfilled, ISetScatterDomain, ISetTaxonomyIds, IRemoveFilters, IGetImportsPending
+  IGetSamplesFulfilled,
+  ISetScatterDomain,
+  ISetTaxonomyIds,
+  IRemoveFilters,
+  IGetImportsPending,
+  ISetScatterDomainX,
+  ISetScatterDomainY,
+  IGetAllEnzymeTypesFulfilled
 } from './interfaces'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
 import {IClientState} from '../index'
@@ -28,6 +35,9 @@ export class SamplesActions {
   static getEnzymeDistributionFulfilled(payload: any): IGetEnzymeDistributionFulfilled {
     return {type: samplesActions.getEnzymeDistributionFulfilled, payload}
   }
+  static getAllEnzymeTypesFulfilled(payload: any): IGetAllEnzymeTypesFulfilled {
+    return {type: samplesActions.getAllEnzymeTypesFulfilled, payload}
+  }
   static getSamplesFulfilled(payload: any): IGetSamplesFulfilled {
     return {type: samplesActions.getSamplesFulfilled, payload}
   }
@@ -43,6 +53,12 @@ export class SamplesActions {
   }
   static setScatterDomain(scatterDomain: IScatterDomain): ISetScatterDomain {
     return {type: samplesActions.setScatterDomain, scatterDomain}
+  }
+  static setScatterDomainX(domain: [number, number]): ISetScatterDomainX {
+    return {type: samplesActions.setScatterDomainX, domain}
+  }
+  static setScatterDomainY(domain: [number, number]): ISetScatterDomainY {
+    return {type: samplesActions.setScatterDomainY, domain}
   }
 
   static updateSelectedTaxonomy(taxonomyIds: number[]): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
@@ -73,9 +89,7 @@ export class SamplesActions {
           () => {
             let filters: ISampleFilter = getState().samples.filters
             let recordId = getImportRecordId(getState())
-            console.log("then do more things", recordId, connection)
             if (connection && recordId) {
-              console.log("then get taxonomies")
               Promise.all([dispatch(DBActions.getTaxonomiesForImport(connection, recordId, filters))]).then(() => resolve())
             } else {
               resolve()
@@ -111,8 +125,6 @@ export class SamplesActions {
         if (connection && recordId) {
           Promise.all([
             dispatch(SamplesActions.removeFilters()),
-            dispatch(DBActions.getEnzymeDistribution(connection, recordId, undefined, undefined)),
-            dispatch(DBActions.getSamples(connection, recordId, undefined, undefined)),
           ]).then(() => resolve())
         } else {
           resolve()

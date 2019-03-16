@@ -3,9 +3,10 @@ import {
   IGetImportsFulfilled, IGetImportsPending, IGetSamplesFulfilled,
   IGetTaxonomiesForImportFulfilled, IRemoveFilters,
   ISamplesState,
-  ISetImportedRecord, ISetScatterDomain, ISetTaxonomyIds
+  ISetImportedRecord, ISetScatterDomain, ISetScatterDomainX, ISetTaxonomyIds, ISetScatterDomainY, IGetAllEnzymeTypesFulfilled
 } from './interfaces'
-import {TreeCreator} from "../../utils/treeCreator";
+import {TreeCreator} from "../../utils/treeCreator"
+import {IScatterDomain} from 'samples'
 
 export const getInitialState = (): ISamplesState => ({
   filters: {},
@@ -30,7 +31,6 @@ export const getImportsFulfilled = (state: ISamplesState, action: IGetImportsFul
 }
 
 export const getTaxonomiesForImportFulfilled = (state: ISamplesState, action: IGetTaxonomiesForImportFulfilled): ISamplesState => {
-  console.log("got taxonomies")
   return {
     ...state,
     taxonomyTreeFull: TreeCreator.createTree(action.payload),
@@ -38,12 +38,19 @@ export const getTaxonomiesForImportFulfilled = (state: ISamplesState, action: IG
 }
 
 export const getEnzymeDistributionFulfilled = (state: ISamplesState, action: IGetEnzymeDistributionFulfilled): ISamplesState => {
-  console.log("got enzyme distribution")
   return {
     ...state,
     enzymeDistribution: action.payload,
   }
 }
+export const getAllEnzymeTypesFulfilled = (state: ISamplesState, action: IGetAllEnzymeTypesFulfilled): ISamplesState => {
+  console.log("enzyme types", action)
+  return {
+    ...state,
+    enzymeTypes: action.payload,
+  }
+}
+
 export const setImportedRecord = (state: ISamplesState, action: ISetImportedRecord): ISamplesState => {
   return {
     ...state,
@@ -51,7 +58,6 @@ export const setImportedRecord = (state: ISamplesState, action: ISetImportedReco
   }
 }
 export const getSamplesFulfilled = (state: ISamplesState, action: IGetSamplesFulfilled): ISamplesState => {
-  console.log("got samples")
   return {
     ...state,
     samples: action.payload,
@@ -71,6 +77,24 @@ export const setScatterDomain = (state: ISamplesState, action: ISetScatterDomain
     ...state,
     filters: {
       scatterDomain: action.scatterDomain,
+    },
+  }
+}
+export const setScatterDomainX = (state: ISamplesState, action: ISetScatterDomainX): ISamplesState => {
+  let newScatterDomain: IScatterDomain = state.filters.scatterDomain ? {x: action.domain, y: state.filters.scatterDomain.y} : {x: action.domain}
+  return {
+    ...state,
+    filters: {
+      scatterDomain: newScatterDomain
+    },
+  }
+}
+export const setScatterDomainY = (state: ISamplesState, action: ISetScatterDomainY): ISamplesState => {
+  let newScatterDomain: IScatterDomain = state.filters.scatterDomain ? {y: action.domain, x: state.filters.scatterDomain.x} : {y: action.domain}
+  return {
+    ...state,
+    filters: {
+      scatterDomain: newScatterDomain
     },
   }
 }
