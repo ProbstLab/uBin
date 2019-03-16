@@ -60,7 +60,8 @@ class CFileManager extends React.Component<TProps> {
   public state: IFileManagerState = {}
 
   public componentDidMount(): void {
-    if (!this.props.fileTree.length) {this.props.initFileTree('/home/tim/')}
+    // if (!this.props.fileTree.length) {this.props.initFileTree('/home/tim/')}
+    if (!this.props.fileTree.length) {this.props.initFileTree('')}
   }
 
   render(): JSX.Element {
