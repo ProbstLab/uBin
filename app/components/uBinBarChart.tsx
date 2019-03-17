@@ -1,10 +1,11 @@
-import * as React from "react"
-import {ISample} from '../utils/interfaces'
+
+import * as React from 'react'
 import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryLabel} from 'victory'
 import {Crossfilter, Dimension} from 'crossfilter2'
 import * as crossfilter from 'crossfilter2'
-import {IScatterDomain} from "samples"
+import {IBin, IScatterDomain} from 'samples'
 import {Enzyme} from '../db/entities/Enzyme'
+import {Sample} from '../db/entities/Sample'
 
 // const getLabelData = (data: IVisData[]) => data.map((value: IVisData, index: number): any => {
 //   return {x: value.x, y: value.y, label: value.x.toString()}
@@ -13,20 +14,22 @@ import {Enzyme} from '../db/entities/Enzyme'
 // const getGeneCount = (data: IVisData[]) => data.map(value => value.y)
 
 interface IProps {
-  data: ISample[]
+  data: Sample[]
   title: string
   xName?: string
   yName?: string
   xLabels?: string[]
   filterBoolName: 'archaeal' | 'bacterial'
   domain?: IScatterDomain
+  bin?: IBin
 }
 
 export interface IBarCharState {
-  cf: Crossfilter<ISample>
-  gcDim?: Dimension<ISample, number>
-  coverageDim?: Dimension<ISample, number>
-  groupDim?: Dimension<ISample, number>
+  cf: Crossfilter<Sample>
+  gcDim?: Dimension<Sample, number>
+  binDim?: Dimension<Sample, number>
+  coverageDim?: Dimension<Sample, number>
+  groupDim?: Dimension<Sample, number>
 }
 
 export class UBinBarChart extends React.Component<IProps> {
@@ -37,9 +40,10 @@ export class UBinBarChart extends React.Component<IProps> {
 
   public componentWillMount(): void {
     this.setState({
-      gcDim: this.state.cf.dimension((d: ISample) => Math.round(d.gc)),
-      coverageDim: this.state.cf.dimension((d: ISample) => Math.round(d.coverage)),
-      groupDim: this.state.cf.dimension((d: ISample) => d.id || 0),
+      gcDim: this.state.cf.dimension((d: Sample) => Math.round(d.gc)),
+      coverageDim: this.state.cf.dimension((d: Sample) => Math.round(d.coverage)),
+      binDim: this.state.cf.dimension((d: Sample) => d.bin ? d.bin.id : 0),
+      groupDim: this.state.cf.dimension((d: Sample) => d.id || 0),
     })
   }
 
@@ -47,7 +51,7 @@ export class UBinBarChart extends React.Component<IProps> {
     return {count: 0, enzymes: {}}
   }
 
-  public reduceAdd(p: any, v: ISample): any {
+  public reduceAdd(p: any, v: Sample): any {
     p.count += 1
     if (v.enzymes && v.enzymes.length >= 0) {
       p.enzymes[v.id || 0] = v.enzymes
@@ -57,7 +61,7 @@ export class UBinBarChart extends React.Component<IProps> {
     return p
   }
 
-  public reduceRemove(p: any, v: ISample): any {
+  public reduceRemove(p: any, v: Sample): any {
     p.count -= 1
     if (v.enzymes && v.enzymes.length) {
       delete p.count[v.id || 0]
@@ -66,9 +70,9 @@ export class UBinBarChart extends React.Component<IProps> {
   }
 
   public getData(): any[] {
-    let {gcDim, coverageDim, groupDim} = this.state
-    if (gcDim && coverageDim && groupDim) {
-      let {domain, xName, yName, xLabels, filterBoolName} = this.props
+    let {gcDim, coverageDim, groupDim, binDim} = this.state
+    if (gcDim && coverageDim && groupDim && binDim) {
+      let {domain, xName, yName, xLabels, filterBoolName, bin} = this.props
       if (domain) {
         if (domain.x) {
           gcDim.filterRange(domain.x)
@@ -76,6 +80,15 @@ export class UBinBarChart extends React.Component<IProps> {
         if (domain.y) {
           coverageDim.filterRange(domain.y)
         }
+      } else {
+        gcDim.filterAll()
+        coverageDim.filterAll()
+      }
+
+      if (bin) {
+        binDim.filterExact(bin.id)
+      } else {
+        binDim.filterAll()
       }
       let xKey: string = xName || 'x'
       let yKey: string = yName || 'y'
@@ -110,6 +123,7 @@ export class UBinBarChart extends React.Component<IProps> {
     return (
       <VictoryChart theme={VictoryTheme.material} domainPadding={20}
                     height={400}
+                    animate={{duration: 300}}
                     padding={{ left: 40, top: 40, right: 10, bottom: 204 }}>
         <VictoryAxis
           tickValues={this.props.xLabels}

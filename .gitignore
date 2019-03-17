@@ -44,3 +44,7 @@ main.js.map
 
 .idea
 *.sqlite
+
+# Compiled db entities
+app/db/entities/*.js
+app/db/entities/*.js.map

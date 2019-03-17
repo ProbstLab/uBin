@@ -11,7 +11,7 @@ import {
   IGetImportsPending,
   ISetScatterDomainX,
   ISetScatterDomainY,
-  IGetAllEnzymeTypesFulfilled
+  IGetAllEnzymeTypesFulfilled, IGetBinsFulfilled, ISetBinFilter, IResetDomain
 } from './interfaces'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
 import {IClientState} from '../index'
@@ -21,6 +21,7 @@ import {getDBConnection} from '../database/selectors'
 import {DBActions} from '../database'
 import {ISampleFilter, IScatterDomain} from 'samples'
 import {getImportRecordId} from './selectors'
+import {Bin} from '../../db/entities/Bin'
 
 export class SamplesActions {
   static getImportsPending(payload: any): IGetImportsPending {
@@ -41,9 +42,15 @@ export class SamplesActions {
   static getSamplesFulfilled(payload: any): IGetSamplesFulfilled {
     return {type: samplesActions.getSamplesFulfilled, payload}
   }
+  static getBinsFulfilled(payload: any): IGetBinsFulfilled {
+    return {type: samplesActions.getBinsFulfilled, payload}
+  }
   // Filters
   static removeFilters(): IRemoveFilters {
     return {type: samplesActions.removeFilters}
+  }
+  static resetDomain(): IResetDomain {
+    return {type: samplesActions.resetDomain}
   }
   static setImportedRecord(recordId: number): ISetImportedRecord {
     return {type: samplesActions.setImportedRecord, recordId}
@@ -59,6 +66,9 @@ export class SamplesActions {
   }
   static setScatterDomainY(domain: [number, number]): ISetScatterDomainY {
     return {type: samplesActions.setScatterDomainY, domain}
+  }
+  static setBinFilter(bin: Bin): ISetBinFilter {
+    return {type: samplesActions.setBinFilter, bin}
   }
 
   static updateSelectedTaxonomy(taxonomyIds: number[]): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
@@ -80,11 +90,9 @@ export class SamplesActions {
   }
 
   static updateScatterDomain(scatterDomain: IScatterDomain): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
-    console.log("updateScatterDomain")
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>(resolve => {
         let connection: Connection | undefined = getDBConnection(getState())
-
         Promise.all([dispatch(SamplesActions.setScatterDomain(scatterDomain))]).then(
           () => {
             let filters: ISampleFilter = getState().samples.filters
@@ -117,6 +125,7 @@ export class SamplesActions {
       })
     }
   }
+
   static resetFilters(): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>(resolve => {
@@ -125,10 +134,36 @@ export class SamplesActions {
         if (connection && recordId) {
           Promise.all([
             dispatch(SamplesActions.removeFilters()),
-          ]).then(() => resolve())
+          ]).then(() => {
+            if (connection && recordId) {
+              Promise.all([dispatch(DBActions.getTaxonomiesForImport(connection, recordId))]).then(() => resolve())
+            } else {
+              resolve()
+            }
+          })
         } else {
           resolve()
         }
+      })
+    }
+  }
+
+
+  static setSelectedBin(bin: Bin): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
+    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
+      return new Promise<void>(resolve => {
+        let connection: Connection | undefined = getDBConnection(getState())
+        Promise.all([dispatch(SamplesActions.resetDomain()), dispatch(SamplesActions.setBinFilter(bin))]).then(
+          () => {
+            let filters: ISampleFilter = getState().samples.filters
+            let recordId = getImportRecordId(getState())
+            if (connection && recordId) {
+              Promise.all([dispatch(DBActions.getTaxonomiesForImport(connection, recordId, filters))]).then(() => resolve())
+            } else {
+              resolve()
+            }
+          }
+        )
       })
     }
   }

@@ -1,4 +1,4 @@
-import * as fs from "fs";
+import * as fs from "fs"
 import {
   ISample,
   IDynamicAssociativeArray,
@@ -8,10 +8,11 @@ import {
   ITaxonomy,
   // IdValuePair,
   ITaxonomyAssociativeArray,
+  IBin,
 } from "./interfaces"
 import * as csv from 'csv-parser'
 import {Connection} from "typeorm"
-import {IFile} from "files";
+import {IFile} from "files"
 import * as _ from 'lodash'
 import {Taxonomy} from '../db/entities/Taxonomy'
 
@@ -21,6 +22,8 @@ export const importFiles = async (addedFiles: IFile[], connection: Connection) =
   let taxonomyMap: ITaxonomyAssociativeArray = {}
   let enzymeMap: IDynamicAssociativeArray = {}
   let sampleMap: IDynamicAssociativeArray = {}
+  let binMap: IDynamicAssociativeArray = {}
+  let binList: string[] = []
   return new Promise(resolve => {
     fs.createReadStream(taxonomyFile.filePath)
       .pipe(csv({separator: '\t', mapHeaders: ({header, index}) => header.toLowerCase()}))
@@ -32,7 +35,11 @@ export const importFiles = async (addedFiles: IFile[], connection: Connection) =
           gc: data.gc,
           length: data.length,
           taxonomyKeys: [],
-          enzymeKeys: []
+          enzymeKeys: [],
+          binName: data.bin,
+        }
+        if (data.bin && binList.indexOf(data.bin) < 0) {
+          binList.push(data.bin)
         }
         let pathToChildren: string[] = []
         taxonomies.map((taxonomy: string, index: number) => {
@@ -58,7 +65,7 @@ export const importFiles = async (addedFiles: IFile[], connection: Connection) =
       fs.createReadStream(enzymeFile.filePath)
         .pipe(csv({separator: ','}))
         .on('headers', (headers: string[]) => {
-          headers.shift();
+          headers.shift()
           enzymeList = headers
         })
         .on('data', async (data: any) => {
@@ -71,7 +78,7 @@ export const importFiles = async (addedFiles: IFile[], connection: Connection) =
             sampleMap[data.scaffolds] = item
           }
         }).on('end', async () => {
-          await saveSamples(enzymeFile, taxonomyFile, connection, enzymeList, enzymeMap, taxonomyMap, sampleMap)
+          await saveSamples(enzymeFile, taxonomyFile, connection, enzymeList, enzymeMap, taxonomyMap, sampleMap, binList, binMap)
           resolve(true)
       })
     })
@@ -79,29 +86,39 @@ export const importFiles = async (addedFiles: IFile[], connection: Connection) =
 }
 
 const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: Connection, enzymeList: string[],
-                     enzymeMap: IDynamicAssociativeArray, taxonomyMap: ITaxonomyAssociativeArray, sampleMap: IDynamicAssociativeArray) => {
-  let t0 = performance.now();
+                           enzymeMap: IDynamicAssociativeArray, taxonomyMap: ITaxonomyAssociativeArray, sampleMap: IDynamicAssociativeArray,
+                           binList: string[], binMap: IDynamicAssociativeArray) => {
+  let t0 = performance.now()
 
   let enzymeFileSaved = await connection.getRepository('import_file').save({ name: enzymeFile.filePath }) as IImportFile
   let taxonomyFileSaved = await connection.getRepository('import_file').save({ name: taxonomyFile.filePath }) as IImportFile
   let importRecord: IImportRecord = {
     name: 'Import_'+Date.now().toString(),
-    files: [enzymeFileSaved, taxonomyFileSaved]
+    files: [enzymeFileSaved, taxonomyFileSaved],
   }
   await connection.getRepository('import_record').save(importRecord)
+
+  // Save new Enzymes and load already saves ones from database
   await Promise.all(enzymeList.map(async (value: string, index: number) => {
-    let exists = await connection.getRepository('enzyme')
-      .count({where: {name: value }})
+    let exists = await connection.getRepository('enzyme').count({where: {name: value }})
     if (exists) {
-      enzymeMap[value] = await connection.getRepository('enzyme')
-        .findOne({where: {name: value }}) as IEnzyme
+      enzymeMap[value] = await connection.getRepository('enzyme').findOne({where: {name: value }}) as IEnzyme
     } else {
       enzymeMap[value] = await connection.getRepository('enzyme').save({ name: value, bacterial: index <= 50, archaeal: index > 50 } ) as IEnzyme
     }
   }))
+
+  // Save bins and link them to new record
+  console.log("bin List", binList)
+  await Promise.all(binList.map(async (value: string) => {
+    binMap[value] = await connection.getRepository('bin').save({name: value, importRecord: importRecord.id}) as IBin
+  }))
+
   console.time("taxonomymap")
+  // Create new Taxonomy tree/Add new taxonomies to existing parents
   await saveTaxonomy(taxonomyMap, connection)
   console.timeEnd("taxonomymap")
+
   let itemList: ISample[] = []
   Object.keys(sampleMap).map( (key: string) => {
     let item = sampleMap[key] as ISample
@@ -117,11 +134,15 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
     for (let enzymeKey of item.enzymeKeys.map((e: number, i: number) => e === 1 ? i : 0).filter((x: number) => x > 0)) {
       newEnzymes.push(enzymeMap[enzymeList[enzymeKey]] as IEnzyme)
     }
+
+    if (item.binName && binMap.hasOwnProperty(item.binName) && binMap[item.binName] !== undefined) {
+        item.bin = binMap[item.binName] as IBin
+    }
+
     item.enzymes = newEnzymes
     item.importRecord = importRecord
     itemList.push(item)
   })
-  console.timeEnd("map samples")
   console.time("save samples")
   let samplePromises: Promise<ISample[]>[] = []
   while (itemList.length > 0) {
@@ -138,7 +159,7 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
   console.timeEnd("save samples")
   var t1 = performance.now()
   console.log("finished")
-  console.log("import took " + (t1 - t0) + " milliseconds.");
+  console.log("import took " + (t1 - t0) + " milliseconds.")
 }
 
 const saveTaxonomy = async (taxonomyMap: ITaxonomyAssociativeArray, connection: Connection, parent?: ITaxonomy) => {

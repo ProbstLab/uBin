@@ -1,17 +1,24 @@
 import {
   dbActions,
   IConnectDatabase,
-  IConnectDatabaseFulfilled, IGetAllEnzymeTypes, IGetEnzymeDistribution, IGetEnzymeDistributionPending,
+  IConnectDatabaseFulfilled, IGetAllEnzymeTypes, IGetBins, IGetEnzymeDistribution, IGetEnzymeDistributionPending,
   IGetImports,
   IGetSamples, IGetSamplesPending, IGetSamplesPendingDone,
-  IGetTaxonomiesForImport, IGetTaxonomiesForImportPending, IGetTaxonomiesForImportPendingDone,
+  IGetTaxonomiesForImport, IGetTaxonomiesForImportPending, IGetTaxonomiesForImportPendingDone, IGetSamplesForBin,
 } from './interfaces'
 import {Connection} from 'typeorm'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
 import {AnyAction} from 'redux'
 import {getDBConnection} from './selectors'
 import {IClientState} from '../index'
-import {getAllEnzymeTypesQuery, getEnzymeDistributionQuery, getSamplesQuery, getTaxonomiesAndCountQuery} from './queries'
+import {
+  getAllEnzymeTypesQuery,
+  getBinsQuery,
+  getEnzymeDistributionQuery,
+  getSamplesForBinQuery,
+  getSamplesQuery,
+  getTaxonomiesAndCountQuery
+} from './queries'
 import {SamplesActions} from '../samples'
 import {ISampleFilter} from 'samples'
 
@@ -51,8 +58,14 @@ export class DBActions {
     return {type: dbActions.getAllEnzymeTypes, payload: getAllEnzymeTypesQuery(connection)}
   }
 
+  static getBins(connection: Connection, recordId: number): IGetBins {
+    return {type: dbActions.getBins, payload: getBinsQuery(connection, recordId)}
+  }
   static getSamples(connection: Connection, recordId: number, taxonomyId?: number[], filter?: ISampleFilter): IGetSamples {
     return {type: dbActions.getSamples, payload: getSamplesQuery(connection, recordId, taxonomyId, filter)}
+  }
+  static getSamplesForBin(connection: Connection, recordId: number, binId: number): IGetSamplesForBin {
+    return {type: dbActions.getSamplesForBin, payload: getSamplesForBinQuery(connection, recordId, binId)}
   }
   // TODO: Maybe combine both cases
   static getSamplesPending(payload: any): IGetSamplesPending {
@@ -92,6 +105,7 @@ export class DBActions {
           Promise.all([
             dispatch(DBActions.getTaxonomiesForImport(connection, recordId)),
             dispatch(DBActions.getAllEnzymeTypes(connection)),
+            dispatch(DBActions.getBins(connection, recordId)),
             dispatch(DBActions.getSamples(connection, recordId)),
             dispatch(SamplesActions.setImportedRecord(recordId)),
           ]).then(() =>

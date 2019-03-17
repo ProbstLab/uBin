@@ -4,6 +4,7 @@ import { Action } from 'redux'
 import {IGenericAssociativeArray, ITaxonomyForSunburst} from '../../utils/interfaces'
 import {Enzyme} from '../../db/entities/Enzyme'
 import {ISampleFilter, IScatterDomain} from 'samples'
+import {Bin} from '../../db/entities/Bin'
 
 export interface IImportRecord {
   id: number
@@ -19,6 +20,7 @@ export interface ISamplesState {
   enzymeTypes?: Enzyme[]
   selectedTaxonomy?: ITaxonomyForSunburst
   recordId?: number
+  bins: Bin[]
   importRecordsPending: boolean
   importsLoaded: boolean
 }
@@ -30,12 +32,15 @@ export enum samplesActions {
   getEnzymeDistributionFulfilled = 'database.getEnzymeDistribution_FULFILLED',
   getAllEnzymeTypesFulfilled = 'database.getAllEnzymeTypes_FULFILLED',
   getSamplesFulfilled = 'database.getSamples_FULFILLED',
+  getBinsFulfilled = 'database.getBins_FULFILLED',
   setImportedRecord = 'database.setImportedRecord',
   setScatterDomain = 'samples.setScatterDomain',
   setScatterDomainX = 'samples.setScatterDomainX',
   setScatterDomainY = 'samples.setScatterDomainY',
   setTaxonomyIds = 'samples.setTaxonomyIds',
   removeFilters = 'samples.removeFilters',
+  resetDomain = 'samples.resetDomain',
+  setBinFilter = 'samples.setBinFilter',
 }
 export interface IGetImportsPending extends Action {
   type: samplesActions.getImportsPending
@@ -62,9 +67,18 @@ export interface IGetSamplesFulfilled extends Action {
   type: samplesActions.getSamplesFulfilled
   payload: any
 }
+export interface IGetBinsFulfilled extends Action {
+  type: samplesActions.getBinsFulfilled
+  payload: any
+}
+
 export interface IRemoveFilters extends Action {
   type: samplesActions.removeFilters
 }
+export interface IResetDomain extends Action {
+  type: samplesActions.resetDomain
+}
+
 export interface ISetImportedRecord extends Action {
   type: samplesActions.setImportedRecord
   recordId: number
@@ -85,4 +99,8 @@ export interface ISetScatterDomainX extends Action {
 export interface ISetScatterDomainY extends Action {
   type: samplesActions.setScatterDomainY
   domain: [number, number]
+}
+export interface ISetBinFilter extends Action {
+  type: samplesActions.setBinFilter
+  bin: Bin
 }

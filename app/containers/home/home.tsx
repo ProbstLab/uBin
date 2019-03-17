@@ -14,7 +14,7 @@ import {
   getScatterDomain,
   getImportRecordsState,
   getBacterialEnzymeTypes,
-  getArchaealEnzymeTypes,
+  getArchaealEnzymeTypes, getBins, getSelectedBin,
 } from '../../controllers/samples'
 import {DBActions, getSamplesStatePending} from '../../controllers/database'
 import {Connection} from 'typeorm'
@@ -22,10 +22,12 @@ import {ITaxonomyForSunburst} from '../../utils/interfaces'
 import {UBinSunburst} from '../../components/uBinSunburst'
 import {ThunkAction} from 'redux-thunk'
 import {UBinScatter} from '../../components/uBinScatter'
-import {IScatterDomain} from 'samples'
+import {IBin, IScatterDomain} from 'samples'
 import {SampleMenu} from '../../components/sampleMenu'
 import {GCCoverageBarCharts} from '../../components/gCCoverageBarCharts'
 import {EnzymeDistributionBarCharts} from '../../components/enzymeDistributionBarCharts'
+import {BinMenu} from '../../components/binMenu'
+import {Bin} from '../../db/entities/Bin'
 
 interface IProps extends RouteComponentProps {
 }
@@ -40,6 +42,8 @@ interface IPropsFromState {
   scatterDomain?: IScatterDomain
   importRecordsState: {pending: boolean, loaded: boolean}
   samplesPending: boolean
+  bins: Bin[]
+  selectedBin?: IBin
 }
 
 interface IActionsFromState {
@@ -52,6 +56,7 @@ interface IActionsFromState {
   setScatterDomain(scatterDomain: IScatterDomain): void
   setScatterDomainX(domain: [number, number]): void
   setScatterDomainY(domain: [number, number]): void
+  setSelectedBin(bin: Bin): void
   applyFilters(): void
   resetFilters(): void
 }
@@ -74,23 +79,24 @@ class CHome extends React.Component<TProps> {
   }
 
   render(): JSX.Element {
-
+    let { samples, samplesPending, taxonomyTreeFull, scatterDomain, archaealEnzymeTypes, bacterialEnzymeTypes,
+          updateSelectedTaxonomy, updateScatterDomain, setScatterDomainX, setScatterDomainY, connection, importRecords,
+          importRecordsState, getImportData, resetFilters, bins, selectedBin} = this.props
     const showScatter = (isReady: boolean): any => {
       if (isReady) {
-        return <UBinScatter data={this.props.samples} domainChangeHandler={this.props.updateScatterDomain} domain={this.props.scatterDomain}/>
+        return <UBinScatter data={samples} domainChangeHandler={updateScatterDomain} domain={scatterDomain} bin={selectedBin}/>
       } else {
         return <Spinner size={20}/>
       }
     }
     const getCharts = (): JSX.Element => {
-
-      if (this.props.samplesPending) {
+      if (samplesPending) {
         return (
           <div style={{alignItems: 'center', justifyContent: 'center', display: 'flex', height: '80vh', width: '100%'}}>
             <Spinner size={100}/>
           </div>
         )
-      } else if (!this.props.samples.length) {
+      } else if (!samples.length) {
         return (
           <div style={{alignItems: 'center', justifyContent: 'center', display: 'flex', height: '80vh', width: '100%'}}>
             <h2>Click on <span style={{backgroundColor: '#efefef', borderRadius: '4px', padding: '6px', margin: '6px', fontSize: 'initial', fontWeight: 400}}>
@@ -103,21 +109,28 @@ class CHome extends React.Component<TProps> {
           <div style={{width: '70%'}}>
             <div style={{width: '100%', display: 'flex'}}>
               <div style={{width: '50%'}}>
-                {showScatter(!!this.props.samples.length)}
+                {showScatter(!!samples.length)}
               </div>
               <div style={{width: '40%', marginTop: '30px'}}>
-                {this.props.taxonomyTreeFull &&
-                <UBinSunburst data={{ children: this.props.taxonomyTreeFull}} clickEvent={this.props.updateSelectedTaxonomy}/>}
+                {taxonomyTreeFull &&
+                <UBinSunburst data={{ children: taxonomyTreeFull}} clickEvent={updateSelectedTaxonomy}/>}
               </div>
             </div>
-            <GCCoverageBarCharts samples={this.props.samples} samplesPending={this.props.samplesPending} scatterDomain={this.props.scatterDomain}
-                                 setScatterDomainX={this.props.setScatterDomainX} setScatterDomainY={this.props.setScatterDomainY}
-                                 domainChangeHandler={this.props.updateScatterDomain}/>
+            <GCCoverageBarCharts samples={samples} samplesPending={samplesPending} scatterDomain={scatterDomain}
+                                 setScatterDomainX={setScatterDomainX} setScatterDomainY={setScatterDomainY}
+                                 domainChangeHandler={updateScatterDomain} bin={selectedBin}/>
           </div>
-          <EnzymeDistributionBarCharts samples={this.props.samples} samplesPending={this.props.samplesPending} domain={this.props.scatterDomain}
-                                       connection={this.props.connection} archaealLabels={this.props.archaealEnzymeTypes}
-                                       bacterialLabels={this.props.bacterialEnzymeTypes}/>
+          <EnzymeDistributionBarCharts samples={samples} samplesPending={samplesPending} domain={scatterDomain} bin={selectedBin}
+                                       archaealLabels={archaealEnzymeTypes} bacterialLabels={bacterialEnzymeTypes}/>
         </>
+      )
+    }
+
+    const getBinDropdown = (): JSX.Element => {
+      return (
+        <Popover content={<BinMenu bins={bins} setSelectedBin={this.props.setSelectedBin}/>} position={Position.BOTTOM}>
+          <Button intent={'primary'} disabled={!bins.length} rightIcon={'layout-group-by'} text='Select Bin'/>
+        </Popover>
       )
     }
 
@@ -125,14 +138,14 @@ class CHome extends React.Component<TProps> {
       <div>
         <div style={homeStyle}>
           <div style={{width: '100%', display: 'flex'}}>
-            <Popover content={<SampleMenu importRecords={this.props.importRecords} importRecordsState={this.props.importRecordsState}
-                                          connection={this.props.connection} getImportData={this.props.getImportData}/>}
+            <Popover content={<SampleMenu importRecords={importRecords} importRecordsState={importRecordsState}
+                                          connection={connection} getImportData={getImportData}/>}
                      position={Position.RIGHT_BOTTOM}>
               <Button icon='settings' text='Data Settings/Import' />
             </Popover>
             <ButtonGroup style={{marginLeft: '12px'}}>
-              {/*<Button icon='filter' intent='success' text='Apply filters' onClick={() => this.props.applyFilters()}/>*/}
-              <Button rightIcon='filter-remove' text='Reset filters' onClick={() => this.props.resetFilters()}/>
+              <Button intent={'warning'} icon={'filter-remove'} text='Reset filters' onClick={() => resetFilters()}/>
+              {getBinDropdown()}
             </ButtonGroup>
           </div>
 
@@ -156,6 +169,8 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   scatterDomain: getScatterDomain(state),
   archaealEnzymeTypes: getArchaealEnzymeTypes(state),
   bacterialEnzymeTypes: getBacterialEnzymeTypes(state),
+  bins: getBins(state),
+  selectedBin: getSelectedBin(state),
 })
 
 const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
@@ -170,9 +185,9 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       setScatterDomainX: scatterDomainX => SamplesActions.setScatterDomainX(scatterDomainX),
       setScatterDomainY: scatterDomainY => SamplesActions.setScatterDomainY(scatterDomainY),
       updateScatterDomain: scatterDomain => SamplesActions.updateScatterDomain(scatterDomain),
+      setSelectedBin: binId => SamplesActions.setSelectedBin(binId),
       applyFilters: SamplesActions.applyFilters,
       resetFilters: SamplesActions.resetFilters,
-      // getTaxonomies: (connection, recordId) => DBActions.getTaxonomiesForImport(connection, recordId)
     },
     dispatch,
   )

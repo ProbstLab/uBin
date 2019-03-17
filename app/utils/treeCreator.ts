@@ -24,13 +24,11 @@ export class TreeCreator {
         TreeCreator.addToTree(tree, rootTaxonomy)
       }
     })
-    console.log("step 2")
     Object.keys(tree).forEach((value: string) => {
       const hexVal: string = TreeCreator.setColour(tree[value])
       tree[value] = TreeCreator.treeToSunburstFormat(tree[value], hexVal)
       tree[value].hex = hexVal
     })
-    console.log("step 3 - return")
     return tree
   }
 

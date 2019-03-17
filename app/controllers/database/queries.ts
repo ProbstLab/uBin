@@ -11,7 +11,11 @@ export const scatterFilter = (query: any, filter?: ISampleFilter): any => {
       query.andWhere('samples.coverage >= :coverageLow AND samples.coverage <= :coverageHigh',
         {coverageLow: filter.scatterDomain.y[0], coverageHigh: filter.scatterDomain.y[1]})
     }
+    if (filter.bin) {
+      query.andWhere('samples.binId = :binId', {binId: filter.bin.id})
+    }
   }
+  console.log("query:", query.getQueryAndParameters())
   return query
 }
 
@@ -63,8 +67,9 @@ export const getEnzymeDistributionQuery =
 
 export const getSamplesQuery = async (connection: Connection, recordId: number, taxonomyIds?: number[], filter?: ISampleFilter): Promise<any> => {
   let query = connection.getRepository('sample').createQueryBuilder('sample')
-    .select(['sample.id', 'sample.gc', 'sample.coverage', 'sample.length', 'enzymes.archaeal', 'enzymes.bacterial', 'enzymes.name'])
+    .select(['sample.id', 'sample.gc', 'sample.coverage', 'sample.length', 'enzymes.archaeal', 'enzymes.bacterial', 'enzymes.name', 'bin.id'])
     .leftJoin('sample.enzymes', 'enzymes')
+    .leftJoin('sample.bin', 'bin')
     .where('sample.importRecordId = :recordId', {recordId})
   if (taxonomyIds) {
     query.andWhere('sample.taxonomyId IN (:...taxonomyIds)', {taxonomyIds})
@@ -72,18 +77,26 @@ export const getSamplesQuery = async (connection: Connection, recordId: number, 
     if (filter.taxonomyIds) {
       query.andWhere('sample.taxonomyId IN (:...taxonomyIds)', {taxonomyIds: filter.taxonomyIds})
     }
-    if (filter.scatterDomain && filter.scatterDomain.x) {
-      query.andWhere('sample.gc >= :gcLow AND sample.gc <= :gcHigh',
-        {gcLow: filter.scatterDomain.x[0], gcHigh: filter.scatterDomain.x[1]})
-    }
-    if (filter.scatterDomain && filter.scatterDomain.y) {
-      query.andWhere('sample.coverage >= :coverageLow AND sample.coverage <= :coverageHigh',
-        {coverageLow: filter.scatterDomain.y[0], coverageHigh: filter.scatterDomain.y[1]})
-    }
   }
   return query.getMany()
 }
 
 export const getAllEnzymeTypesQuery = async(connection: Connection): Promise<any> => {
   return connection.getRepository('enzyme').createQueryBuilder('enzyme').getMany()
+}
+
+export const getBinsQuery = async(connection: Connection, recordId: number): Promise<any> => {
+  return connection.getRepository('bin').createQueryBuilder('bin').select(['bin.id', 'bin.name'])
+    .leftJoin('bin.samples', 'samples').where('samples.importRecordId = :recordId', {recordId})
+    .getMany()
+}
+
+export const getSamplesForBinQuery = async (connection: Connection, recordId: number, binId: number): Promise<any> => {
+  let query = connection.getRepository('sample').createQueryBuilder('sample')
+    .select(['sample.id', 'sample.gc', 'sample.coverage', 'sample.length', 'enzymes.archaeal', 'enzymes.bacterial', 'enzymes.name', 'bin.id'])
+    .leftJoin('sample.enzymes', 'enzymes')
+    .leftJoin('sample.bin', 'bin')
+    .where('sample.importRecordId = :recordId', {recordId})
+    .andWhere('sample.binId = :binId', {binId})
+  return query.getMany()
 }

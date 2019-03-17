@@ -1,15 +1,16 @@
 import * as React from 'react'
-import {ISample} from '../utils/interfaces'
-import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryLabel, VictoryBrushContainer} from 'victory'
+import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryBrushContainer} from 'victory'
 import {Crossfilter, Dimension} from 'crossfilter2'
-import {IScatterDomain} from "samples"
+import {IBin, IScatterDomain} from 'samples'
+import {Sample} from '../db/entities/Sample'
 
 interface IProps {
-  cf: Crossfilter<ISample>
+  cf: Crossfilter<Sample>
   title: string
   worldDomain?: [number, number]
   xName?: 'gc' | 'length' | 'coverage'
   yName?: 'gc' | 'length' | 'coverage'
+  bin?: IBin
   setWorldDomain(domain: [number, number]): void
   domainChangeHandler(scatterDomain: IScatterDomain): void
 }
@@ -17,8 +18,9 @@ interface IProps {
 export interface IBarCharState {
   selectedDomain?: any
   zoomDomain?: any
-  groupDim?: Dimension<ISample, number>
-  filterDim?: Dimension<ISample, number>
+  groupDim?: Dimension<Sample, number>
+  filterDim?: Dimension<Sample, number>
+  binDim?: Dimension<Sample, number>
   originalXDomain?: [number, number]
 }
 
@@ -32,16 +34,17 @@ export class UBinSelectBarChart extends React.Component<IProps> {
   public componentWillMount(): void {
     if (this.props.xName !== undefined) {
       let {cf} = this.props
+      this.setState({binDim: cf.dimension((d: Sample) => d.bin ? d.bin.id : 0)})
       if (this.props.xName === 'coverage') {
         this.setState({
-          filterDim: cf.dimension((d: ISample) => Math.round(d.coverage)),
-          groupDim: cf.dimension((d: ISample) => Math.round(d.coverage)),
+          filterDim: cf.dimension((d: Sample) => Math.round(d.coverage)),
+          groupDim: cf.dimension((d: Sample) => Math.round(d.coverage)),
         })
       }
       else if (this.props.xName === 'gc') {
         this.setState({
-          filterDim: cf.dimension((d: ISample) => Math.round(d.gc)),
-          groupDim: cf.dimension((d: ISample) => Math.round(d.gc)),
+          filterDim: cf.dimension((d: Sample) => Math.round(d.gc)),
+          groupDim: cf.dimension((d: Sample) => Math.round(d.gc)),
         })
       }
     }
@@ -119,13 +122,13 @@ export class UBinSelectBarChart extends React.Component<IProps> {
     return {xSum: 0, count: 0}
   }
 
-  public reduceAddLength(p: any, v: ISample): any {
+  public reduceAddLength(p: any, v: Sample): any {
     p.xSum += v.length
     p.count += 1
     return p
   }
 
-  public reduceRemoveLength(p: any, v: ISample): any {
+  public reduceRemoveLength(p: any, v: Sample): any {
     p.xSum -= v.length
     p.count -= 1
     return p
@@ -144,14 +147,20 @@ export class UBinSelectBarChart extends React.Component<IProps> {
   }
 
   public getData(): any[] {
-    let { groupDim, filterDim } = this.state
-    if (groupDim && filterDim) {
-      let {xName, yName} = this.props
+    let { groupDim, filterDim, binDim } = this.state
+    if (groupDim && filterDim && binDim) {
+      let {xName, yName, bin} = this.props
       let { worldDomain } = this.props
+      
       if (worldDomain) {
         filterDim.filterRange(worldDomain)
       } else {
         filterDim.filterAll()
+      }
+      if (bin) {
+        binDim.filterExact(bin.id)
+      } else {
+        binDim.filterAll()
       }
       if (xName) {
         this.yMax = 0
@@ -205,9 +214,7 @@ export class UBinSelectBarChart extends React.Component<IProps> {
                         />
                       }>
           <VictoryAxis
-            tickValues={this.getXLabels(true)}
             tickFormat={(t: number) => {return  t >= 1000 ? `${Math.round(t)/1000}k` : Math.round(t*100)/100}}
-            tickLabelComponent={<VictoryLabel style={{textAnchor:'end', fontSize: '8px'}} angle={-75}/>}
           />
           <VictoryAxis
             tickFormat={(t: number) => {return  t >= 1000000 ? `${Math.round(t)/1000000}M` : t >= 1000 ? `${Math.round(t)/1000}K` : t}}

@@ -18,6 +18,9 @@ export enum dbActions {
   getSamples = 'database.getSamples',
   getSamplesPending = 'database.getSamples_PENDING',
   getSamplesPendingDone = 'database.getSamples_PENDING_DONE',
+  getBins = 'database.getBins',
+  getBinsPending = 'database.getBins_PENDING',
+  getSamplesForBin = 'database.getSamplesForBin',
 }
 
 export interface IConnectDatabase extends Action {
@@ -71,5 +74,14 @@ export interface IGetSamplesPendingDone extends Action {
 
 export interface IGetImports extends Action {
   type: dbActions.getImports
+  payload: Promise<any>
+}
+
+export interface IGetBins extends Action {
+  type: dbActions.getBins
+  payload: Promise<any>
+}
+export interface IGetSamplesForBin extends Action {
+  type: dbActions.getSamplesForBin
   payload: Promise<any>
 }

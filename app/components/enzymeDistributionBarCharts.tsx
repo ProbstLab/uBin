@@ -1,8 +1,7 @@
 
 import * as React from 'react'
-import {Connection} from 'typeorm'
 import {UBinBarChart} from './uBinBarChart'
-import {IScatterDomain} from 'samples'
+import {IBin, IScatterDomain} from 'samples'
 
 interface IProps {
   samples: any[]
@@ -10,28 +9,24 @@ interface IProps {
   archaealLabels: string[]
   bacterialLabels: string[]
   domain?: IScatterDomain
+  bin?: IBin
 }
 
-interface IActionsFromState {}
-
-interface IPropsFromState {
-  connection: Connection | undefined
-}
-
-type TProps = IProps & IPropsFromState & IActionsFromState
+type TProps = IProps
 
 export class EnzymeDistributionBarCharts extends React.PureComponent<TProps> {
 
   render(): JSX.Element {
+    let {bin, samples, domain, archaealLabels, bacterialLabels} = this.props
     return (
       <div style={{width: '30%', height: 'inherit'}}>
         <div style={{height: '400px'}}>
-          <UBinBarChart data={this.props.samples} title='Bacterial Single Copy Genes' xName='name' xLabels={this.props.bacterialLabels} yName='amount'
-                        domain={this.props.domain} filterBoolName={'bacterial'} />
+          <UBinBarChart data={samples} title='Bacterial Single Copy Genes' xName='name' xLabels={bacterialLabels} yName='amount'
+                        domain={domain} filterBoolName={'bacterial'} bin={bin}/>
         </div>
         <div style={{height: '400px'}}>
-          <UBinBarChart data={this.props.samples} title='Archaeal Single Copy Genes' xName='name' xLabels={this.props.archaealLabels} yName='amount'
-                        domain={this.props.domain} filterBoolName={'archaeal'}/>
+          <UBinBarChart data={samples} title='Archaeal Single Copy Genes' xName='name' xLabels={archaealLabels} yName='amount'
+                        domain={domain} filterBoolName={'archaeal'} bin={bin}/>
         </div>
       </div>
     )}

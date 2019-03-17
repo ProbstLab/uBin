@@ -18,12 +18,15 @@ export const samplesReducer = createReducer(samples.getInitialState(), {
   [samplesActions.getTaxonomiesForImportFulfilled]: samples.getTaxonomiesForImportFulfilled,
   [samplesActions.getEnzymeDistributionFulfilled]: samples.getEnzymeDistributionFulfilled,
   [samplesActions.getAllEnzymeTypesFulfilled]: samples.getAllEnzymeTypesFulfilled,
-  [samplesActions.setImportedRecord]: samples.setImportedRecord,
   [samplesActions.getSamplesFulfilled]: samples.getSamplesFulfilled,
+  [samplesActions.getBinsFulfilled]: samples.getBinsFulfilled,
+  [samplesActions.setImportedRecord]: samples.setImportedRecord,
   [samplesActions.setScatterDomain]: samples.setScatterDomain,
   [samplesActions.setScatterDomainX]: samples.setScatterDomainX,
   [samplesActions.setScatterDomainY]: samples.setScatterDomainY,
+  [samplesActions.setBinFilter]: samples.setBinFilter,
   [samplesActions.removeFilters]: samples.removeFilters,
+  [samplesActions.resetDomain]: samples.resetDomain,
 })
 
 export const fileTreeReducer = createReducer(files.getInitialState(), {

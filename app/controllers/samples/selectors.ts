@@ -58,6 +58,15 @@ export const getSamples = createSelector(
   }) : []
 )
 
+export const getBins = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.bins,
+)
+export const getSelectedBin = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.filters.bin,
+)
+
 export const getScatterDomain = createSelector(
   getSamplesState,
   (state: ISamplesState) => state.filters.scatterDomain

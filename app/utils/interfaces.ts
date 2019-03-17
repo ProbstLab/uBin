@@ -1,3 +1,4 @@
+
 export interface IIdType {
   id: number
 }
@@ -11,6 +12,12 @@ export interface IImportRecord {
   id?: number
   name: string
   files: IImportFile[]
+}
+
+export interface IBin {
+  id?: number,
+  name: string,
+  importRecord: number | IImportRecord
 }
 
 export interface IEnzyme {
@@ -48,6 +55,8 @@ export interface ISample {
   enzymes?: (number | IEnzyme | IdValuePair)[]
   enzymeKeys: number[]
   importRecord?: IImportRecord
+  binName?: string
+  bin?: number | IBin
 }
 
 export interface IdValuePair {
@@ -55,7 +64,7 @@ export interface IdValuePair {
 }
 
 export interface IDynamicAssociativeArray {
-  [key: string]: ITaxonomy | IEnzyme | ISample
+  [key: string]: ITaxonomy | IEnzyme | ISample | IBin
 }
 
 export interface ITaxonomyAssociativeArray {

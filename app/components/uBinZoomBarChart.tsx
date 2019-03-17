@@ -98,7 +98,6 @@ export class UBinZoomBarChart extends React.Component<IProps> {
     if (originalXDomain) {
       let xDistance: number = Math.sqrt((originalXDomain[1] - originalXDomain[0]) ** 2)
       let stepSize: number = this.getStepSize(xDistance)
-      console.log("xdistance", xDistance, "stepsize", stepSize)
       for (let i: number = 0; i < this.roundLarge(xDistance, stepSize, 0);
            i += !adjustScale || !this.currentDomain ? stepSize : this.getStepSize(Math.sqrt((this.currentDomain.x[1] - this.currentDomain.x[0])**2))) {
         stepsArray.push(i)

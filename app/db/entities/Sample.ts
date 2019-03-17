@@ -2,6 +2,7 @@ import {Entity, PrimaryGeneratedColumn, Column, JoinTable, ManyToMany, ManyToOne
 import {Taxonomy} from './Taxonomy'
 import {Enzyme} from './Enzyme'
 import {ImportRecord} from './ImportRecord'
+import {Bin} from './Bin'
 
 @Entity()
 @Unique(['scaffold', 'importRecord'])
@@ -31,6 +32,10 @@ export class Sample {
   @ManyToMany(type => Enzyme, enzyme => enzyme.samples)
   @JoinTable()
   enzymes: Enzyme[]
+
+  @ManyToOne(type => Bin, bin => bin.samples)
+  @JoinTable()
+  bin: Bin
 
   @ManyToOne(type => ImportRecord, importRecord => importRecord.samples)
   @JoinTable()
