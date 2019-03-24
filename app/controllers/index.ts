@@ -27,6 +27,7 @@ export const samplesReducer = createReducer(samples.getInitialState(), {
   [samplesActions.setBinFilter]: samples.setBinFilter,
   [samplesActions.removeFilters]: samples.removeFilters,
   [samplesActions.resetDomain]: samples.resetDomain,
+  [samplesActions.setTaxonomyId]: samples.setTaxonomyId,
 })
 
 export const fileTreeReducer = createReducer(files.getInitialState(), {

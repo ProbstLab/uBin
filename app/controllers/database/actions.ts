@@ -61,8 +61,8 @@ export class DBActions {
   static getBins(connection: Connection, recordId: number): IGetBins {
     return {type: dbActions.getBins, payload: getBinsQuery(connection, recordId)}
   }
-  static getSamples(connection: Connection, recordId: number, taxonomyId?: number[], filter?: ISampleFilter): IGetSamples {
-    return {type: dbActions.getSamples, payload: getSamplesQuery(connection, recordId, taxonomyId, filter)}
+  static getSamples(connection: Connection, recordId: number, filter?: ISampleFilter): IGetSamples {
+    return {type: dbActions.getSamples, payload: getSamplesQuery(connection, recordId, filter)}
   }
   static getSamplesForBin(connection: Connection, recordId: number, binId: number): IGetSamplesForBin {
     return {type: dbActions.getSamplesForBin, payload: getSamplesForBinQuery(connection, recordId, binId)}
@@ -101,12 +101,13 @@ export class DBActions {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>(resolve => {
         let connection: Connection | undefined = getDBConnection(getState())
+        let filters: ISampleFilter = getState().samples.filters
         if (connection) {
           Promise.all([
-            dispatch(DBActions.getTaxonomiesForImport(connection, recordId)),
+            dispatch(DBActions.getTaxonomiesForImport(connection, recordId, filters)),
             dispatch(DBActions.getAllEnzymeTypes(connection)),
             dispatch(DBActions.getBins(connection, recordId)),
-            dispatch(DBActions.getSamples(connection, recordId)),
+            dispatch(DBActions.getSamples(connection, recordId, filters)),
             dispatch(SamplesActions.setImportedRecord(recordId)),
           ]).then(() =>
               Promise.all([dispatch(DBActions.setImportDataFinished())]).then(() => resolve()))

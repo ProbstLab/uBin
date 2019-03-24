@@ -9,7 +9,7 @@ import {
   ISetImportedRecord,
   ISetScatterDomain,
   ISetScatterDomainX,
-  ISetTaxonomyIds,
+  ISetTaxonomyId,
   ISetScatterDomainY,
   IGetAllEnzymeTypesFulfilled,
   IGetBinsFulfilled,
@@ -68,6 +68,7 @@ export const setImportedRecord = (state: ISamplesState, action: ISetImportedReco
   }
 }
 export const getSamplesFulfilled = (state: ISamplesState, action: IGetSamplesFulfilled): ISamplesState => {
+  console.log("Payload:", action.payload)
   return {
     ...state,
     samples: action.payload,
@@ -80,11 +81,12 @@ export const getBinsFulfilled = (state: ISamplesState, action: IGetBinsFulfilled
   }
 }
 
-export const setTaxonomyIds = (state: ISamplesState, action: ISetTaxonomyIds): ISamplesState => {
+export const setTaxonomyId = (state: ISamplesState, action: ISetTaxonomyId): ISamplesState => {
+  console.log("Set taxonomy id", action)
   return {
     ...state,
     filters: {
-      taxonomyIds: action.taxonomyIds,
+      taxonomyId: action.taxonomyId,
     },
   }
 }

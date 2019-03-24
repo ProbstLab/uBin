@@ -57,7 +57,6 @@ interface IActionsFromState {
   setScatterDomainX(domain: [number, number]): void
   setScatterDomainY(domain: [number, number]): void
   setSelectedBin(bin: Bin): void
-  applyFilters(): void
   resetFilters(): void
 }
 
@@ -186,7 +185,6 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       setScatterDomainY: scatterDomainY => SamplesActions.setScatterDomainY(scatterDomainY),
       updateScatterDomain: scatterDomain => SamplesActions.updateScatterDomain(scatterDomain),
       setSelectedBin: binId => SamplesActions.setSelectedBin(binId),
-      applyFilters: SamplesActions.applyFilters,
       resetFilters: SamplesActions.resetFilters,
     },
     dispatch,

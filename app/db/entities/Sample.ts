@@ -25,6 +25,13 @@ export class Sample {
   @Column('integer')
   length: number
 
+  @Column({
+    type: 'varchar',
+    length: 100,
+    default: '',
+  })
+  taxonomiesRelationString: string
+
   @ManyToOne(type => Taxonomy, taxonomy => taxonomy.samples)
   @JoinTable()
   taxonomy: Taxonomy

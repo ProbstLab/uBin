@@ -30,7 +30,7 @@ declare module 'samples' {
   }
 
   interface ISampleFilter {
-    taxonomyIds?: number[]
+    taxonomyId?: number
     scatterDomain?: IScatterDomain
     gcLengthDomain?: IAxisFilter
     gcCoverageDomain?: IAxisFilter

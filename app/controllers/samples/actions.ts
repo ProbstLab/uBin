@@ -6,7 +6,7 @@ import {
   samplesActions,
   IGetSamplesFulfilled,
   ISetScatterDomain,
-  ISetTaxonomyIds,
+  ISetTaxonomyId,
   IRemoveFilters,
   IGetImportsPending,
   ISetScatterDomainX,
@@ -55,8 +55,8 @@ export class SamplesActions {
   static setImportedRecord(recordId: number): ISetImportedRecord {
     return {type: samplesActions.setImportedRecord, recordId}
   }
-  static setTaxonomyIds(taxonomyIds: number[]): ISetTaxonomyIds {
-    return {type: samplesActions.setTaxonomyIds, taxonomyIds}
+  static setTaxonomyId(taxonomyId: number): ISetTaxonomyId {
+    return {type: samplesActions.setTaxonomyId, taxonomyId}
   }
   static setScatterDomain(scatterDomain: IScatterDomain): ISetScatterDomain {
     return {type: samplesActions.setScatterDomain, scatterDomain}
@@ -71,17 +71,16 @@ export class SamplesActions {
     return {type: samplesActions.setBinFilter, bin}
   }
 
-  static updateSelectedTaxonomy(taxonomyIds: number[]): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
+  static updateSelectedTaxonomy(taxonomyId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>(resolve => {
         let connection: Connection | undefined = getDBConnection(getState())
         let recordId: number | undefined = getState().samples.recordId
         if (connection && recordId) {
           Promise.all([
-            dispatch(SamplesActions.setTaxonomyIds(taxonomyIds)),
-            dispatch(DBActions.getEnzymeDistribution(connection, recordId, taxonomyIds)),
-            dispatch(DBActions.getSamples(connection, recordId, taxonomyIds)),
-          ]).then(() => resolve())
+            dispatch(SamplesActions.setTaxonomyId(taxonomyId)),
+          ]).then(() =>
+          Promise.all([dispatch(DBActions.getImportData(recordId || 0))]).then(() => resolve()))
         } else {
           resolve()
         }
@@ -104,24 +103,6 @@ export class SamplesActions {
             }
           }
         )
-      })
-    }
-  }
-
-  static applyFilters(): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
-    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
-      return new Promise<void>(resolve => {
-        let connection: Connection | undefined = getDBConnection(getState())
-        let recordId: number | undefined = getState().samples.recordId
-        let filters: ISampleFilter = getState().samples.filters
-        if (connection && recordId) {
-          Promise.all([
-            dispatch(DBActions.getEnzymeDistribution(connection, recordId, undefined, filters)),
-            dispatch(DBActions.getSamples(connection, recordId, undefined, filters)),
-          ]).then(() => resolve())
-        } else {
-          resolve()
-        }
       })
     }
   }

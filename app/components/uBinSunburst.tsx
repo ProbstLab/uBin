@@ -1,5 +1,5 @@
-import {LabelSeries, Sunburst} from "react-vis";
-import * as React from "react";
+import {LabelSeries, Sunburst} from "react-vis"
+import * as React from "react"
 import {MouseEvent} from 'react'
 
 const sunburstLabelStyle = {
@@ -44,7 +44,7 @@ function updateData(data: any, keyPath: any): any {
   data.style = {
     ...data.style,
     fillOpacity: keyPath && !keyPath[data.id] ? 0.2 : 1,
-  };
+  }
 
   return data
 }
@@ -52,7 +52,7 @@ function updateData(data: any, keyPath: any): any {
 
 interface IProps {
   data: any
-  clickEvent(datapoint: any): void
+  clickEvent(id: number): void
 }
 
 export interface ISunburstState {
@@ -85,7 +85,7 @@ export class UBinSunburst extends React.PureComponent<IProps> {
 
   public selectTaxonomy(datapoint: any): void {
     if (!this.state.clicked) {
-      this.props.clickEvent(this.getChildrenIds(datapoint))
+      this.props.clickEvent(datapoint.id)
     }
   }
 
@@ -104,14 +104,14 @@ export class UBinSunburst extends React.PureComponent<IProps> {
             keyPath = keyPath.reverse()
             namePath = namePath.reverse()
             const pathAsMap = keyPath.reduce((res: any, row: any) => {
-              res[row] = true;
-              return res;
-            }, {});
+              res[row] = true
+              return res
+            }, {})
             this.setState({
               finalValue: namePath[namePath.length - 1],
               namePathValue: namePath.slice(1).join(' > '),
               data: updateData(this.props.data, pathAsMap)
-            });
+            })
           }}
           onValueMouseOut={() =>
             clicked

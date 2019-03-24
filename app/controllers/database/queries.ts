@@ -14,8 +14,10 @@ export const scatterFilter = (query: any, filter?: ISampleFilter): any => {
     if (filter.bin) {
       query.andWhere('samples.binId = :binId', {binId: filter.bin.id})
     }
+    if (filter.taxonomyId) {
+      query.andWhere('samples.taxonomiesRelationString like :taxonomyId', {taxonomyId: '%;' + filter.taxonomyId + ';%'})
+    }
   }
-  console.log("query:", query.getQueryAndParameters())
   return query
 }
 
@@ -57,27 +59,25 @@ export const getEnzymeDistributionQuery =
   if (taxonomyIds) {
     query.andWhere('samples.taxonomyId IN (:...taxonomyIds)', {taxonomyIds})
   } else if (filter) {
-    if (filter.taxonomyIds) {
-      query.andWhere('samples.taxonomyId IN (:...taxonomyIds)', {taxonomyIds: filter.taxonomyIds})
+    if (filter.taxonomyId) {
+      query.andWhere('sample.taxonomiesRelationString like :taxonomyId', {taxonomyId: '%;' + filter.taxonomyId + '%'})
     }
     query = scatterFilter(query, filter)
   }
   return query.getMany()
 }
 
-export const getSamplesQuery = async (connection: Connection, recordId: number, taxonomyIds?: number[], filter?: ISampleFilter): Promise<any> => {
+export const getSamplesQuery = async (connection: Connection, recordId: number, filter?: ISampleFilter): Promise<any> => {
   let query = connection.getRepository('sample').createQueryBuilder('sample')
     .select(['sample.id', 'sample.gc', 'sample.coverage', 'sample.length', 'enzymes.archaeal', 'enzymes.bacterial', 'enzymes.name', 'bin.id'])
     .leftJoin('sample.enzymes', 'enzymes')
     .leftJoin('sample.bin', 'bin')
     .where('sample.importRecordId = :recordId', {recordId})
-  if (taxonomyIds) {
-    query.andWhere('sample.taxonomyId IN (:...taxonomyIds)', {taxonomyIds})
-  } else if (filter) {
-    if (filter.taxonomyIds) {
-      query.andWhere('sample.taxonomyId IN (:...taxonomyIds)', {taxonomyIds: filter.taxonomyIds})
-    }
-  }
+   if (filter) {
+     if (filter.taxonomyId) {
+       query.andWhere('sample.taxonomiesRelationString like :taxonomyId', {taxonomyId: '%;' + filter.taxonomyId + '%'})
+     }
+   }
   return query.getMany()
 }
 

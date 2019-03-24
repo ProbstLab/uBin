@@ -109,7 +109,6 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
   }))
 
   // Save bins and link them to new record
-  console.log("bin List", binList)
   await Promise.all(binList.map(async (value: string) => {
     binMap[value] = await connection.getRepository('bin').save({name: value, importRecord: importRecord.id}) as IBin
   }))
@@ -123,11 +122,28 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
   Object.keys(sampleMap).map( (key: string) => {
     let item = sampleMap[key] as ISample
     let newEnzymes: IEnzyme[] = []
+
+    let tmpTaxonomy: ITaxonomy = taxonomyMap[item.taxonomyKeys[0]]
+    let taxonomyIds: number[] = []
+    if (tmpTaxonomy) {
+      if (tmpTaxonomy && tmpTaxonomy.id) {
+        taxonomyIds.push(tmpTaxonomy.id)
+      }
+      for (let i: number = 1; i < item.taxonomyKeys.length; i ++) {
+        tmpTaxonomy = tmpTaxonomy.children[item.taxonomyKeys[i]]
+        if (tmpTaxonomy) {
+          taxonomyIds.push(tmpTaxonomy.id || 0)
+        } else {
+          break
+        }
+      }
+    }
     for (let i: number = item.taxonomyKeys.length-1; i > 0; i--) {
       item.taxonomyKeys.splice(i, 0, 'children')
     }
     try {
       item.taxonomy = {id: _.get(taxonomyMap, item.taxonomyKeys).id}
+      item.taxonomiesRelationString = ';'+taxonomyIds.join(';')+';'
     } catch (e) {
       console.log("nope", e)
     }

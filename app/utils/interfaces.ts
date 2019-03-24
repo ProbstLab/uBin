@@ -57,6 +57,7 @@ export interface ISample {
   importRecord?: IImportRecord
   binName?: string
   bin?: number | IBin
+  taxonomiesRelationString?: string
 }
 
 export interface IdValuePair {

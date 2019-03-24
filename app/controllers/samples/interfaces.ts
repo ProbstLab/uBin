@@ -37,7 +37,7 @@ export enum samplesActions {
   setScatterDomain = 'samples.setScatterDomain',
   setScatterDomainX = 'samples.setScatterDomainX',
   setScatterDomainY = 'samples.setScatterDomainY',
-  setTaxonomyIds = 'samples.setTaxonomyIds',
+  setTaxonomyId = 'samples.setTaxonomyId',
   removeFilters = 'samples.removeFilters',
   resetDomain = 'samples.resetDomain',
   setBinFilter = 'samples.setBinFilter',
@@ -83,9 +83,9 @@ export interface ISetImportedRecord extends Action {
   type: samplesActions.setImportedRecord
   recordId: number
 }
-export interface ISetTaxonomyIds extends Action {
-  type: samplesActions.setTaxonomyIds
-  taxonomyIds: number[]
+export interface ISetTaxonomyId extends Action {
+  type: samplesActions.setTaxonomyId
+  taxonomyId: number | undefined
 }
 
 export interface ISetScatterDomain extends Action {
