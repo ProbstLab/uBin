@@ -58,10 +58,16 @@ export const getSamples = createSelector(
   }) : []
 )
 
+export const getSamplesFilters = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.filters
+)
+
 export const getBins = createSelector(
   getSamplesState,
   (state: ISamplesState) => state.bins,
 )
+
 export const getSelectedBin = createSelector(
   getSamplesState,
   (state: ISamplesState) => state.filters.bin,
