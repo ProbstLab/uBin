@@ -5,7 +5,7 @@ import * as crossfilter from 'crossfilter2'
 import {IBin, IScatterDomain} from "samples"
 import {Sample} from '../db/entities/Sample'
 import {CoverageBarChartsWrapper} from './coverageBarChartsWrapper'
-import {UBinSelectBarChart} from './uBinSelectBarChart'
+import {UBinGCBarChart} from './uBinGCBarChart'
 
 interface IProps {
   samples: any[]
@@ -36,8 +36,9 @@ export class GCCoverageBarCharts extends React.PureComponent<TProps> {
     return (
       <div style={{width: '100%', display: 'flex'}}>
         <div style={{width: '50%', height: '360px'}}>
-          <UBinSelectBarChart cf={cf} title='GC/Length' xName='gc' yName='length' worldDomain={scatterDomain ? scatterDomain.x : undefined}
-                            setWorldDomain={setScatterDomainX} domainChangeHandler={domainChangeHandler} bin={bin}/>
+          <UBinGCBarChart data={this.props.samples} title='GC/Length' xName='gc' yName='length' xDomain={scatterDomain ? scatterDomain.x : undefined}
+                          coverageRange={scatterDomain ? scatterDomain.y : undefined} setWorldDomain={setScatterDomainX}
+                          domainChangeHandler={domainChangeHandler} bin={bin}/>
         </div>
         <div style={{width: '50%', height: '360px'}}>
           <CoverageBarChartsWrapper cf={cf} samples={samples} samplesPending={samplesPending} setScatterDomainY={setScatterDomainY}
