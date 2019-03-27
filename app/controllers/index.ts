@@ -38,6 +38,7 @@ export const fileTreeReducer = createReducer(files.getInitialState(), {
   [fileTreeActions.removeAddedFile]: files.removeAddedFiles,
   [fileTreeActions.importFilePending]: files.importFilePending,
   [fileTreeActions.importFileFulfilled]: files.importFileFulfilled,
+  [fileTreeActions.setImportName]: files.setImportName,
 })
 
 export const dbReducer = createReducer(db.getInitialState(), {

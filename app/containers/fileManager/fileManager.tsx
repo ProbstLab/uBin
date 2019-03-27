@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import { withRouter, RouteComponentProps } from 'react-router'
 import { IClientState } from '../../controllers'
 import {FileTreeActions, getAddedFiles, getFileTreeAsArray} from '../../controllers/files'
-import {Callout, Classes, ITreeNode, Card, Button, Dialog, ProgressBar} from '@blueprintjs/core'
+import {Callout, Classes, ITreeNode, Card, Button, Dialog, ProgressBar, InputGroup, Tag} from '@blueprintjs/core'
 import {IFile} from 'files'
 import {UBinTree} from '../../components/uBinTree'
 import {FileList} from '../../components/fileList/FileList'
@@ -25,10 +25,15 @@ interface IActionsFromState {
   openFile(file: IFile): void
   addFile(file: IFile): void
   removeAddedFile(file: IFile): void
-  startFileImport(addedFiles: IFile[], connection: Connection): void
+  startFileImport(addedFiles: IFile[], connection: Connection, importName: string): void
 }
 
-interface IFileManagerState {}
+interface IFileManagerState {
+  numFilesRequired: number
+  importName: string,
+  importNameLength: number
+  importNameLengthReached: boolean
+}
 
 const fileManagerStyle = {
   display: 'flex',
@@ -57,16 +62,26 @@ class CFileManager extends React.Component<TProps> {
 
   importingFiles: boolean = false
 
-  public state: IFileManagerState = {}
+  public state: IFileManagerState = {
+    numFilesRequired: 2,
+    importName: '',
+    importNameLength: 6,
+    importNameLengthReached: false,
+  }
 
   public componentDidMount(): void {
-    // if (!this.props.fileTree.length) {this.props.initFileTree('/home/tim/')}
     if (!this.props.fileTree.length) {this.props.initFileTree('')}
   }
 
+  private handleImportNameChange = (value: string) => this.setState({importNameLengthReached: value.length >= this.state.importNameLength,
+                                                                    importName: value})
+
   render(): JSX.Element {
-    const { fileTree } = this.props
-    const { addedFiles } = this.props
+    const { fileTree, addedFiles } = this.props
+    const { numFilesRequired, importNameLength, importNameLengthReached, importName } = this.state
+    const charactersLeft = <Tag intent={importNameLengthReached ? 'success' : undefined} rightIcon={ importNameLengthReached ? 'tick' : undefined}
+                                minimal={true}>{importNameLengthReached ? 'Valid name' : <span>{importNameLength - importName.length} Characters left</span>}</Tag>
+    const enableImport = (): boolean => numFilesRequired === addedFiles.length && importNameLengthReached
     return (
       <div style={fileManagerStyle}>
         <Callout title={'Files'} style={fileTreeStyle}>
@@ -83,10 +98,14 @@ class CFileManager extends React.Component<TProps> {
           <Card style={{ margin: '8px'}}>
             <h4>Import</h4>
             <Callout intent={'warning'}>
-              Add taxonomy file first, then .csv or .txt of second dataset ({2 - addedFiles.length} files remaining)
+              Add taxonomy file first, then .csv or .txt of second dataset ({numFilesRequired - addedFiles.length} files remaining)
             </Callout>
+            <div style={{marginTop: '16px'}}>
+              <InputGroup type={'text'} placeholder={'Name your import'} rightElement={charactersLeft}
+                          onChange={(event: any) => this.handleImportNameChange(event.target.value)}/>
+            </div>
             <FileList files={addedFiles} removeAddedFile={this.props.removeAddedFile}/>
-            <Button icon='import' disabled={addedFiles.length !== 2} intent='primary'
+            <Button icon='import' disabled={!enableImport()} intent='primary'
                     onClick={() => this.toggleDialog(true)}>Import</Button>
           </Card>
           <Dialog isOpen={this.props.isImportingFiles} onClose={() => this.toggleDialog(false)} icon='import'
@@ -141,7 +160,7 @@ class CFileManager extends React.Component<TProps> {
 
   private toggleDialog(isOpen: boolean): void {
     if (this.props.connection) {
-      this.props.startFileImport(this.props.addedFiles, this.props.connection)
+      this.props.startFileImport(this.props.addedFiles, this.props.connection, this.state.importName)
     }
   }
 }
@@ -160,7 +179,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       openFile: file => FileTreeActions.openFile(file),
       addFile: file => FileTreeActions.addFile(file),
       removeAddedFile: file => FileTreeActions.removeAddedFile(file),
-      startFileImport: (addedFiles, connection) => FileTreeActions.importFile(addedFiles, connection)
+      startFileImport: (addedFiles, connection, importName) => FileTreeActions.importFile(addedFiles, connection, importName)
     },
     dispatch,
   )

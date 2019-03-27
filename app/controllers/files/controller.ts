@@ -2,7 +2,7 @@ import {
   IAddFile,
   IFileTreeState,
   IImportFileFulfilled,
-  IInitFileTree,
+  IInitFileTree, IISetImportName,
   IOpenFile,
   IPopulateFileTree,
   IRemoveAddedFile,
@@ -107,5 +107,12 @@ export const importFileFulfilled = (state: IFileTreeState, action: IImportFileFu
   return {
     ...state,
     isImportingFiles: false,
+  }
+}
+
+export const setImportName = (state: IFileTreeState, action: IISetImportName): IFileTreeState => {
+  return {
+    ...state,
+    importName: action.importName,
   }
 }

@@ -6,6 +6,7 @@ export interface IFileTreeState {
   fileTree?: IFile[]
   addedFiles: IValueMap<IFile>
   isImportingFiles: boolean
+  importName?: string
 }
 
 export enum fileTreeActions {
@@ -18,6 +19,7 @@ export enum fileTreeActions {
   importFile = 'files.import',
   importFilePending = 'files.import_PENDING',
   importFileFulfilled = 'files.import_FULFILLED',
+  setImportName = 'files.setImportName',
 }
 
 export interface IOpenFile extends Action {
@@ -56,5 +58,9 @@ export interface IImportFilePending extends Action {
 export interface IImportFileFulfilled extends Action {
   type: fileTreeActions.importFileFulfilled
   payload: any
+}
+export interface IISetImportName extends Action {
+  type: fileTreeActions.setImportName
+  importName: string
 }
 

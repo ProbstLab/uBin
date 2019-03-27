@@ -3,7 +3,7 @@ import {
   IAddFile,
   IImportFile,
   IImportFileFulfilled, IImportFilePending,
-  IInitFileTree,
+  IInitFileTree, IISetImportName,
   IOpenFile,
   IPopulateFileTree,
   IRemoveAddedFile,
@@ -28,13 +28,16 @@ export class FileTreeActions {
   static removeAddedFile(file: IFile): IRemoveAddedFile {
     return {file, type: fileTreeActions.removeAddedFile }
   }
-  static importFile(addedFiles: IFile[], connection: Connection): IImportFile {
-    return {type: fileTreeActions.importFile, payload: importFiles(addedFiles, connection)}
+  static importFile(addedFiles: IFile[], connection: Connection, importName: string): IImportFile {
+    return {type: fileTreeActions.importFile, payload: importFiles(addedFiles, connection, importName)}
   }
   static importFilePending(payload: any): IImportFilePending {
     return {type: fileTreeActions.importFilePending, payload}
   }
   static importFileFulfilled(payload: any): IImportFileFulfilled {
     return {type: fileTreeActions.importFileFulfilled, payload}
+  }
+  static setImportName(importName: string): IISetImportName {
+    return {type: fileTreeActions.setImportName, importName}
   }
 }

@@ -16,7 +16,7 @@ import {IFile} from "files"
 import * as _ from 'lodash'
 import {Taxonomy} from '../db/entities/Taxonomy'
 
-export const importFiles = async (addedFiles: IFile[], connection: Connection) => {
+export const importFiles = async (addedFiles: IFile[], connection: Connection, importName: string) => {
   const taxonomyFile: IFile = addedFiles[0]
   const enzymeFile: IFile = addedFiles[1]
   let taxonomyMap: ITaxonomyAssociativeArray = {}
@@ -78,14 +78,14 @@ export const importFiles = async (addedFiles: IFile[], connection: Connection) =
             sampleMap[data.scaffolds] = item
           }
         }).on('end', async () => {
-          await saveSamples(enzymeFile, taxonomyFile, connection, enzymeList, enzymeMap, taxonomyMap, sampleMap, binList, binMap)
+          await saveSamples(enzymeFile, taxonomyFile, connection, importName, enzymeList, enzymeMap, taxonomyMap, sampleMap, binList, binMap)
           resolve(true)
       })
     })
   })
 }
 
-const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: Connection, enzymeList: string[],
+const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: Connection, importName: string, enzymeList: string[],
                            enzymeMap: IDynamicAssociativeArray, taxonomyMap: ITaxonomyAssociativeArray, sampleMap: IDynamicAssociativeArray,
                            binList: string[], binMap: IDynamicAssociativeArray) => {
   let t0 = performance.now()
@@ -93,7 +93,7 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
   let enzymeFileSaved = await connection.getRepository('import_file').save({ name: enzymeFile.filePath }) as IImportFile
   let taxonomyFileSaved = await connection.getRepository('import_file').save({ name: taxonomyFile.filePath }) as IImportFile
   let importRecord: IImportRecord = {
-    name: 'Import_'+Date.now().toString(),
+    name: importName,
     files: [enzymeFileSaved, taxonomyFileSaved],
   }
   await connection.getRepository('import_record').save(importRecord)
