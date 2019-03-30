@@ -11,7 +11,7 @@ import {
   IGetImportsPending,
   ISetDomainX,
   ISetDomainY,
-  IGetAllEnzymeTypesFulfilled, IGetBinsFulfilled, ISetBinFilter, IResetDomain
+  IGetAllEnzymeTypesFulfilled, IGetBinsFulfilled, ISetBinFilter, IResetDomain, ISetBinView
 } from './interfaces'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
 import {IClientState} from '../index'
@@ -70,6 +70,9 @@ export class SamplesActions {
   static setBinFilter(bin: Bin): ISetBinFilter {
     return {type: samplesActions.setBinFilter, bin}
   }
+  static setBinView(binView: boolean): ISetBinView {
+    return {type: samplesActions.setBinView, binView}
+  }
 
   static updateSelectedTaxonomy(taxonomyId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
@@ -88,20 +91,22 @@ export class SamplesActions {
     }
   }
 
+  static updateTaxonomy(dispatch: ThunkDispatch<{}, {}, AnyAction>, resolve: any, state: IClientState): void {
+    let connection: Connection | undefined = getDBConnection(state)
+    let filters: ISampleFilter = state.samples.filters
+    let recordId = getImportRecordId(state)
+    if (connection && recordId && connection) {
+      Promise.all([dispatch(DBActions.getTaxonomiesForImport(connection, recordId, filters))]).then(() => resolve())
+    } else {
+      resolve()
+    }
+  }
+
   static updateDomain(domain: IDomain): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>(resolve => {
-        let connection: Connection | undefined = getDBConnection(getState())
         Promise.all([dispatch(SamplesActions.setDomain(domain))]).then(
-          () => {
-            let filters: ISampleFilter = getState().samples.filters
-            let recordId = getImportRecordId(getState())
-            if (connection && recordId) {
-              Promise.all([dispatch(DBActions.getTaxonomiesForImport(connection, recordId, filters))]).then(() => resolve())
-            } else {
-              resolve()
-            }
-          },
+          () => SamplesActions.updateTaxonomy(dispatch, resolve, getState()),
         )
       })
     }
@@ -110,17 +115,8 @@ export class SamplesActions {
   static updateDomainX(domain: [number, number]): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>(resolve => {
-        let connection: Connection | undefined = getDBConnection(getState())
         Promise.all([dispatch(SamplesActions.setDomainX(domain))]).then(
-          () => {
-            let filters: ISampleFilter = getState().samples.filters
-            let recordId = getImportRecordId(getState())
-            if (connection && recordId) {
-              Promise.all([dispatch(DBActions.getTaxonomiesForImport(connection, recordId, filters))]).then(() => resolve())
-            } else {
-              resolve()
-            }
-          },
+          () => SamplesActions.updateTaxonomy(dispatch, resolve, getState()),
         )
       })
     }
@@ -129,17 +125,18 @@ export class SamplesActions {
   static updateDomainY(domain: [number, number]): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>(resolve => {
-        let connection: Connection | undefined = getDBConnection(getState())
         Promise.all([dispatch(SamplesActions.setDomainY(domain))]).then(
-          () => {
-            let filters: ISampleFilter = getState().samples.filters
-            let recordId = getImportRecordId(getState())
-            if (connection && recordId) {
-              Promise.all([dispatch(DBActions.getTaxonomiesForImport(connection, recordId, filters))]).then(() => resolve())
-            } else {
-              resolve()
-            }
-          },
+          () => SamplesActions.updateTaxonomy(dispatch, resolve, getState()),
+        )
+      })
+    }
+  }
+
+  static updateBinView(binView: boolean): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
+    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
+      return new Promise<void>(resolve => {
+        Promise.all([dispatch(SamplesActions.setBinView(binView))]).then(
+          () => SamplesActions.updateTaxonomy(dispatch, resolve, getState()),
         )
       })
     }
@@ -148,21 +145,9 @@ export class SamplesActions {
   static resetFilters(): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>(resolve => {
-        let connection: Connection | undefined = getDBConnection(getState())
-        let recordId: number | undefined = getState().samples.recordId
-        if (connection && recordId) {
-          Promise.all([
-            dispatch(SamplesActions.removeFilters()),
-          ]).then(() => {
-            if (connection && recordId) {
-              Promise.all([dispatch(DBActions.getTaxonomiesForImport(connection, recordId))]).then(() => resolve())
-            } else {
-              resolve()
-            }
-          })
-        } else {
-          resolve()
-        }
+        Promise.all([dispatch(SamplesActions.removeFilters())]).then(
+          () => SamplesActions.updateTaxonomy(dispatch, resolve, getState()),
+        )
       })
     }
   }
@@ -171,17 +156,10 @@ export class SamplesActions {
   static setSelectedBin(bin: Bin): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>(resolve => {
-        let connection: Connection | undefined = getDBConnection(getState())
-        Promise.all([dispatch(SamplesActions.resetDomain()), dispatch(SamplesActions.setBinFilter(bin))]).then(
-          () => {
-            let filters: ISampleFilter = getState().samples.filters
-            let recordId = getImportRecordId(getState())
-            if (connection && recordId) {
-              Promise.all([dispatch(DBActions.getTaxonomiesForImport(connection, recordId, filters))]).then(() => resolve())
-            } else {
-              resolve()
-            }
-          },
+        Promise.all([dispatch(SamplesActions.resetDomain()),
+                            dispatch(SamplesActions.setBinFilter(bin)),
+                            dispatch(SamplesActions.setBinView(true))]).then(
+          () => SamplesActions.updateTaxonomy(dispatch, resolve, getState()),
         )
       })
     }

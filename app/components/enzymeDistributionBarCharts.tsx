@@ -10,6 +10,7 @@ interface IProps {
   bacterialLabels: string[]
   domain?: IDomain
   bin?: IBin
+  binView: boolean
 }
 
 type TProps = IProps
@@ -17,16 +18,16 @@ type TProps = IProps
 export class EnzymeDistributionBarCharts extends React.PureComponent<TProps> {
 
   render(): JSX.Element {
-    let {bin, samples, domain, archaealLabels, bacterialLabels} = this.props
+    let {bin, samples, domain, archaealLabels, bacterialLabels, binView} = this.props
     return (
       <div style={{width: '30%', height: 'inherit'}}>
         <div style={{height: '400px'}}>
           <UBinBarChart data={samples} title='Bacterial Single Copy Genes' xName='name' xLabels={bacterialLabels} yName='amount'
-                        domain={domain} filterBoolName={'bacterial'} bin={bin}/>
+                        domain={domain} filterBoolName={'bacterial'} bin={bin} binView={binView}/>
         </div>
         <div style={{height: '400px'}}>
           <UBinBarChart data={samples} title='Archaeal Single Copy Genes' xName='name' xLabels={archaealLabels} yName='amount'
-                        domain={domain} filterBoolName={'archaeal'} bin={bin}/>
+                        domain={domain} filterBoolName={'archaeal'} bin={bin} binView={binView}/>
         </div>
       </div>
     )}

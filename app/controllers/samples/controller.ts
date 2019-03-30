@@ -13,13 +13,13 @@ import {
   ISetDomainY,
   IGetAllEnzymeTypesFulfilled,
   IGetBinsFulfilled,
-  IResetDomain
+  IResetDomain, ISetBinView
 } from './interfaces'
 import {TreeCreator} from '../../utils/treeCreator'
 import {ISetBinFilter} from './index'
 
 export const getInitialState = (): ISamplesState => ({
-  filters: {},
+  filters: {binView: true},
   importRecords: [],
   importsLoaded: false,
   importRecordsPending: false,
@@ -86,6 +86,7 @@ export const setTaxonomyId = (state: ISamplesState, action: ISetTaxonomyId): ISa
   return {
     ...state,
     filters: {
+      ...state.filters,
       taxonomyId: action.taxonomyId,
     },
   }
@@ -95,6 +96,7 @@ export const setDomain = (state: ISamplesState, action: ISetDomain): ISamplesSta
   return {
     ...state,
     filters: {
+      ...state.filters,
       domain: action.domain,
     },
   }
@@ -103,6 +105,7 @@ export const setDomainX = (state: ISamplesState, action: ISetDomainX): ISamplesS
   return {
     ...state,
     filters: {
+      ...state.filters,
       domain: {
         ...state.filters.domain,
         x: action.domain,
@@ -114,6 +117,7 @@ export const setDomainY = (state: ISamplesState, action: ISetDomainY): ISamplesS
   return {
     ...state,
     filters: {
+      ...state.filters,
       domain: {
         ...state.filters.domain,
         y: action.domain,
@@ -132,10 +136,20 @@ export const setBinFilter = (state: ISamplesState, action: ISetBinFilter): ISamp
   }
 }
 
+export const setBinView = (state: ISamplesState, action: ISetBinView): ISamplesState => {
+  return {
+    ...state,
+    filters: {
+      ...state.filters,
+      binView: action.binView,
+    },
+  }
+}
+
 export const removeFilters = (state: ISamplesState, action: IRemoveFilters): ISamplesState => {
   return {
     ...state,
-    filters: {},
+    filters: {binView: true},
   }
 }
 export const resetDomain = (state: ISamplesState, action: IResetDomain): ISamplesState => {

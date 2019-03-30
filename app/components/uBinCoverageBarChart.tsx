@@ -3,6 +3,7 @@ import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryBrushContain
 import {Crossfilter, Dimension} from 'crossfilter2'
 import {IBin, IDomain} from 'samples'
 import {Sample} from '../db/entities/Sample'
+import {numToColour} from '../utils/convert'
 
 interface IProps {
   cf: Crossfilter<Sample>
@@ -12,6 +13,7 @@ interface IProps {
   xName?: 'gc' | 'length' | 'coverage'
   yName?: 'gc' | 'length' | 'coverage'
   bin?: IBin
+  binView: boolean
   range?: [number, number]
   setWorldDomain(domain: [number, number]): void
   domainChangeHandler(domain: IDomain): void
@@ -31,6 +33,8 @@ export class UBinCoverageBarChart extends React.Component<IProps> {
 
   yMax: number = 0
   currentDomain?: any
+  activeBin?: number
+  binRange?: [number, number]
 
   public state: IBarCharState = {}
 
@@ -92,15 +96,21 @@ export class UBinCoverageBarChart extends React.Component<IProps> {
   public getData(): any[] {
     let { groupDim, gcDim, coverageDim, binDim } = this.state
     if (groupDim && coverageDim && gcDim && binDim) {
-      let {xName, yName, bin, range, gcRange} = this.props
+      let binChanged: boolean = false
+      let {xName, yName, bin, binView, range, gcRange} = this.props
 
       if (range) {
         coverageDim.filterRange(range)
       } else {
         coverageDim.filterAll()
       }
-      if (bin) {
+      if (bin && binView) {
         binDim.filterExact(bin.id)
+        if (this.activeBin !== bin.id) {
+          this.activeBin = bin.id
+          this.binRange = undefined
+          binChanged = true
+        }
       } else {
         binDim.filterAll()
       }
@@ -114,12 +124,17 @@ export class UBinCoverageBarChart extends React.Component<IProps> {
         let grouped: any[] = groupDim.group().reduce(this.reduceAddLength, this.reduceRemoveLength, this.reduceInitial).all()
         let bottom: Sample = groupDim.bottom(1)[0]
         let top: Sample = groupDim.top(1)[0]
-        if (this.currentDomain) {
-          if (bottom.coverage > this.currentDomain[0]) {
-            this.currentDomain[0] = bottom.coverage
+        if (bottom && top) {
+          if (this.currentDomain) {
+            if (bottom.coverage > this.currentDomain[0]) {
+              this.currentDomain[0] = bottom.coverage
+            }
+            if (top.coverage < this.currentDomain[1]) {
+              this.currentDomain[1] = top.coverage
+            }
           }
-          if (top.coverage < this.currentDomain[1]) {
-            this.currentDomain[1] = top.coverage
+          if (binChanged) {
+            this.binRange = [bottom[xName], top[xName]]
           }
         }
         if (grouped) {
@@ -140,6 +155,12 @@ export class UBinCoverageBarChart extends React.Component<IProps> {
   }
 
   public render(): JSX.Element {
+    let {xName, bin} = this.props
+    let {binRange} = this
+    let binColour: string
+    if (bin && xName) {
+      binColour = numToColour(bin.id)
+    }
     return (
       <VictoryChart theme={VictoryTheme.material} domainPadding={20}
                     height={300}
@@ -161,6 +182,11 @@ export class UBinCoverageBarChart extends React.Component<IProps> {
           dependentAxis={true}
         />
         <VictoryBar
+          style={{
+            data: {
+              fill: (d) => binRange && binRange[0] <= d[xName || 'x'] && binRange[1] >= d[xName || 'x'] ? binColour : "#455a64",
+            },
+          }}
           barRatio={0.4}
           data={this.getData()}
           x={this.props.xName || 'x'}

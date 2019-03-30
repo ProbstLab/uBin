@@ -10,6 +10,7 @@ import {UBinGCBarChart} from './uBinGCBarChart'
 interface IProps {
   samples: any[]
   samplesPending: boolean
+  binView: boolean
   domain?: IDomain
   bin?: IBin
   setDomainX(domain: [number, number]): void
@@ -31,18 +32,17 @@ export class GCCoverageBarCharts extends React.PureComponent<TProps> {
 
   render(): JSX.Element {
     let {cf} = this.state
-    // let {domain, setDomainX, setDomainY, domainChangeHandler, bin} = this.props
-    let {domain, setDomainX, setDomainY, domainChangeHandler, bin, samples, samplesPending} = this.props
+    let {domain, setDomainX, setDomainY, domainChangeHandler, bin, binView, samples, samplesPending} = this.props
     return (
       <div style={{width: '100%', display: 'flex'}}>
         <div style={{width: '50%', height: '360px'}}>
           <UBinGCBarChart data={this.props.samples} title='GC/Length' xName='gc' yName='length' xDomain={domain ? domain.x : undefined}
                           coverageRange={domain ? domain.y : undefined} setWorldDomain={setDomainX}
-                          domainChangeHandler={domainChangeHandler} bin={bin}/>
+                          domainChangeHandler={domainChangeHandler} bin={bin} binView={binView}/>
         </div>
         <div style={{width: '50%', height: '360px'}}>
           <CoverageBarChartsWrapper cf={cf} samples={samples} samplesPending={samplesPending} setDomainY={setDomainY}
-                                    domainChangeHandler={domainChangeHandler} bin={bin} worldDomain={domain}/>
+                                    domainChangeHandler={domainChangeHandler} bin={bin} binView={binView} worldDomain={domain}/>
         </div>
       </div>
     )}

@@ -11,7 +11,7 @@ export const scatterFilter = (query: any, filter?: ISampleFilter): any => {
       query.andWhere('samples.coverage >= :coverageLow AND samples.coverage <= :coverageHigh',
         {coverageLow: filter.domain.y[0], coverageHigh: filter.domain.y[1]})
     }
-    if (filter.bin) {
+    if (filter.bin && filter.binView) {
       query.andWhere('samples.binId = :binId', {binId: filter.bin.id})
     }
     if (filter.taxonomyId) {

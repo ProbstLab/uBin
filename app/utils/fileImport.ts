@@ -220,7 +220,6 @@ const saveTaxonomy = async (taxonomyMap: ITaxonomyAssociativeArray, connection: 
     }
     if (taxonomyMap[key].id && taxonomyMap[key].children) {
       await saveTaxonomyChildren(taxonomyMap[key].children, connection, taxonomyMap[key])
-      // return saveTaxonomy(taxonomyMap[key].children, connection, taxonomyMap[key])
     }
   }))
 }

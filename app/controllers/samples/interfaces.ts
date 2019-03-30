@@ -41,6 +41,7 @@ export enum samplesActions {
   removeFilters = 'samples.removeFilters',
   resetDomain = 'samples.resetDomain',
   setBinFilter = 'samples.setBinFilter',
+  setBinView = 'samples.setBinView',
 }
 export interface IGetImportsPending extends Action {
   type: samplesActions.getImportsPending
@@ -103,4 +104,8 @@ export interface ISetDomainY extends Action {
 export interface ISetBinFilter extends Action {
   type: samplesActions.setBinFilter
   bin: Bin
+}
+export interface ISetBinView extends Action {
+  type: samplesActions.setBinView
+  binView: boolean
 }

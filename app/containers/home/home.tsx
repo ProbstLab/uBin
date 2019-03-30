@@ -4,7 +4,7 @@ import {AnyAction, bindActionCreators, Dispatch} from 'redux'
 import {connect} from 'react-redux'
 import {withRouter, RouteComponentProps} from 'react-router'
 import {IClientState} from '../../controllers'
-import {Button, Popover, Position, ButtonGroup, Spinner, Icon} from '@blueprintjs/core'
+import {Button, Popover, Position, ButtonGroup, Spinner, Icon, Checkbox} from '@blueprintjs/core'
 import {
   getImportRecords,
   getTaxonomyTreeFull,
@@ -14,7 +14,7 @@ import {
   getDomain,
   getImportRecordsState,
   getBacterialEnzymeTypes,
-  getArchaealEnzymeTypes, getBins, getSelectedBin,
+  getArchaealEnzymeTypes, getBins, getSelectedBin, getBinView,
 } from '../../controllers/samples'
 import {DBActions, getSamplesStatePending} from '../../controllers/database'
 import {Connection} from 'typeorm'
@@ -43,6 +43,7 @@ interface IPropsFromState {
   importRecordsState: {pending: boolean, loaded: boolean}
   samplesPending: boolean
   bins: Bin[]
+  binView: boolean
   selectedBin?: IBin
 }
 
@@ -56,6 +57,7 @@ interface IActionsFromState {
   setDomain(domain: IDomain): void
   updateDomainX(domain: [number, number]): void
   updateDomainY(domain: [number, number]): void
+  updateBinView(isActive: boolean): void
   setSelectedBin(bin: Bin): void
   resetFilters(): void
 }
@@ -77,13 +79,17 @@ class CHome extends React.Component<TProps> {
     this.props.refreshImports()
   }
 
+  private toggleBinView(): void {
+    this.props.updateBinView(!this.props.binView)
+  }
+
   render(): JSX.Element {
     let { samples, samplesPending, taxonomyTreeFull, domain, archaealEnzymeTypes, bacterialEnzymeTypes,
           updateSelectedTaxonomy, updateDomain, updateDomainX, updateDomainY, connection, importRecords,
-          importRecordsState, getImportData, resetFilters, bins, selectedBin} = this.props
+          importRecordsState, getImportData, resetFilters, bins, binView, selectedBin} = this.props
     const showScatter = (isReady: boolean): any => {
       if (isReady) {
-        return <UBinScatter data={samples} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin}/>
+        return <UBinScatter data={samples} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin} binView={binView}/>
       } else {
         return <Spinner size={20}/>
       }
@@ -117,10 +123,10 @@ class CHome extends React.Component<TProps> {
             </div>
             <GCCoverageBarCharts samples={samples} samplesPending={samplesPending} domain={domain}
                                  setDomainX={updateDomainX} setDomainY={updateDomainY}
-                                 domainChangeHandler={updateDomain} bin={selectedBin}/>
+                                 domainChangeHandler={updateDomain} bin={selectedBin} binView={binView}/>
           </div>
           <EnzymeDistributionBarCharts samples={samples} samplesPending={samplesPending} domain={domain} bin={selectedBin}
-                                       archaealLabels={archaealEnzymeTypes} bacterialLabels={bacterialEnzymeTypes}/>
+                                       archaealLabels={archaealEnzymeTypes} bacterialLabels={bacterialEnzymeTypes} binView={binView}/>
         </>
       )
     }
@@ -129,8 +135,7 @@ class CHome extends React.Component<TProps> {
       return (
         <Popover content={<BinMenu bins={bins} setSelectedBin={this.props.setSelectedBin}/>} position={Position.BOTTOM}>
           <Button intent={'primary'} disabled={!bins.length} rightIcon={'layout-group-by'} text='Select Bin'/>
-        </Popover>
-      )
+        </Popover>)
     }
 
     return (
@@ -146,6 +151,7 @@ class CHome extends React.Component<TProps> {
               <Button intent={'warning'} icon={'filter-remove'} text='Reset filters' onClick={() => resetFilters()}/>
               {getBinDropdown()}
             </ButtonGroup>
+            <Checkbox checked={binView} onClick={() => this.toggleBinView()}/>
           </div>
 
           <div style={{width: '100%', display: 'flex'}}>
@@ -169,6 +175,7 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   archaealEnzymeTypes: getArchaealEnzymeTypes(state),
   bacterialEnzymeTypes: getBacterialEnzymeTypes(state),
   bins: getBins(state),
+  binView: getBinView(state),
   selectedBin: getSelectedBin(state),
 })
 
@@ -184,6 +191,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       updateDomain: domain => SamplesActions.updateDomain(domain),
       updateDomainX: domainX => SamplesActions.updateDomainX(domainX),
       updateDomainY: domainY => SamplesActions.updateDomainY(domainY),
+      updateBinView: isActive => SamplesActions.updateBinView(isActive),
       setSelectedBin: binId => SamplesActions.setSelectedBin(binId),
       resetFilters: SamplesActions.resetFilters,
     },

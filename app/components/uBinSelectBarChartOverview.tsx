@@ -11,6 +11,7 @@ interface IProps {
   xName?: 'gc' | 'length' | 'coverage'
   yName?: 'gc' | 'length' | 'coverage'
   bin?: IBin
+  binView: boolean
   setRange(range: [number, number]): void
 }
 
@@ -93,9 +94,11 @@ export class UBinSelectBarChartOverview extends React.Component<IProps> {
   public getData(): any[] {
     let { groupDim, binDim } = this.state
     if (groupDim && binDim) {
-      let { bin, xName, yName } = this.props
-      if (bin) {
+      let { bin, binView, xName, yName } = this.props
+      if (bin && binView) {
         binDim.filterExact(bin.id)
+      } else {
+        binDim.filterAll()
       }
       let grouped: any[] = []
       switch (xName) {

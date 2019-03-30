@@ -73,6 +73,11 @@ export const getSelectedBin = createSelector(
   (state: ISamplesState) => state.filters.bin,
 )
 
+export const getBinView = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.filters.binView
+)
+
 export const getDomain = createSelector(
   getSamplesState,
   (state: ISamplesState) => state.filters.domain

@@ -35,6 +35,7 @@ declare module 'samples' {
     gcLengthDomain?: IAxisFilter
     gcCoverageDomain?: IAxisFilter
     bin?: IBin
+    binView: boolean
   }
 
   const enum samplesApiActions {

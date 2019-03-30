@@ -14,6 +14,7 @@ interface IProps {
   cf: Crossfilter<Sample>
   worldDomain?: IDomain
   bin?: IBin
+  binView: boolean
   setDomainY(domain: [number, number]): void
   domainChangeHandler(domain: IDomain): void
 }
@@ -38,13 +39,13 @@ export class CoverageBarChartsWrapper extends React.PureComponent<TProps> {
   render(): JSX.Element {
     let {cf} = this.props
     let {overviewCf, range} = this.state
-    let {worldDomain, setDomainY, domainChangeHandler, bin} = this.props
+    let {worldDomain, setDomainY, domainChangeHandler, bin, binView} = this.props
     return (
         <div>
           <UBinCoverageBarChart cf={cf} title='Coverage/Length' xName='coverage' yName='length' coverageRange={worldDomain ? worldDomain.y : undefined}
-                                setWorldDomain={setDomainY} domainChangeHandler={domainChangeHandler} bin={bin} range={range}
+                                setWorldDomain={setDomainY} domainChangeHandler={domainChangeHandler} bin={bin} range={range} binView={binView}
                                 gcRange={worldDomain ? worldDomain.x : undefined}/>
-          <UBinSelectBarChartOverview cf={overviewCf} title='Coverage/Length' xName='coverage' yName='length'
+          <UBinSelectBarChartOverview cf={overviewCf} title='Coverage/Length' xName='coverage' yName='length' binView={binView}
                                       worldDomain={worldDomain ? worldDomain.y : undefined} bin={bin} setRange={this.setRange.bind(this)}/>
         </div>
     )}

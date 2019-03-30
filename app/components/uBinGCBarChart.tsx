@@ -4,6 +4,7 @@ import {Crossfilter, Dimension} from 'crossfilter2'
 import {IBin, IDomain} from 'samples'
 import {Sample} from '../db/entities/Sample'
 import crossfilter = require('crossfilter2')
+import {numToColour} from '../utils/convert'
 
 interface IProps {
   data: any[]
@@ -13,6 +14,7 @@ interface IProps {
   xName?: 'gc' | 'length' | 'coverage'
   yName?: 'gc' | 'length' | 'coverage'
   bin?: IBin
+  binView: boolean
   range?: [number, number]
   setWorldDomain(domain: [number, number]): void
   domainChangeHandler(domain: IDomain): void
@@ -32,6 +34,8 @@ export class UBinGCBarChart extends React.Component<IProps> {
 
   yMax: number = 0
   currentDomain?: any
+  activeBin?: number
+  binRange?: [number, number]
 
   public state: IBarCharState = {
     cf: crossfilter(this.props.data),
@@ -90,20 +94,28 @@ export class UBinGCBarChart extends React.Component<IProps> {
   public getData(): any[] {
     let { groupDim, coverageDim, binDim } = this.state
     if (groupDim && coverageDim && binDim) {
-      let {xName, yName, bin} = this.props
-      let { coverageRange } = this.props
+      let binChanged: boolean = false
+      let {xName, yName, bin, binView, coverageRange} = this.props
       if (coverageRange) {
         coverageDim.filterRange(coverageRange)
       } else {
         coverageDim.filterAll()
       }
-      if (bin) {
+      if (bin && binView) {
         binDim.filterExact(bin.id)
+        if (this.activeBin !== bin.id) {
+          this.activeBin = bin.id
+          this.binRange = undefined
+          binChanged = true
+        }
       } else {
         binDim.filterAll()
       }
       if (xName) {
         let grouped: any[] = groupDim.group().reduce(this.reduceAddLength, this.reduceRemoveLength, this.reduceInitial).all()
+        if (binChanged) {
+          this.binRange = [groupDim.bottom(1)[0][xName], groupDim.top(1)[0][xName]]
+        }
         if (grouped) {
           let arr: any[] = grouped.filter((value: any) => value.value.count).map((value: any) => {
               let obj: any = {}
@@ -119,6 +131,12 @@ export class UBinGCBarChart extends React.Component<IProps> {
   }
 
   public render(): JSX.Element {
+    let {xName, bin} = this.props
+    let {binRange} = this
+    let binColour: string
+    if (bin && xName) {
+      binColour = numToColour(bin.id)
+    }
     return (
       <VictoryChart theme={VictoryTheme.material} domainPadding={20}
                     height={300}
@@ -143,6 +161,11 @@ export class UBinGCBarChart extends React.Component<IProps> {
           dependentAxis={true}
         />
         <VictoryBar
+          style={{
+            data: {
+              fill: (d) => binRange && binRange[0] <= d[xName || 'x'] && binRange[1] >= d[xName || 'x'] ? binColour : "#455a64",
+            },
+          }}
           barRatio={0.1}
           data={this.getData()}
           x={this.props.xName || 'x'}

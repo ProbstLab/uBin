@@ -15,12 +15,14 @@ interface IProps {
   domainChangeHandler(domain: IDomain): void
   domain?: IDomain
   bin?: IBin
+  binView: boolean
 }
 
 interface IScatterDetails {
   xSum: number
   ySum: number
   count: number
+  lengthSum: number
   colour: string
 }
 
@@ -57,18 +59,34 @@ export class UBinScatter extends React.PureComponent<IProps> {
   public componentDidMount(): void {
     let { covDim, gcDim } = this.state
     if (covDim && gcDim) {
-      this.setState({originalDomain: {x: [gcDim.bottom(1)[0].gc, gcDim.top(1)[0].gc],
-                                            y: [covDim.bottom(1)[0].coverage, covDim.top(1)[0].coverage]}})
+      let bottom: Sample = gcDim.bottom(1)[0]
+      let top: Sample = gcDim.top(1)[0]
+      if (bottom && top) {
+        this.setState({
+          originalDomain: {
+            x: [bottom.gc, top.gc],
+            y: [bottom.coverage, top.coverage],
+          },
+        })
+      } else {
+        this.setState({
+          originalDomain: {
+            x: [0, 100],
+            y: [0, 8000],
+          },
+        })
+      }
     }
   }
 
   public reduceInitial(): any {
-    return {xSum: 0, ySum: 0, count: 0}
+    return {xSum: 0, ySum: 0, count: 0, lengthSum: 0}
   }
 
   public reduceAdd(p: any, v: Sample): any {
     p.xSum += v.gc
     p.ySum += v.coverage
+    p.lengthSum += v.length
     p.count += 1
     if (!p.colour) {
       if (v.bin) {
@@ -83,6 +101,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
   public reduceRemove(p: any, v: Sample): any {
     p.xSum -= v.gc
     p.ySum -= v.coverage
+    p.lengthSum -= v.length
     p.count -= 1
     return p
   }
@@ -93,7 +112,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
 
   public getData(): any {
     let { covDim, gcDim, combDim, binDim, originalDomain } = this.state
-    let { domain, bin } = this.props
+    let { domain, bin, binView } = this.props
 
     if (domain && domain.x && domain.y && originalDomain && originalDomain.x && originalDomain.y) {
       let origSize: number = Math.sqrt((originalDomain.x[1] - originalDomain.x[0])**2) * Math.sqrt((originalDomain.y[1] - originalDomain.y[0])**2)
@@ -122,18 +141,25 @@ export class UBinScatter extends React.PureComponent<IProps> {
         covDim.filterAll()
         this.zoom = undefined
       }
-      if (bin) {
+      if (bin && binView) {
         binDim.filterExact(bin.id)
       } else {
         binDim.filterAll()
       }
-      let logFactor: number = 10/Math.log(100)
-      let basePointSize: number = 10-Math.log((this.zoom !== undefined ? this.zoom || 0.01 : 1)*200)*logFactor
+      // let logFactor: number = 10/Math.log(100)
+      // let basePointSize: number = 10-Math.log((this.zoom !== undefined ? this.zoom || 0.01 : 1)*200)*logFactor
+      // let basePointSize: number = 1
+      let bottom: Sample = combDim.bottom(1)[0]
+      let top: Sample = combDim.top(1)[0]
+      let scalingFactor: number
+      if (bottom && top) {
+        scalingFactor = 20 / Math.sqrt((top.gc ** 2 - bottom.gc ** 2))
+      }
       let returnVals: any = combDim.group().reduce(this.reduceAdd, this.reduceRemove, this.reduceInitial).all().
                               filter((value: any) => value.value.count).map((value: any) => {
         let valObj: IScatterDetails = value.value
-        let size: number = Math.log(valObj.count/2)+basePointSize
-        return {gc: valObj.xSum/valObj.count, coverage: valObj.ySum/valObj.count, size: size >= 1 ? size : 1, colour: valObj.colour}
+        let size: number = Math.log(valObj.lengthSum)*scalingFactor
+        return {gc: valObj.xSum/valObj.count, coverage: valObj.ySum/valObj.count, size, colour: valObj.colour}
       })
       return returnVals
     }

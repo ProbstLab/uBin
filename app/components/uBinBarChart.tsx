@@ -22,6 +22,7 @@ interface IProps {
   filterBoolName: 'archaeal' | 'bacterial'
   domain?: IDomain
   bin?: IBin
+  binView: boolean
 }
 
 export interface IBarCharState {
@@ -72,7 +73,7 @@ export class UBinBarChart extends React.Component<IProps> {
   public getData(): any[] {
     let {gcDim, coverageDim, groupDim, binDim} = this.state
     if (gcDim && coverageDim && groupDim && binDim) {
-      let {domain, xName, yName, xLabels, filterBoolName, bin} = this.props
+      let {domain, xName, yName, xLabels, filterBoolName, bin, binView} = this.props
       if (domain) {
         if (domain.x) {
           gcDim.filterRange(domain.x)
@@ -85,7 +86,7 @@ export class UBinBarChart extends React.Component<IProps> {
         coverageDim.filterAll()
       }
 
-      if (bin) {
+      if (bin && binView) {
         binDim.filterExact(bin.id)
       } else {
         binDim.filterAll()

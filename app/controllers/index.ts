@@ -25,6 +25,7 @@ export const samplesReducer = createReducer(samples.getInitialState(), {
   [samplesActions.setDomainX]: samples.setDomainX,
   [samplesActions.setDomainY]: samples.setDomainY,
   [samplesActions.setBinFilter]: samples.setBinFilter,
+  [samplesActions.setBinView]: samples.setBinView,
   [samplesActions.removeFilters]: samples.removeFilters,
   [samplesActions.resetDomain]: samples.resetDomain,
   [samplesActions.setTaxonomyId]: samples.setTaxonomyId,
