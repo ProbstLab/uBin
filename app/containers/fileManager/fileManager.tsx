@@ -169,7 +169,7 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   fileTree: getFileTreeAsArray(state),
   addedFiles: getAddedFiles(state),
   isImportingFiles: state.fileTree.isImportingFiles,
-  connection: state.database.connection
+  connection: state.database.connection,
 })
 
 const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
@@ -179,7 +179,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       openFile: file => FileTreeActions.openFile(file),
       addFile: file => FileTreeActions.addFile(file),
       removeAddedFile: file => FileTreeActions.removeAddedFile(file),
-      startFileImport: (addedFiles, connection, importName) => FileTreeActions.importFile(addedFiles, connection, importName)
+      startFileImport: (addedFiles, connection, importName) => FileTreeActions.importFile(addedFiles, connection, importName),
     },
     dispatch,
   )

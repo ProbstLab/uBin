@@ -5,12 +5,12 @@ import {
   ISetImportedRecord,
   samplesActions,
   IGetSamplesFulfilled,
-  ISetScatterDomain,
+  ISetDomain,
   ISetTaxonomyId,
   IRemoveFilters,
   IGetImportsPending,
-  ISetScatterDomainX,
-  ISetScatterDomainY,
+  ISetDomainX,
+  ISetDomainY,
   IGetAllEnzymeTypesFulfilled, IGetBinsFulfilled, ISetBinFilter, IResetDomain
 } from './interfaces'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
@@ -19,7 +19,7 @@ import {AnyAction} from 'redux'
 import {Connection} from 'typeorm'
 import {getDBConnection} from '../database/selectors'
 import {DBActions} from '../database'
-import {ISampleFilter, IScatterDomain} from 'samples'
+import {ISampleFilter, IDomain} from 'samples'
 import {getImportRecordId} from './selectors'
 import {Bin} from '../../db/entities/Bin'
 
@@ -58,14 +58,14 @@ export class SamplesActions {
   static setTaxonomyId(taxonomyId: number): ISetTaxonomyId {
     return {type: samplesActions.setTaxonomyId, taxonomyId}
   }
-  static setScatterDomain(scatterDomain: IScatterDomain): ISetScatterDomain {
-    return {type: samplesActions.setScatterDomain, scatterDomain}
+  static setDomain(domain: IDomain): ISetDomain {
+    return {type: samplesActions.setDomain, domain}
   }
-  static setScatterDomainX(domain: [number, number]): ISetScatterDomainX {
-    return {type: samplesActions.setScatterDomainX, domain}
+  static setDomainX(domain: [number, number]): ISetDomainX {
+    return {type: samplesActions.setDomainX, domain}
   }
-  static setScatterDomainY(domain: [number, number]): ISetScatterDomainY {
-    return {type: samplesActions.setScatterDomainY, domain}
+  static setDomainY(domain: [number, number]): ISetDomainY {
+    return {type: samplesActions.setDomainY, domain}
   }
   static setBinFilter(bin: Bin): ISetBinFilter {
     return {type: samplesActions.setBinFilter, bin}
@@ -88,11 +88,11 @@ export class SamplesActions {
     }
   }
 
-  static updateScatterDomain(scatterDomain: IScatterDomain): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
+  static updateDomain(domain: IDomain): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>(resolve => {
         let connection: Connection | undefined = getDBConnection(getState())
-        Promise.all([dispatch(SamplesActions.setScatterDomain(scatterDomain))]).then(
+        Promise.all([dispatch(SamplesActions.setDomain(domain))]).then(
           () => {
             let filters: ISampleFilter = getState().samples.filters
             let recordId = getImportRecordId(getState())
@@ -101,7 +101,45 @@ export class SamplesActions {
             } else {
               resolve()
             }
-          }
+          },
+        )
+      })
+    }
+  }
+
+  static updateDomainX(domain: [number, number]): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
+    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
+      return new Promise<void>(resolve => {
+        let connection: Connection | undefined = getDBConnection(getState())
+        Promise.all([dispatch(SamplesActions.setDomainX(domain))]).then(
+          () => {
+            let filters: ISampleFilter = getState().samples.filters
+            let recordId = getImportRecordId(getState())
+            if (connection && recordId) {
+              Promise.all([dispatch(DBActions.getTaxonomiesForImport(connection, recordId, filters))]).then(() => resolve())
+            } else {
+              resolve()
+            }
+          },
+        )
+      })
+    }
+  }
+
+  static updateDomainY(domain: [number, number]): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
+    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
+      return new Promise<void>(resolve => {
+        let connection: Connection | undefined = getDBConnection(getState())
+        Promise.all([dispatch(SamplesActions.setDomainY(domain))]).then(
+          () => {
+            let filters: ISampleFilter = getState().samples.filters
+            let recordId = getImportRecordId(getState())
+            if (connection && recordId) {
+              Promise.all([dispatch(DBActions.getTaxonomiesForImport(connection, recordId, filters))]).then(() => resolve())
+            } else {
+              resolve()
+            }
+          },
         )
       })
     }
@@ -143,7 +181,7 @@ export class SamplesActions {
             } else {
               resolve()
             }
-          }
+          },
         )
       })
     }

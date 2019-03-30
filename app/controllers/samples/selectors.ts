@@ -73,9 +73,9 @@ export const getSelectedBin = createSelector(
   (state: ISamplesState) => state.filters.bin,
 )
 
-export const getScatterDomain = createSelector(
+export const getDomain = createSelector(
   getSamplesState,
-  (state: ISamplesState) => state.filters.scatterDomain
+  (state: ISamplesState) => state.filters.domain
 )
 
 export const getImportRecordsState = createSelector(

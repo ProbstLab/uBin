@@ -3,7 +3,7 @@ import * as React from 'react'
 import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryLabel} from 'victory'
 import {Crossfilter, Dimension} from 'crossfilter2'
 import * as crossfilter from 'crossfilter2'
-import {IBin, IScatterDomain} from 'samples'
+import {IBin, IDomain} from 'samples'
 import {Enzyme} from '../db/entities/Enzyme'
 import {Sample} from '../db/entities/Sample'
 
@@ -20,7 +20,7 @@ interface IProps {
   yName?: string
   xLabels?: string[]
   filterBoolName: 'archaeal' | 'bacterial'
-  domain?: IScatterDomain
+  domain?: IDomain
   bin?: IBin
 }
 

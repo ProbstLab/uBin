@@ -11,7 +11,7 @@ import {
   IImportRecord,
   SamplesActions,
   getSamples,
-  getScatterDomain,
+  getDomain,
   getImportRecordsState,
   getBacterialEnzymeTypes,
   getArchaealEnzymeTypes, getBins, getSelectedBin,
@@ -22,7 +22,7 @@ import {ITaxonomyForSunburst} from '../../utils/interfaces'
 import {UBinSunburst} from '../../components/uBinSunburst'
 import {ThunkAction} from 'redux-thunk'
 import {UBinScatter} from '../../components/uBinScatter'
-import {IBin, IScatterDomain} from 'samples'
+import {IBin, IDomain} from 'samples'
 import {SampleMenu} from '../../components/sampleMenu'
 import {GCCoverageBarCharts} from '../../components/gCCoverageBarCharts'
 import {EnzymeDistributionBarCharts} from '../../components/enzymeDistributionBarCharts'
@@ -39,7 +39,7 @@ interface IPropsFromState {
   archaealEnzymeTypes: string[]
   bacterialEnzymeTypes: string[]
   samples: any[]
-  scatterDomain?: IScatterDomain
+  domain?: IDomain
   importRecordsState: {pending: boolean, loaded: boolean}
   samplesPending: boolean
   bins: Bin[]
@@ -52,10 +52,10 @@ interface IActionsFromState {
   getImportData(recordId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   updateSelectedTaxonomy(taxonomyId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   refreshImports(): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
-  updateScatterDomain(scatterDomain: IScatterDomain): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
-  setScatterDomain(scatterDomain: IScatterDomain): void
-  setScatterDomainX(domain: [number, number]): void
-  setScatterDomainY(domain: [number, number]): void
+  updateDomain(domain: IDomain): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
+  setDomain(domain: IDomain): void
+  updateDomainX(domain: [number, number]): void
+  updateDomainY(domain: [number, number]): void
   setSelectedBin(bin: Bin): void
   resetFilters(): void
 }
@@ -78,12 +78,12 @@ class CHome extends React.Component<TProps> {
   }
 
   render(): JSX.Element {
-    let { samples, samplesPending, taxonomyTreeFull, scatterDomain, archaealEnzymeTypes, bacterialEnzymeTypes,
-          updateSelectedTaxonomy, updateScatterDomain, setScatterDomainX, setScatterDomainY, connection, importRecords,
+    let { samples, samplesPending, taxonomyTreeFull, domain, archaealEnzymeTypes, bacterialEnzymeTypes,
+          updateSelectedTaxonomy, updateDomain, updateDomainX, updateDomainY, connection, importRecords,
           importRecordsState, getImportData, resetFilters, bins, selectedBin} = this.props
     const showScatter = (isReady: boolean): any => {
       if (isReady) {
-        return <UBinScatter data={samples} domainChangeHandler={updateScatterDomain} domain={scatterDomain} bin={selectedBin}/>
+        return <UBinScatter data={samples} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin}/>
       } else {
         return <Spinner size={20}/>
       }
@@ -115,11 +115,11 @@ class CHome extends React.Component<TProps> {
                 <UBinSunburst data={{ children: taxonomyTreeFull}} clickEvent={updateSelectedTaxonomy}/>}
               </div>
             </div>
-            <GCCoverageBarCharts samples={samples} samplesPending={samplesPending} scatterDomain={scatterDomain}
-                                 setScatterDomainX={setScatterDomainX} setScatterDomainY={setScatterDomainY}
-                                 domainChangeHandler={updateScatterDomain} bin={selectedBin}/>
+            <GCCoverageBarCharts samples={samples} samplesPending={samplesPending} domain={domain}
+                                 setDomainX={updateDomainX} setDomainY={updateDomainY}
+                                 domainChangeHandler={updateDomain} bin={selectedBin}/>
           </div>
-          <EnzymeDistributionBarCharts samples={samples} samplesPending={samplesPending} domain={scatterDomain} bin={selectedBin}
+          <EnzymeDistributionBarCharts samples={samples} samplesPending={samplesPending} domain={domain} bin={selectedBin}
                                        archaealLabels={archaealEnzymeTypes} bacterialLabels={bacterialEnzymeTypes}/>
         </>
       )
@@ -165,7 +165,7 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   samples: getSamples(state),
   samplesPending: getSamplesStatePending(state),
   importRecordsState: getImportRecordsState(state),
-  scatterDomain: getScatterDomain(state),
+  domain: getDomain(state),
   archaealEnzymeTypes: getArchaealEnzymeTypes(state),
   bacterialEnzymeTypes: getBacterialEnzymeTypes(state),
   bins: getBins(state),
@@ -180,10 +180,10 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       refreshImports: DBActions.refreshImports,
       getImportData: recordId => DBActions.getImportData(recordId),
       updateSelectedTaxonomy: taxonomyIds => SamplesActions.updateSelectedTaxonomy(taxonomyIds),
-      setScatterDomain: scatterDomain => SamplesActions.setScatterDomain(scatterDomain),
-      setScatterDomainX: scatterDomainX => SamplesActions.setScatterDomainX(scatterDomainX),
-      setScatterDomainY: scatterDomainY => SamplesActions.setScatterDomainY(scatterDomainY),
-      updateScatterDomain: scatterDomain => SamplesActions.updateScatterDomain(scatterDomain),
+      setDomain: domain => SamplesActions.setDomain(domain),
+      updateDomain: domain => SamplesActions.updateDomain(domain),
+      updateDomainX: domainX => SamplesActions.updateDomainX(domainX),
+      updateDomainY: domainY => SamplesActions.updateDomainY(domainY),
       setSelectedBin: binId => SamplesActions.setSelectedBin(binId),
       resetFilters: SamplesActions.resetFilters,
     },

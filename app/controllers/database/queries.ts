@@ -3,13 +3,13 @@ import {ISampleFilter} from 'samples'
 
 export const scatterFilter = (query: any, filter?: ISampleFilter): any => {
   if (filter) {
-    if (filter.scatterDomain && filter.scatterDomain.x) {
+    if (filter.domain && filter.domain.x) {
       query.andWhere('samples.gc >= :gcLow AND samples.gc <= :gcHigh',
-        {gcLow: filter.scatterDomain.x[0], gcHigh: filter.scatterDomain.x[1]})
+        {gcLow: filter.domain.x[0], gcHigh: filter.domain.x[1]})
     }
-    if (filter.scatterDomain && filter.scatterDomain.y) {
+    if (filter.domain && filter.domain.y) {
       query.andWhere('samples.coverage >= :coverageLow AND samples.coverage <= :coverageHigh',
-        {coverageLow: filter.scatterDomain.y[0], coverageHigh: filter.scatterDomain.y[1]})
+        {coverageLow: filter.domain.y[0], coverageHigh: filter.domain.y[1]})
     }
     if (filter.bin) {
       query.andWhere('samples.binId = :binId', {binId: filter.bin.id})

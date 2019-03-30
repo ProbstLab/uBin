@@ -16,11 +16,11 @@ declare module 'samples' {
 
   // import {DomainPropType} from 'victory'
 
-  interface IScatterDomain {
+  interface IDomain {
     x?: [number, number]
     y?: [number, number]
   }
-  interface IBarChartDomain extends IScatterDomain {
+  interface IBarChartDomain extends IDomain {
   }
 
   // TODO: IBin is defined here and in utils/interfaces.ts - Should find a better way to do this
@@ -31,7 +31,7 @@ declare module 'samples' {
 
   interface ISampleFilter {
     taxonomyId?: number
-    scatterDomain?: IScatterDomain
+    domain?: IDomain
     gcLengthDomain?: IAxisFilter
     gcCoverageDomain?: IAxisFilter
     bin?: IBin

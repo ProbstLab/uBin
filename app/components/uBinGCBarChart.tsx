@@ -1,7 +1,7 @@
 import * as React from 'react'
 import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryBrushContainer} from 'victory'
 import {Crossfilter, Dimension} from 'crossfilter2'
-import {IBin, IScatterDomain} from 'samples'
+import {IBin, IDomain} from 'samples'
 import {Sample} from '../db/entities/Sample'
 import crossfilter = require('crossfilter2')
 
@@ -15,7 +15,7 @@ interface IProps {
   bin?: IBin
   range?: [number, number]
   setWorldDomain(domain: [number, number]): void
-  domainChangeHandler(scatterDomain: IScatterDomain): void
+  domainChangeHandler(domain: IDomain): void
 }
 
 export interface IBarCharState {

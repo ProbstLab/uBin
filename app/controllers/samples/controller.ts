@@ -7,10 +7,10 @@ import {
   IRemoveFilters,
   ISamplesState,
   ISetImportedRecord,
-  ISetScatterDomain,
-  ISetScatterDomainX,
+  ISetDomain,
+  ISetDomainX,
   ISetTaxonomyId,
-  ISetScatterDomainY,
+  ISetDomainY,
   IGetAllEnzymeTypesFulfilled,
   IGetBinsFulfilled,
   IResetDomain
@@ -91,31 +91,31 @@ export const setTaxonomyId = (state: ISamplesState, action: ISetTaxonomyId): ISa
   }
 }
 
-export const setScatterDomain = (state: ISamplesState, action: ISetScatterDomain): ISamplesState => {
+export const setDomain = (state: ISamplesState, action: ISetDomain): ISamplesState => {
   return {
     ...state,
     filters: {
-      scatterDomain: action.scatterDomain,
+      domain: action.domain,
     },
   }
 }
-export const setScatterDomainX = (state: ISamplesState, action: ISetScatterDomainX): ISamplesState => {
+export const setDomainX = (state: ISamplesState, action: ISetDomainX): ISamplesState => {
   return {
     ...state,
     filters: {
-      scatterDomain: {
-        ...state.filters.scatterDomain,
+      domain: {
+        ...state.filters.domain,
         x: action.domain,
       },
     },
   }
 }
-export const setScatterDomainY = (state: ISamplesState, action: ISetScatterDomainY): ISamplesState => {
+export const setDomainY = (state: ISamplesState, action: ISetDomainY): ISamplesState => {
   return {
     ...state,
     filters: {
-      scatterDomain: {
-        ...state.filters.scatterDomain,
+      domain: {
+        ...state.filters.domain,
         y: action.domain,
       },
     },
@@ -143,7 +143,7 @@ export const resetDomain = (state: ISamplesState, action: IResetDomain): ISample
     ...state,
     filters: {
       ...state.filters,
-      scatterDomain: undefined,
+      domain: undefined,
     },
   }
 }

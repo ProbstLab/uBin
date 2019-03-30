@@ -1,14 +1,14 @@
 
 import * as React from 'react'
 import {UBinBarChart} from './uBinBarChart'
-import {IBin, IScatterDomain} from 'samples'
+import {IBin, IDomain} from 'samples'
 
 interface IProps {
   samples: any[]
   samplesPending: boolean
   archaealLabels: string[]
   bacterialLabels: string[]
-  domain?: IScatterDomain
+  domain?: IDomain
   bin?: IBin
 }
 

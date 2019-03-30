@@ -1,6 +1,6 @@
 import * as React from "react"
 import {VictoryAxis, VictoryScatter, VictoryChart, VictoryTheme, VictoryBrushContainer} from 'victory'
-import {IBin, IScatterDomain} from 'samples'
+import {IBin, IDomain} from 'samples'
 import * as crossfilter from 'crossfilter2'
 import {Crossfilter} from 'crossfilter2'
 import {Dimension} from 'crossfilter2'
@@ -12,8 +12,8 @@ import {numToColour} from '../utils/convert'
 interface IProps {
   data: Sample[]
   title?: string
-  domainChangeHandler(scatterDomain: IScatterDomain): void
-  domain?: IScatterDomain
+  domainChangeHandler(domain: IDomain): void
+  domain?: IDomain
   bin?: IBin
 }
 
@@ -30,7 +30,7 @@ export interface IUBinScatterState {
   binDim?: Dimension<Sample, number>
   covDim?: Dimension<Sample, number>
   gcDim?: Dimension<Sample, number>
-  originalDomain?: IScatterDomain
+  originalDomain?: IDomain
   logScale: boolean
 }
 
@@ -147,7 +147,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
     }
   }
 
-  public handleDomainChange(domain: IScatterDomain): void {
+  public handleDomainChange(domain: IDomain): void {
     this.xAxis = domain.x
     this.yAxis = domain.y
   }

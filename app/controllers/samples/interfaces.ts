@@ -3,7 +3,7 @@ import { Action } from 'redux'
 // import { ISample } from 'samples'
 import {IGenericAssociativeArray, ITaxonomyForSunburst} from '../../utils/interfaces'
 import {Enzyme} from '../../db/entities/Enzyme'
-import {ISampleFilter, IScatterDomain} from 'samples'
+import {ISampleFilter, IDomain} from 'samples'
 import {Bin} from '../../db/entities/Bin'
 
 export interface IImportRecord {
@@ -34,9 +34,9 @@ export enum samplesActions {
   getSamplesFulfilled = 'database.getSamples_FULFILLED',
   getBinsFulfilled = 'database.getBins_FULFILLED',
   setImportedRecord = 'database.setImportedRecord',
-  setScatterDomain = 'samples.setScatterDomain',
-  setScatterDomainX = 'samples.setScatterDomainX',
-  setScatterDomainY = 'samples.setScatterDomainY',
+  setDomain = 'samples.setDomain',
+  setDomainX = 'samples.setDomainX',
+  setDomainY = 'samples.setDomainY',
   setTaxonomyId = 'samples.setTaxonomyId',
   removeFilters = 'samples.removeFilters',
   resetDomain = 'samples.resetDomain',
@@ -88,16 +88,16 @@ export interface ISetTaxonomyId extends Action {
   taxonomyId: number | undefined
 }
 
-export interface ISetScatterDomain extends Action {
-  type: samplesActions.setScatterDomain
-  scatterDomain: IScatterDomain
+export interface ISetDomain extends Action {
+  type: samplesActions.setDomain
+  domain: IDomain
 }
-export interface ISetScatterDomainX extends Action {
-  type: samplesActions.setScatterDomainX
+export interface ISetDomainX extends Action {
+  type: samplesActions.setDomainX
   domain: [number, number]
 }
-export interface ISetScatterDomainY extends Action {
-  type: samplesActions.setScatterDomainY
+export interface ISetDomainY extends Action {
+  type: samplesActions.setDomainY
   domain: [number, number]
 }
 export interface ISetBinFilter extends Action {
