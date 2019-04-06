@@ -1,7 +1,6 @@
 import * as React from "react"
 import {VictoryAxis, VictoryScatter, VictoryChart, VictoryTheme, VictoryBrushContainer} from 'victory'
 import {IBin, IDomain} from 'samples'
-import * as crossfilter from 'crossfilter2'
 import {Crossfilter} from 'crossfilter2'
 import {Dimension} from 'crossfilter2'
 import {Checkbox} from '@blueprintjs/core'
@@ -10,7 +9,7 @@ import {numToColour} from '../utils/convert'
 
 
 interface IProps {
-  data: Sample[]
+  cf: Crossfilter<Sample>
   title?: string
   domainChangeHandler(domain: IDomain): void
   domain?: IDomain
@@ -27,7 +26,6 @@ interface IScatterDetails {
 }
 
 export interface IUBinScatterState {
-  cf: Crossfilter<Sample>
   combDim?: Dimension<Sample, string>
   binDim?: Dimension<Sample, number>
   covDim?: Dimension<Sample, number>
@@ -43,16 +41,16 @@ export class UBinScatter extends React.PureComponent<IProps> {
   zoom?: number
 
   public state: IUBinScatterState = {
-    cf: crossfilter(this.props.data),
     logScale: false,
   }
 
   public componentWillMount(): void {
+    let {cf} = this.props
     this.setState({
-      combDim: this.state.cf.dimension((d: Sample) => d.gc+':'+Math.round(d.coverage)+':'+(d.bin ? d.bin.id : '')),
-      binDim: this.state.cf.dimension((d: Sample) => d.bin ? d.bin.id : 0),
-      covDim: this.state.cf.dimension((d: Sample) => d.coverage),
-      gcDim: this.state.cf.dimension((d: Sample) => d.gc),
+      combDim: cf.dimension((d: Sample) => d.gc+':'+Math.round(d.coverage)+':'+(d.bin ? d.bin.id : '')),
+      binDim: cf.dimension((d: Sample) => d.bin ? d.bin.id : 0),
+      covDim: cf.dimension((d: Sample) => d.coverage),
+      gcDim: cf.dimension((d: Sample) => d.gc),
     })
   }
 
@@ -112,7 +110,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
 
   public getData(): any {
     let { covDim, gcDim, combDim, binDim, originalDomain } = this.state
-    let { domain, bin, binView } = this.props
+    let { domain, bin, binView, cf } = this.props
 
     if (domain && domain.x && domain.y && originalDomain && originalDomain.x && originalDomain.y) {
       let origSize: number = Math.sqrt((originalDomain.x[1] - originalDomain.x[0])**2) * Math.sqrt((originalDomain.y[1] - originalDomain.y[0])**2)
@@ -121,7 +119,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
         let roundedStepSize: number = Math.round(currentSize/origSize * 100)/100
         if (this.zoom !== roundedStepSize) {
           this.zoom = roundedStepSize
-          this.setState({combDim: this.state.cf.dimension(
+          this.setState({combDim: cf.dimension(
             (d: Sample) => d.gc+':'+this.round(d.coverage, this.zoom || 0.1, 0).toString()+':'+(d.bin ? d.bin.id : ''))},
             )
         }

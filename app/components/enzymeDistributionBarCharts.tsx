@@ -2,10 +2,11 @@
 import * as React from 'react'
 import {UBinBarChart} from './uBinBarChart'
 import {IBin, IDomain} from 'samples'
+import {Crossfilter} from 'crossfilter2'
+import {Sample} from '../db/entities/Sample'
 
 interface IProps {
-  samples: any[]
-  samplesPending: boolean
+  cf: Crossfilter<Sample>
   archaealLabels: string[]
   bacterialLabels: string[]
   domain?: IDomain
@@ -18,15 +19,15 @@ type TProps = IProps
 export class EnzymeDistributionBarCharts extends React.PureComponent<TProps> {
 
   render(): JSX.Element {
-    let {bin, samples, domain, archaealLabels, bacterialLabels, binView} = this.props
+    let {bin, cf, domain, archaealLabels, bacterialLabels, binView} = this.props
     return (
       <div style={{width: '30%', height: 'inherit'}}>
         <div style={{height: '400px'}}>
-          <UBinBarChart data={samples} title='Bacterial Single Copy Genes' xName='name' xLabels={bacterialLabels} yName='amount'
+          <UBinBarChart cf={cf} title='Bacterial Single Copy Genes' xName='name' xLabels={bacterialLabels} yName='amount'
                         domain={domain} filterBoolName={'bacterial'} bin={bin} binView={binView}/>
         </div>
         <div style={{height: '400px'}}>
-          <UBinBarChart data={samples} title='Archaeal Single Copy Genes' xName='name' xLabels={archaealLabels} yName='amount'
+          <UBinBarChart cf={cf} title='Archaeal Single Copy Genes' xName='name' xLabels={archaealLabels} yName='amount'
                         domain={domain} filterBoolName={'archaeal'} bin={bin} binView={binView}/>
         </div>
       </div>

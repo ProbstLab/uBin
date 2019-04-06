@@ -2,7 +2,6 @@
 import * as React from 'react'
 import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryLabel} from 'victory'
 import {Crossfilter, Dimension} from 'crossfilter2'
-import * as crossfilter from 'crossfilter2'
 import {IBin, IDomain} from 'samples'
 import {Enzyme} from '../db/entities/Enzyme'
 import {Sample} from '../db/entities/Sample'
@@ -14,11 +13,11 @@ import {Sample} from '../db/entities/Sample'
 // const getGeneCount = (data: IVisData[]) => data.map(value => value.y)
 
 interface IProps {
-  data: Sample[]
   title: string
   xName?: string
   yName?: string
   xLabels?: string[]
+  cf: Crossfilter<Sample>
   filterBoolName: 'archaeal' | 'bacterial'
   domain?: IDomain
   bin?: IBin
@@ -26,7 +25,6 @@ interface IProps {
 }
 
 export interface IBarCharState {
-  cf: Crossfilter<Sample>
   gcDim?: Dimension<Sample, number>
   binDim?: Dimension<Sample, number>
   coverageDim?: Dimension<Sample, number>
@@ -35,16 +33,15 @@ export interface IBarCharState {
 
 export class UBinBarChart extends React.Component<IProps> {
 
-  public state: IBarCharState = {
-    cf: crossfilter(this.props.data),
-  }
+  public state: IBarCharState = {}
 
   public componentWillMount(): void {
+    let {cf} = this.props
     this.setState({
-      gcDim: this.state.cf.dimension((d: Sample) => Math.round(d.gc)),
-      coverageDim: this.state.cf.dimension((d: Sample) => Math.round(d.coverage)),
-      binDim: this.state.cf.dimension((d: Sample) => d.bin ? d.bin.id : 0),
-      groupDim: this.state.cf.dimension((d: Sample) => d.id || 0),
+      gcDim: cf.dimension((d: Sample) => Math.round(d.gc)),
+      coverageDim: cf.dimension((d: Sample) => Math.round(d.coverage)),
+      binDim: cf.dimension((d: Sample) => d.bin ? d.bin.id : 0),
+      groupDim: cf.dimension((d: Sample) => d.id || 0),
     })
   }
 
@@ -73,24 +70,7 @@ export class UBinBarChart extends React.Component<IProps> {
   public getData(): any[] {
     let {gcDim, coverageDim, groupDim, binDim} = this.state
     if (gcDim && coverageDim && groupDim && binDim) {
-      let {domain, xName, yName, xLabels, filterBoolName, bin, binView} = this.props
-      if (domain) {
-        if (domain.x) {
-          gcDim.filterRange(domain.x)
-        }
-        if (domain.y) {
-          coverageDim.filterRange(domain.y)
-        }
-      } else {
-        gcDim.filterAll()
-        coverageDim.filterAll()
-      }
-
-      if (bin && binView) {
-        binDim.filterExact(bin.id)
-      } else {
-        binDim.filterAll()
-      }
+      let {xName, yName, xLabels, filterBoolName} = this.props
       let xKey: string = xName || 'x'
       let yKey: string = yName || 'y'
       if (xLabels) {

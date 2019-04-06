@@ -4,7 +4,7 @@ import {AnyAction, bindActionCreators, Dispatch} from 'redux'
 import {connect} from 'react-redux'
 import {withRouter, RouteComponentProps} from 'react-router'
 import {IClientState} from '../../controllers'
-import {Button, Popover, Position, ButtonGroup, Checkbox} from '@blueprintjs/core'
+import {Button, Popover, Position, ButtonGroup, Checkbox, Spinner, Icon} from '@blueprintjs/core'
 import {
   getImportRecords,
   getTaxonomyTreeFull,
@@ -100,6 +100,29 @@ class CHome extends React.Component<TProps> {
         </Popover>)
     }
 
+    const showCharts = (show: boolean): JSX.Element => {
+      if (samplesPending) {
+        return (
+          <div style={{alignItems: 'center', justifyContent: 'center', display: 'flex', height: '80vh', width: '100%'}}>
+            <Spinner size={100}/>
+          </div>
+        )
+      } else if (!samples.length) {
+        return (
+          <div style={{alignItems: 'center', justifyContent: 'center', display: 'flex', height: '80vh', width: '100%'}}>
+            <h2>Click on <span
+              style={{backgroundColor: '#efefef', borderRadius: '4px', padding: '6px', margin: '6px', fontSize: 'initial', fontWeight: 400}}>
+              <Icon icon={'import'}/> Import</span> to import your datasets and get started!</h2>
+          </div>
+        )
+      } else {
+        return (<UBinPlotsWrappers connection={connection} importRecords={importRecords} archaealEnzymeTypes={archaealEnzymeTypes}
+                                   bacterialEnzymeTypes={bacterialEnzymeTypes} samples={samples} importRecordsState={importRecordsState}
+                                   bins={bins} binView={binView} selectedBin={selectedBin} taxonomyTreeFull={taxonomyTreeFull} domain={domain}
+                                   updateDomain={updateDomain} updateDomainX={updateDomainX} updateDomainY={updateDomainY}
+                                   updateSelectedTaxonomy={updateSelectedTaxonomy}/>)
+      }
+    }
     return (
       <div>
         <div style={homeStyle}>
@@ -117,11 +140,7 @@ class CHome extends React.Component<TProps> {
           </div>
 
           <div style={{width: '100%', display: 'flex'}}>
-            <UBinPlotsWrappers connection={connection} importRecords={importRecords} archaealEnzymeTypes={archaealEnzymeTypes}
-                               bacterialEnzymeTypes={bacterialEnzymeTypes} samples={samples} importRecordsState={importRecordsState}
-                               samplesPending={samplesPending} bins={bins} binView={binView} selectedBin={selectedBin}
-                               updateDomain={updateDomain} updateDomainX={updateDomainX} updateDomainY={updateDomainY}
-                               updateSelectedTaxonomy={updateSelectedTaxonomy} taxonomyTreeFull={taxonomyTreeFull} domain={domain}/>
+            {showCharts(!!samples.length)}
           </div>
         </div>
       </div>

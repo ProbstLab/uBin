@@ -9,7 +9,6 @@ import {UBinCoverageBarChart} from './uBinCoverageBarChart'
 
 interface IProps {
   samples: any[]
-  samplesPending: boolean
   domain?: IDomain
   cf: Crossfilter<Sample>
   worldDomain?: IDomain

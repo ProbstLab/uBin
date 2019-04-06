@@ -1,6 +1,5 @@
 
 import * as React from 'react'
-import {Icon, Spinner} from '@blueprintjs/core'
 import {UBinSunburst} from './uBinSunburst'
 import {GCCoverageBarCharts} from './gCCoverageBarCharts'
 import {EnzymeDistributionBarCharts} from './enzymeDistributionBarCharts'
@@ -15,6 +14,9 @@ import {AnyAction} from 'redux'
 // import {Crossfilter} from 'crossfilter2'
 // import {Sample} from '../db/entities/Sample'
 import {UBinScatter} from './uBinScatter'
+import {Crossfilter} from 'crossfilter2'
+import {Sample} from '../db/entities/Sample'
+import * as crossfilter from 'crossfilter2'
 
 
 interface IProps {
@@ -26,7 +28,6 @@ interface IProps {
   samples: any[]
   domain?: IDomain
   importRecordsState: {pending: boolean, loaded: boolean}
-  samplesPending: boolean
   bins: Bin[]
   binView: boolean
   selectedBin?: IBin
@@ -36,58 +37,39 @@ interface IProps {
   updateDomainY(domain: [number, number]): void
 }
 
+interface IUBinPlotsWrappersState {
+  cf: Crossfilter<Sample>
+}
+
 export class UBinPlotsWrappers extends React.PureComponent<IProps> {
 
+  public state: IUBinPlotsWrappersState = {
+    cf: crossfilter(this.props.samples),
+  }
+
   render(): JSX.Element {
-    const showScatter = (isReady: boolean): any => {
-      if (isReady) {
-        return <UBinScatter data={samples} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin} binView={binView}/>
-      } else {
-        return <Spinner size={20}/>
-      }
-    }
-    let {samplesPending, samples, taxonomyTreeFull, domain, selectedBin, binView, archaealEnzymeTypes, bacterialEnzymeTypes,
-      updateSelectedTaxonomy, updateDomain, updateDomainX, updateDomainY} = this.props
-    const showCharts = (show: boolean): JSX.Element => {
-      if (samplesPending) {
-        return (
-          <div style={{alignItems: 'center', justifyContent: 'center', display: 'flex', height: '80vh', width: '100%'}}>
-            <Spinner size={100}/>
-          </div>
-        )
-      } else if (!samples.length) {
-        return (
-          <div style={{alignItems: 'center', justifyContent: 'center', display: 'flex', height: '80vh', width: '100%'}}>
-            <h2>Click on <span
-              style={{backgroundColor: '#efefef', borderRadius: '4px', padding: '6px', margin: '6px', fontSize: 'initial', fontWeight: 400}}>
-              <Icon icon={'import'}/> Import</span> to import your datasets and get started!</h2>
-          </div>
-        )
-      } else {
-        return (
-          <>
-            <div style={{width: '70%'}}>
-              <div style={{width: '100%', display: 'flex'}}>
-                <div style={{width: '50%'}}>
-                  {showScatter(!!samples.length)}
-                </div>
-                <div style={{width: '60%', marginTop: '30px'}}>
-                  {taxonomyTreeFull &&
-                  <UBinSunburst data={{ children: taxonomyTreeFull}} clickEvent={updateSelectedTaxonomy}/>}
-                </div>
-              </div>
-              <GCCoverageBarCharts samples={samples} samplesPending={samplesPending} domain={domain}
-                                   setDomainX={updateDomainX} setDomainY={updateDomainY}
-                                   domainChangeHandler={updateDomain} bin={selectedBin} binView={binView}/>
-            </div>
-            <EnzymeDistributionBarCharts samples={samples} samplesPending={samplesPending} domain={domain} bin={selectedBin}
-                                         archaealLabels={archaealEnzymeTypes} bacterialLabels={bacterialEnzymeTypes} binView={binView}/>
-          </>
-        )
-      }
-    }
+    let {samples, taxonomyTreeFull, domain, selectedBin, binView, archaealEnzymeTypes, bacterialEnzymeTypes,
+        updateSelectedTaxonomy, updateDomain, updateDomainX, updateDomainY} = this.props
+    let {cf} = this.state
     return (
-      showCharts(!!samples.length)
+      <>
+        <div style={{width: '70%'}}>
+          <div style={{width: '100%', display: 'flex'}}>
+            <div style={{width: '50%'}}>
+              <UBinScatter cf={cf} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin} binView={binView}/>
+            </div>
+            <div style={{width: '60%', marginTop: '30px'}}>
+              {taxonomyTreeFull &&
+              <UBinSunburst data={{ children: taxonomyTreeFull}} clickEvent={updateSelectedTaxonomy}/>}
+            </div>
+          </div>
+          <GCCoverageBarCharts samples={samples} domain={domain}
+                               setDomainX={updateDomainX} setDomainY={updateDomainY}
+                               domainChangeHandler={updateDomain} bin={selectedBin} binView={binView}/>
+        </div>
+        <EnzymeDistributionBarCharts domain={domain} bin={selectedBin} cf={cf}
+                                     archaealLabels={archaealEnzymeTypes} bacterialLabels={bacterialEnzymeTypes} binView={binView}/>
+      </>
     )
   }
 }
