@@ -14,8 +14,8 @@ export const scatterFilter = (query: any, filter?: ISampleFilter): any => {
     if (filter.bin && filter.binView) {
       query.andWhere('samples.binId = :binId', {binId: filter.bin.id})
     }
-    if (filter.taxonomyId) {
-      query.andWhere('samples.taxonomiesRelationString like :taxonomyId', {taxonomyId: '%;' + filter.taxonomyId + ';%'})
+    if (filter.selectedTaxonomy) {
+      query.andWhere('samples.taxonomiesRelationString like :selectedTaxonomy', {selectedTaxonomy: '%;' + filter.selectedTaxonomy + ';%'})
     }
   }
   return query
@@ -55,16 +55,16 @@ export const getAllTaxonomiesQuery = async (connection: Connection): Promise<any
 }
 
 export const getEnzymeDistributionQuery =
-  async (connection: Connection, recordId: number, taxonomyIds?: number[], filter?: ISampleFilter): Promise<any> => {
+  async (connection: Connection, recordId: number, selectedTaxonomys?: number[], filter?: ISampleFilter): Promise<any> => {
   let query = connection.getRepository('enzyme').createQueryBuilder('enzyme')
     .leftJoin('enzyme.samples', 'samples')
     .loadRelationCountAndMap('enzyme.sampleCount', 'enzyme.samples')
     .where('samples.importRecordId = :recordId', {recordId})
-  if (taxonomyIds) {
-    query.andWhere('samples.taxonomyId IN (:...taxonomyIds)', {taxonomyIds})
+  if (selectedTaxonomys) {
+    query.andWhere('samples.selectedTaxonomy IN (:...selectedTaxonomys)', {selectedTaxonomys})
   } else if (filter) {
-    if (filter.taxonomyId) {
-      query.andWhere('sample.taxonomiesRelationString like :taxonomyId', {taxonomyId: '%;' + filter.taxonomyId + '%'})
+    if (filter.selectedTaxonomy) {
+      query.andWhere('sample.taxonomiesRelationString like :selectedTaxonomy', {selectedTaxonomy: '%;' + filter.selectedTaxonomy + '%'})
     }
     query = scatterFilter(query, filter)
   }
@@ -79,8 +79,8 @@ export const getSamplesQuery = async (connection: Connection, recordId: number, 
     .leftJoin('sample.bin', 'bin')
     .where('sample.importRecordId = :recordId', {recordId})
    if (filter) {
-     if (filter.taxonomyId) {
-       query.andWhere('sample.taxonomiesRelationString like :taxonomyId', {taxonomyId: '%;' + filter.taxonomyId + '%'})
+     if (filter.selectedTaxonomy) {
+       query.andWhere('sample.taxonomiesRelationString like :selectedTaxonomy', {selectedTaxonomy: '%;' + filter.selectedTaxonomy + '%'})
      }
    }
   return query.getMany()

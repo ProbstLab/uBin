@@ -32,7 +32,8 @@ interface IProps {
   bins: Bin[]
   binView: boolean
   selectedBin?: IBin
-  updateSelectedTaxonomy(taxonomyId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
+  selectedTaxonomy?: number
+  updateSelectedTaxonomy(taxonomyId: number): void
   updateDomain(domain: IDomain): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   updateDomainX(domain: [number, number]): void
   updateDomainY(domain: [number, number]): void
@@ -49,7 +50,7 @@ export class UBinPlotsWrappers extends React.PureComponent<IProps> {
   }
 
   render(): JSX.Element {
-    let {samples, taxonomies, domain, selectedBin, binView, archaealEnzymeTypes, bacterialEnzymeTypes,
+    let {samples, taxonomies, domain, selectedBin, binView, archaealEnzymeTypes, bacterialEnzymeTypes, selectedTaxonomy,
         updateSelectedTaxonomy, updateDomain, updateDomainX, updateDomainY} = this.props
     let {cf} = this.state
     return (
@@ -57,7 +58,8 @@ export class UBinPlotsWrappers extends React.PureComponent<IProps> {
         <div style={{width: '70%'}}>
           <div style={{width: '100%', display: 'flex'}}>
             <div style={{width: '50%'}}>
-              <UBinScatter cf={cf} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin} binView={binView}/>
+              <UBinScatter cf={cf} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin}
+                           selectedTaxonomy={selectedTaxonomy} binView={binView}/>
             </div>
             <div style={{width: '60%', marginTop: '30px'}}>
               {taxonomies &&

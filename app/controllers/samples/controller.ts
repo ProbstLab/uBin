@@ -9,11 +9,10 @@ import {
   ISetImportedRecord,
   ISetDomain,
   ISetDomainX,
-  ISetTaxonomyId,
   ISetDomainY,
   IGetAllEnzymeTypesFulfilled,
   IGetBinsFulfilled,
-  IResetDomain, ISetBinView, IGetTaxonomiesFulfilled
+  IResetDomain, ISetBinView, IGetTaxonomiesFulfilled, ISetSelectedTaxonomy
 } from './interfaces'
 import {ISetBinFilter} from './index'
 
@@ -85,12 +84,12 @@ export const getBinsFulfilled = (state: ISamplesState, action: IGetBinsFulfilled
   }
 }
 
-export const setTaxonomyId = (state: ISamplesState, action: ISetTaxonomyId): ISamplesState => {
+export const setSelectedTaxonomy = (state: ISamplesState, action: ISetSelectedTaxonomy): ISamplesState => {
   return {
     ...state,
     filters: {
       ...state.filters,
-      taxonomyId: action.taxonomyId,
+      selectedTaxonomy: action.taxonomyId,
     },
   }
 }

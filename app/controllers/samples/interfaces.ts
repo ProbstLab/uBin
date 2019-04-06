@@ -39,7 +39,7 @@ export enum samplesActions {
   setDomain = 'samples.setDomain',
   setDomainX = 'samples.setDomainX',
   setDomainY = 'samples.setDomainY',
-  setTaxonomyId = 'samples.setTaxonomyId',
+  setSelectedTaxonomy = 'samples.setSelectedTaxonomy',
   removeFilters = 'samples.removeFilters',
   resetDomain = 'samples.resetDomain',
   setBinFilter = 'samples.setBinFilter',
@@ -90,8 +90,8 @@ export interface ISetImportedRecord extends Action {
   type: samplesActions.setImportedRecord
   recordId: number
 }
-export interface ISetTaxonomyId extends Action {
-  type: samplesActions.setTaxonomyId
+export interface ISetSelectedTaxonomy extends Action {
+  type: samplesActions.setSelectedTaxonomy
   taxonomyId: number | undefined
 }
 

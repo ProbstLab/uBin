@@ -6,12 +6,11 @@ import {
   samplesActions,
   IGetSamplesFulfilled,
   ISetDomain,
-  ISetTaxonomyId,
   IRemoveFilters,
   IGetImportsPending,
   ISetDomainX,
   ISetDomainY,
-  IGetAllEnzymeTypesFulfilled, IGetBinsFulfilled, ISetBinFilter, IResetDomain, ISetBinView, IGetTaxonomiesFulfilled
+  IGetAllEnzymeTypesFulfilled, IGetBinsFulfilled, ISetBinFilter, IResetDomain, ISetBinView, IGetTaxonomiesFulfilled, ISetSelectedTaxonomy
 } from './interfaces'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
 import {IClientState} from '../index'
@@ -58,8 +57,8 @@ export class SamplesActions {
   static setImportedRecord(recordId: number): ISetImportedRecord {
     return {type: samplesActions.setImportedRecord, recordId}
   }
-  static setTaxonomyId(taxonomyId: number): ISetTaxonomyId {
-    return {type: samplesActions.setTaxonomyId, taxonomyId}
+  static setSelectedTaxonomy(taxonomyId: number): ISetSelectedTaxonomy {
+    return {type: samplesActions.setSelectedTaxonomy, taxonomyId}
   }
   static setDomain(domain: IDomain): ISetDomain {
     return {type: samplesActions.setDomain, domain}
@@ -84,7 +83,7 @@ export class SamplesActions {
         let recordId: number | undefined = getState().samples.recordId
         if (connection && recordId) {
           Promise.all([
-            dispatch(SamplesActions.setTaxonomyId(taxonomyId)),
+            dispatch(SamplesActions.setSelectedTaxonomy(taxonomyId)),
           ]).then(() =>
           Promise.all([dispatch(DBActions.getImportData(recordId || 0))]).then(() => resolve()))
         } else {

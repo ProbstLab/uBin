@@ -15,6 +15,7 @@ interface IProps {
   domain?: IDomain
   bin?: IBin
   binView: boolean
+  selectedTaxonomy?: number
 }
 
 interface IScatterDetails {
@@ -30,6 +31,7 @@ export interface IUBinScatterState {
   binDim?: Dimension<Sample, number>
   covDim?: Dimension<Sample, number>
   gcDim?: Dimension<Sample, number>
+  taxonomyDim?: Dimension<Sample, string>
   originalDomain?: IDomain
   logScale: boolean
 }
@@ -50,6 +52,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
       combDim: cf.dimension((d: Sample) => d.gc+':'+Math.round(d.coverage)+':'+(d.bin ? d.bin.id : '')),
       binDim: cf.dimension((d: Sample) => d.bin ? d.bin.id : 0),
       covDim: cf.dimension((d: Sample) => d.coverage),
+      taxonomyDim: cf.dimension((d: Sample) => d.taxonomiesRelationString),
       gcDim: cf.dimension((d: Sample) => d.gc),
     })
   }
@@ -109,8 +112,8 @@ export class UBinScatter extends React.PureComponent<IProps> {
   }
 
   public getData(): any {
-    let { covDim, gcDim, combDim, binDim, originalDomain } = this.state
-    let { domain, bin, binView, cf } = this.props
+    let { covDim, gcDim, combDim, binDim, taxonomyDim, originalDomain } = this.state
+    let { domain, bin, binView, cf, selectedTaxonomy } = this.props
 
     if (domain && domain.x && domain.y && originalDomain && originalDomain.x && originalDomain.y) {
       let origSize: number = Math.sqrt((originalDomain.x[1] - originalDomain.x[0])**2) * Math.sqrt((originalDomain.y[1] - originalDomain.y[0])**2)
@@ -126,7 +129,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
       }
     }
 
-    if (gcDim && covDim && combDim && binDim) {
+    if (gcDim && covDim && combDim && binDim && taxonomyDim) {
       if (domain) {
         if (domain.x) {
           gcDim.filterRange(domain.x)
@@ -143,6 +146,12 @@ export class UBinScatter extends React.PureComponent<IProps> {
         binDim.filterExact(bin.id)
       } else {
         binDim.filterAll()
+      }
+      if (selectedTaxonomy) {
+        let taxonomyString: string = ';'+selectedTaxonomy.toString()+';'
+        taxonomyDim.filterFunction((d: string) => d.indexOf(taxonomyString) >= 0)
+      } else {
+        taxonomyDim.filterAll()
       }
       // let logFactor: number = 10/Math.log(100)
       // let basePointSize: number = 10-Math.log((this.zoom !== undefined ? this.zoom || 0.01 : 1)*200)*logFactor

@@ -1,7 +1,7 @@
 import {LabelSeries, Sunburst} from "react-vis"
 import * as React from "react"
 import {MouseEvent} from 'react'
-import {Crossfilter, Dimension} from 'crossfilter2'
+import {Crossfilter, Dimension, Grouping, NaturallyOrderedValue} from 'crossfilter2'
 import {Sample} from '../db/entities/Sample'
 import {Taxonomy} from '../db/entities/Taxonomy'
 import {IValueMap} from "common"
@@ -18,7 +18,7 @@ function getNamePath(node: any): any {
   if (!node.parent) {
     return ['root']
   }
-  return [(node.data && node.data.name) || node.name].concat(getNamePath(node.parent))
+  return [(node.data && node.data.title) || node.title].concat(getNamePath(node.parent))
 }
 
 function getKeyPath(node: any): any {
@@ -33,7 +33,7 @@ function getKeyAndNamePath(node: any): any {
     return ['root']
   }
   return {keyPath: [(node.data && node.data.id) || node.id].concat(getKeyPath(node.parent)),
-          namePath: [(node.data && node.data.name) || node.name].concat(getNamePath(node.parent))}
+          namePath: [(node.data && node.data.title) || node.title].concat(getNamePath(node.parent))}
 }
 
 function updateData(data: any, keyPath: any): any {
@@ -66,7 +66,9 @@ export interface ISunburstState {
   namePathValue: string,
   finalValue: string,
   clicked: boolean
+  pastLength: number
   groupDim?: Dimension<Sample, string>
+  tree?: any
 }
 
 export class UBinSunburst extends React.PureComponent<IProps> {
@@ -75,6 +77,7 @@ export class UBinSunburst extends React.PureComponent<IProps> {
     namePathValue: '',
     finalValue: 'Taxonomy',
     clicked: false,
+    pastLength: 0,
   }
 
   public componentWillMount(): void {
@@ -84,15 +87,27 @@ export class UBinSunburst extends React.PureComponent<IProps> {
     })
   }
 
-  public getData(): any {
+  public componentDidMount(): void {
     let {groupDim} = this.state
     if (groupDim) {
-      console.time("tree creating")
-      console.log("Return: ", TreeCreator.createTreeFromCFData(groupDim.group().all().filter(d => d.value), this.props.taxonomies))
-      console.timeEnd("tree creating")
-      return TreeCreator.createTreeFromCFData(groupDim.group().all().filter(d => d.value), this.props.taxonomies)
+      let grouped: Grouping<NaturallyOrderedValue, NaturallyOrderedValue>[] = groupDim.group().all().filter(d => d.value)
+      this.setState({tree: TreeCreator.createTreeFromCFData(grouped, this.props.taxonomies), pastLength: grouped.length})
     }
-    return {}
+  }
+
+  public componentWillUpdate(): void {
+    let {groupDim, pastLength} = this.state
+    if (groupDim) {
+      let grouped: Grouping<NaturallyOrderedValue, NaturallyOrderedValue>[] = groupDim.group().all().filter(d => d.value)
+      if (grouped.length !== pastLength) {
+        this.setState({tree: TreeCreator.createTreeFromCFData(grouped, this.props.taxonomies), pastLength: grouped.length})
+      }
+    }
+  }
+
+  public getData(): any {
+    let {tree} = this.state
+    return tree ? tree : {}
   }
 
   public getChildrenIds(datapoint: any): number[] {

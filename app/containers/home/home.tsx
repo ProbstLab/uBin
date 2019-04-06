@@ -13,7 +13,7 @@ import {
   getDomain,
   getImportRecordsState,
   getBacterialEnzymeTypes,
-  getArchaealEnzymeTypes, getBins, getSelectedBin, getBinView, getTaxonomiesMap,
+  getArchaealEnzymeTypes, getBins, getSelectedBin, getBinView, getTaxonomiesMap, getSelectedTaxonomy,
 } from '../../controllers/samples'
 import {DBActions, getSamplesStatePending} from '../../controllers/database'
 import {Connection} from 'typeorm'
@@ -44,6 +44,7 @@ interface IPropsFromState {
   bins: Bin[]
   binView: boolean
   selectedBin?: IBin
+  selectedTaxonomy?: number
 }
 
 interface IActionsFromState {
@@ -58,6 +59,7 @@ interface IActionsFromState {
   updateDomainY(domain: [number, number]): void
   updateBinView(isActive: boolean): void
   setSelectedBin(bin: Bin): void
+  setSelectedTaxonomy(id: number): void
   resetFilters(): void
 }
 
@@ -88,8 +90,8 @@ class CHome extends React.Component<TProps> {
 
   render(): JSX.Element {
     let { samples, samplesPending, taxonomiesMap, domain, archaealEnzymeTypes, bacterialEnzymeTypes,
-          updateSelectedTaxonomy, updateDomain, updateDomainX, updateDomainY, connection, importRecords,
-          importRecordsState, getImportData, resetFilters, bins, binView, selectedBin} = this.props
+          setSelectedTaxonomy, updateDomain, updateDomainX, updateDomainY, connection, importRecords,
+          importRecordsState, getImportData, resetFilters, bins, binView, selectedBin, selectedTaxonomy} = this.props
 
     const getBinDropdown = (): JSX.Element => {
       return (
@@ -116,9 +118,10 @@ class CHome extends React.Component<TProps> {
       } else {
         return (<UBinPlotsWrappers connection={connection} importRecords={importRecords} archaealEnzymeTypes={archaealEnzymeTypes}
                                    bacterialEnzymeTypes={bacterialEnzymeTypes} samples={samples} importRecordsState={importRecordsState}
-                                   bins={bins} binView={binView} selectedBin={selectedBin} taxonomies={taxonomiesMap} domain={domain}
+                                   bins={bins} binView={binView} selectedBin={selectedBin} selectedTaxonomy={selectedTaxonomy}
+                                   taxonomies={taxonomiesMap} domain={domain}
                                    updateDomain={updateDomain} updateDomainX={updateDomainX} updateDomainY={updateDomainY}
-                                   updateSelectedTaxonomy={updateSelectedTaxonomy}/>)
+                                   updateSelectedTaxonomy={setSelectedTaxonomy}/>)
       }
     }
     return (
@@ -160,6 +163,7 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   bins: getBins(state),
   binView: getBinView(state),
   selectedBin: getSelectedBin(state),
+  selectedTaxonomy: getSelectedTaxonomy(state),
 })
 
 const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
@@ -176,6 +180,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       updateDomainY: domainY => SamplesActions.updateDomainY(domainY),
       updateBinView: isActive => SamplesActions.updateBinView(isActive),
       setSelectedBin: binId => SamplesActions.setSelectedBin(binId),
+      setSelectedTaxonomy: taxonomyId => SamplesActions.setSelectedTaxonomy(taxonomyId),
       resetFilters: SamplesActions.resetFilters,
     },
     dispatch,
