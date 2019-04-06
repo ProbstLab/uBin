@@ -5,7 +5,6 @@ import {GCCoverageBarCharts} from './gCCoverageBarCharts'
 import {EnzymeDistributionBarCharts} from './enzymeDistributionBarCharts'
 import {Connection} from 'typeorm'
 import {IImportRecord} from '../controllers/samples'
-import {ITaxonomyForSunburst} from '../utils/interfaces'
 import {IBin, IDomain} from "samples"
 import {Bin} from '../db/entities/Bin'
 import {ThunkAction} from 'redux-thunk'
@@ -17,12 +16,14 @@ import {UBinScatter} from './uBinScatter'
 import {Crossfilter} from 'crossfilter2'
 import {Sample} from '../db/entities/Sample'
 import * as crossfilter from 'crossfilter2'
+import {Taxonomy} from '../db/entities/Taxonomy'
+import {IValueMap} from "common"
 
 
 interface IProps {
   connection: Connection | undefined
   importRecords: IImportRecord[]
-  taxonomyTreeFull?: ITaxonomyForSunburst[]
+  taxonomies: IValueMap<Taxonomy>
   archaealEnzymeTypes: string[]
   bacterialEnzymeTypes: string[]
   samples: any[]
@@ -48,7 +49,7 @@ export class UBinPlotsWrappers extends React.PureComponent<IProps> {
   }
 
   render(): JSX.Element {
-    let {samples, taxonomyTreeFull, domain, selectedBin, binView, archaealEnzymeTypes, bacterialEnzymeTypes,
+    let {samples, taxonomies, domain, selectedBin, binView, archaealEnzymeTypes, bacterialEnzymeTypes,
         updateSelectedTaxonomy, updateDomain, updateDomainX, updateDomainY} = this.props
     let {cf} = this.state
     return (
@@ -59,8 +60,8 @@ export class UBinPlotsWrappers extends React.PureComponent<IProps> {
               <UBinScatter cf={cf} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin} binView={binView}/>
             </div>
             <div style={{width: '60%', marginTop: '30px'}}>
-              {taxonomyTreeFull &&
-              <UBinSunburst data={{ children: taxonomyTreeFull}} clickEvent={updateSelectedTaxonomy}/>}
+              {taxonomies &&
+              <UBinSunburst data={{ children: []}} taxonomies={taxonomies} cf={cf} clickEvent={updateSelectedTaxonomy}/>}
             </div>
           </div>
           <GCCoverageBarCharts samples={samples} domain={domain}

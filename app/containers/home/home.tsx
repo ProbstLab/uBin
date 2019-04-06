@@ -7,18 +7,16 @@ import {IClientState} from '../../controllers'
 import {Button, Popover, Position, ButtonGroup, Checkbox, Spinner, Icon} from '@blueprintjs/core'
 import {
   getImportRecords,
-  getTaxonomyTreeFull,
   IImportRecord,
   SamplesActions,
   getSamples,
   getDomain,
   getImportRecordsState,
   getBacterialEnzymeTypes,
-  getArchaealEnzymeTypes, getBins, getSelectedBin, getBinView,
+  getArchaealEnzymeTypes, getBins, getSelectedBin, getBinView, getTaxonomiesMap,
 } from '../../controllers/samples'
 import {DBActions, getSamplesStatePending} from '../../controllers/database'
 import {Connection} from 'typeorm'
-import {ITaxonomyForSunburst} from '../../utils/interfaces'
 import {ThunkAction} from 'redux-thunk'
 import {IBin, IDomain} from 'samples'
 import {SampleMenu} from '../../components/sampleMenu'
@@ -27,8 +25,8 @@ import {Bin} from '../../db/entities/Bin'
 import {Crossfilter} from 'crossfilter2'
 import {Sample} from '../../db/entities/Sample'
 import {UBinPlotsWrappers} from '../../components/uBinPlotsWrappers'
-// import * as crossfilter from 'crossfilter2'
-// import {IBarCharState} from '../../components/uBinBarChart'
+import {Taxonomy} from '../../db/entities/Taxonomy'
+import {IValueMap} from 'common'
 
 interface IProps extends RouteComponentProps {
 }
@@ -36,7 +34,7 @@ interface IProps extends RouteComponentProps {
 interface IPropsFromState {
   connection: Connection | undefined
   importRecords: IImportRecord[]
-  taxonomyTreeFull?: ITaxonomyForSunburst[]
+  taxonomiesMap: IValueMap<Taxonomy>
   archaealEnzymeTypes: string[]
   bacterialEnzymeTypes: string[]
   samples: any[]
@@ -89,7 +87,7 @@ class CHome extends React.Component<TProps> {
   }
 
   render(): JSX.Element {
-    let { samples, samplesPending, taxonomyTreeFull, domain, archaealEnzymeTypes, bacterialEnzymeTypes,
+    let { samples, samplesPending, taxonomiesMap, domain, archaealEnzymeTypes, bacterialEnzymeTypes,
           updateSelectedTaxonomy, updateDomain, updateDomainX, updateDomainY, connection, importRecords,
           importRecordsState, getImportData, resetFilters, bins, binView, selectedBin} = this.props
 
@@ -118,7 +116,7 @@ class CHome extends React.Component<TProps> {
       } else {
         return (<UBinPlotsWrappers connection={connection} importRecords={importRecords} archaealEnzymeTypes={archaealEnzymeTypes}
                                    bacterialEnzymeTypes={bacterialEnzymeTypes} samples={samples} importRecordsState={importRecordsState}
-                                   bins={bins} binView={binView} selectedBin={selectedBin} taxonomyTreeFull={taxonomyTreeFull} domain={domain}
+                                   bins={bins} binView={binView} selectedBin={selectedBin} taxonomies={taxonomiesMap} domain={domain}
                                    updateDomain={updateDomain} updateDomainX={updateDomainX} updateDomainY={updateDomainY}
                                    updateSelectedTaxonomy={updateSelectedTaxonomy}/>)
       }
@@ -152,7 +150,7 @@ class CHome extends React.Component<TProps> {
 const mapStateToProps = (state: IClientState): IPropsFromState => ({
   importRecords: getImportRecords(state),
   connection: state.database.connection,
-  taxonomyTreeFull: getTaxonomyTreeFull(state),
+  taxonomiesMap: getTaxonomiesMap(state),
   samples: getSamples(state),
   samplesPending: getSamplesStatePending(state),
   importRecordsState: getImportRecordsState(state),

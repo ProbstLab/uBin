@@ -1,10 +1,21 @@
 import {
   dbActions,
   IConnectDatabase,
-  IConnectDatabaseFulfilled, IGetAllEnzymeTypes, IGetBins, IGetEnzymeDistribution, IGetEnzymeDistributionPending,
+  IConnectDatabaseFulfilled,
+  IGetAllEnzymeTypes,
+  IGetBins,
+  IGetEnzymeDistribution,
+  IGetEnzymeDistributionPending,
   IGetImports,
-  IGetSamples, IGetSamplesPending, IGetSamplesPendingDone,
-  IGetTaxonomiesForImport, IGetTaxonomiesForImportPending, IGetTaxonomiesForImportPendingDone, IGetSamplesForBin,
+  IGetSamples,
+  IGetSamplesPending,
+  IGetSamplesPendingDone,
+  IGetTaxonomiesForImport,
+  IGetTaxonomiesForImportPending,
+  IGetTaxonomiesForImportPendingDone,
+  IGetSamplesForBin,
+  IGetTaxonomies,
+  IGetTaxonomiesPending, IGetTaxonomiesPendingDone,
 } from './interfaces'
 import {Connection} from 'typeorm'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
@@ -17,7 +28,8 @@ import {
   getEnzymeDistributionQuery,
   getSamplesForBinQuery,
   getSamplesQuery,
-  getTaxonomiesAndCountQuery
+  getTaxonomiesAndCountQuery,
+  getAllTaxonomiesQuery
 } from './queries'
 import {SamplesActions} from '../samples'
 import {ISampleFilter} from 'samples'
@@ -45,6 +57,16 @@ export class DBActions {
   }
   static getTaxonomiesForImportPendingDone(): IGetTaxonomiesForImportPendingDone {
     return {type: dbActions.getTaxonomiesForImportPendingDone, taxonomiesPending: false}
+  }
+  
+  static getTaxonomies(connection: Connection, recordId: number, filter?: ISampleFilter): IGetTaxonomies {
+    return {type: dbActions.getTaxonomies, payload: getAllTaxonomiesQuery(connection)}
+  }
+  static getTaxonomiesPending(payload: any): IGetTaxonomiesPending {
+    return {type: dbActions.getTaxonomiesPending, taxonomiesPending: true}
+  }
+  static getTaxonomiesPendingDone(): IGetTaxonomiesPendingDone {
+    return {type: dbActions.getTaxonomiesPendingDone, taxonomiesPending: false}
   }
 
   static getEnzymeDistribution(connection: Connection, recordId: number, taxonomyId?: number[], filter?: ISampleFilter): IGetEnzymeDistribution {
@@ -92,7 +114,7 @@ export class DBActions {
             dispatch(DBActions.getImports(connection))
             resolve()
           }
-        }, 2000)
+        }, 1000)
       })
     }
   }
@@ -104,7 +126,8 @@ export class DBActions {
         let filters: ISampleFilter = getState().samples.filters
         if (connection) {
           Promise.all([
-            dispatch(DBActions.getTaxonomiesForImport(connection, recordId, filters)),
+            // dispatch(DBActions.getTaxonomiesForImport(connection, recordId, filters)),
+            dispatch(DBActions.getTaxonomies(connection, recordId, filters)),
             dispatch(DBActions.getAllEnzymeTypes(connection)),
             dispatch(DBActions.getBins(connection, recordId)),
             dispatch(DBActions.getSamples(connection, recordId, filters)),

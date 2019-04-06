@@ -1,6 +1,6 @@
 declare module 'common' {
   interface IObjectWithId {
-    id: string
+    id: string|number
   }
 
   interface IValueMap<TValueType extends IObjectWithId> {

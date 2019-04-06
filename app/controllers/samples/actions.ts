@@ -11,7 +11,7 @@ import {
   IGetImportsPending,
   ISetDomainX,
   ISetDomainY,
-  IGetAllEnzymeTypesFulfilled, IGetBinsFulfilled, ISetBinFilter, IResetDomain, ISetBinView
+  IGetAllEnzymeTypesFulfilled, IGetBinsFulfilled, ISetBinFilter, IResetDomain, ISetBinView, IGetTaxonomiesFulfilled
 } from './interfaces'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
 import {IClientState} from '../index'
@@ -19,8 +19,8 @@ import {AnyAction} from 'redux'
 import {Connection} from 'typeorm'
 import {getDBConnection} from '../database/selectors'
 import {DBActions} from '../database'
-import {ISampleFilter, IDomain} from 'samples'
-import {getImportRecordId} from './selectors'
+import {IDomain} from 'samples'
+// import {getImportRecordId} from './selectors'
 import {Bin} from '../../db/entities/Bin'
 
 export class SamplesActions {
@@ -32,6 +32,9 @@ export class SamplesActions {
   }
   static getTaxonomiesForImportFulfilled(payload: any): IGetTaxonomiesForImportFulfilled {
     return {type: samplesActions.getTaxonomiesForImportFulfilled, payload}
+  }
+  static getTaxonomiesFulfilled(payload: any): IGetTaxonomiesFulfilled {
+    return {type: samplesActions.getTaxonomiesFulfilled, payload}
   }
   static getEnzymeDistributionFulfilled(payload: any): IGetEnzymeDistributionFulfilled {
     return {type: samplesActions.getEnzymeDistributionFulfilled, payload}
@@ -92,14 +95,15 @@ export class SamplesActions {
   }
 
   static updateTaxonomy(dispatch: ThunkDispatch<{}, {}, AnyAction>, resolve: any, state: IClientState): void {
-    let connection: Connection | undefined = getDBConnection(state)
-    let filters: ISampleFilter = state.samples.filters
-    let recordId = getImportRecordId(state)
-    if (connection && recordId && connection) {
-      Promise.all([dispatch(DBActions.getTaxonomiesForImport(connection, recordId, filters))]).then(() => resolve())
-    } else {
-      resolve()
-    }
+    resolve()
+    // let connection: Connection | undefined = getDBConnection(state)
+    // let filters: ISampleFilter = state.samples.filters
+    // let recordId = getImportRecordId(state)
+    // if (connection && recordId && connection) {
+    //   Promise.all([dispatch(DBActions.getTaxonomiesForImport(connection, recordId, filters))]).then(() => resolve())
+    // } else {
+    //   resolve()
+    // }
   }
 
   static updateDomain(domain: IDomain): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {

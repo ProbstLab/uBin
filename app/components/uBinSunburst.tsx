@@ -1,6 +1,11 @@
 import {LabelSeries, Sunburst} from "react-vis"
 import * as React from "react"
 import {MouseEvent} from 'react'
+import {Crossfilter, Dimension} from 'crossfilter2'
+import {Sample} from '../db/entities/Sample'
+import {Taxonomy} from '../db/entities/Taxonomy'
+import {IValueMap} from "common"
+import {TreeCreator} from '../utils/treeCreator'
 
 const sunburstLabelStyle = {
   fontSize: '14px',
@@ -52,6 +57,8 @@ function updateData(data: any, keyPath: any): any {
 
 interface IProps {
   data: any
+  cf: Crossfilter<Sample>
+  taxonomies: IValueMap<Taxonomy>
   clickEvent(id: number): void
 }
 
@@ -59,6 +66,7 @@ export interface ISunburstState {
   namePathValue: string,
   finalValue: string,
   clicked: boolean
+  groupDim?: Dimension<Sample, string>
 }
 
 export class UBinSunburst extends React.PureComponent<IProps> {
@@ -67,6 +75,24 @@ export class UBinSunburst extends React.PureComponent<IProps> {
     namePathValue: '',
     finalValue: 'Taxonomy',
     clicked: false,
+  }
+
+  public componentWillMount(): void {
+    let {cf} = this.props
+    this.setState({
+      groupDim: cf.dimension((d: Sample) => d.taxonomiesRelationString),
+    })
+  }
+
+  public getData(): any {
+    let {groupDim} = this.state
+    if (groupDim) {
+      console.time("tree creating")
+      console.log("Return: ", TreeCreator.createTreeFromCFData(groupDim.group().all().filter(d => d.value), this.props.taxonomies))
+      console.timeEnd("tree creating")
+      return TreeCreator.createTreeFromCFData(groupDim.group().all().filter(d => d.value), this.props.taxonomies)
+    }
+    return {}
   }
 
   public getChildrenIds(datapoint: any): number[] {
@@ -129,9 +155,7 @@ export class UBinSunburst extends React.PureComponent<IProps> {
             strokeWidth: '0.5',
           }}
           colorType="literal"
-          getSize={(d: any) => d.value}
-          getColor={(d: any) => d.hex}
-          data={this.props.data}
+          data={this.getData()}
           height={300}
           width={350}
         >

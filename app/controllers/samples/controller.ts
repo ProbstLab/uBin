@@ -13,9 +13,8 @@ import {
   ISetDomainY,
   IGetAllEnzymeTypesFulfilled,
   IGetBinsFulfilled,
-  IResetDomain, ISetBinView
+  IResetDomain, ISetBinView, IGetTaxonomiesFulfilled
 } from './interfaces'
-import {TreeCreator} from '../../utils/treeCreator'
 import {ISetBinFilter} from './index'
 
 export const getInitialState = (): ISamplesState => ({
@@ -44,7 +43,13 @@ export const getImportsFulfilled = (state: ISamplesState, action: IGetImportsFul
 export const getTaxonomiesForImportFulfilled = (state: ISamplesState, action: IGetTaxonomiesForImportFulfilled): ISamplesState => {
   return {
     ...state,
-    taxonomyTreeFull: TreeCreator.createTree(action.payload),
+    taxonomies: action.payload,
+  }
+}
+export const getTaxonomiesFulfilled = (state: ISamplesState, action: IGetTaxonomiesFulfilled): ISamplesState => {
+  return {
+    ...state,
+    taxonomies: action.payload,
   }
 }
 
@@ -81,7 +86,6 @@ export const getBinsFulfilled = (state: ISamplesState, action: IGetBinsFulfilled
 }
 
 export const setTaxonomyId = (state: ISamplesState, action: ISetTaxonomyId): ISamplesState => {
-  console.log("Set taxonomy id", action)
   return {
     ...state,
     filters: {

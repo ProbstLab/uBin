@@ -1,10 +1,11 @@
 import { Action } from 'redux'
 // import { IValueMap } from 'common'
 // import { ISample } from 'samples'
-import {IGenericAssociativeArray, ITaxonomyForSunburst} from '../../utils/interfaces'
+import {ITaxonomyForSunburst} from '../../utils/interfaces'
 import {Enzyme} from '../../db/entities/Enzyme'
 import {ISampleFilter, IDomain} from 'samples'
 import {Bin} from '../../db/entities/Bin'
+import {Taxonomy} from '../../db/entities/Taxonomy'
 
 export interface IImportRecord {
   id: number
@@ -15,7 +16,7 @@ export interface ISamplesState {
   filters: ISampleFilter
   samples?: any[]
   importRecords: IImportRecord[]
-  taxonomyTreeFull?: IGenericAssociativeArray
+  taxonomies?: Taxonomy[]
   enzymeDistribution?: Enzyme[]
   enzymeTypes?: Enzyme[]
   selectedTaxonomy?: ITaxonomyForSunburst
@@ -28,6 +29,7 @@ export interface ISamplesState {
 export enum samplesActions {
   getImportsPending = 'database.getImports_PENDING',
   getImportsFulfilled = 'database.getImports_FULFILLED',
+  getTaxonomiesFulfilled = 'database.getTaxonomies_FULFILLED',
   getTaxonomiesForImportFulfilled = 'database.getTaxonomiesForImport_FULFILLED',
   getEnzymeDistributionFulfilled = 'database.getEnzymeDistribution_FULFILLED',
   getAllEnzymeTypesFulfilled = 'database.getAllEnzymeTypes_FULFILLED',
@@ -54,6 +56,10 @@ export interface IGetImportsFulfilled extends Action {
 
 export interface IGetTaxonomiesForImportFulfilled extends Action {
   type: samplesActions.getTaxonomiesForImportFulfilled
+  payload: any
+}
+export interface IGetTaxonomiesFulfilled extends Action {
+  type: samplesActions.getTaxonomiesFulfilled
   payload: any
 }
 export interface IGetEnzymeDistributionFulfilled extends Action {

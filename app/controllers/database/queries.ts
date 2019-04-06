@@ -50,6 +50,10 @@ export const getTaxonomiesAndCountQuery = async (connection: Connection, recordI
   return Promise.all([getTaxonomiesForImportQuery(connection, recordId, filter), getTaxonomyCountQuery(connection, recordId, filter)])
 }
 
+export const getAllTaxonomiesQuery = async (connection: Connection): Promise<any> => {
+  return connection.getRepository('taxonomy').createQueryBuilder('taxonomy').select('taxonomy').getMany()
+}
+
 export const getEnzymeDistributionQuery =
   async (connection: Connection, recordId: number, taxonomyIds?: number[], filter?: ISampleFilter): Promise<any> => {
   let query = connection.getRepository('enzyme').createQueryBuilder('enzyme')
@@ -69,7 +73,8 @@ export const getEnzymeDistributionQuery =
 
 export const getSamplesQuery = async (connection: Connection, recordId: number, filter?: ISampleFilter): Promise<any> => {
   let query = connection.getRepository('sample').createQueryBuilder('sample')
-    .select(['sample.id', 'sample.gc', 'sample.coverage', 'sample.length', 'enzymes.archaeal', 'enzymes.bacterial', 'enzymes.name', 'bin.id'])
+    .select(['sample.id', 'sample.gc', 'sample.coverage', 'sample.length', 'sample.taxonomiesRelationString',
+                      'enzymes.archaeal', 'enzymes.bacterial', 'enzymes.name', 'bin.id'])
     .leftJoin('sample.enzymes', 'enzymes')
     .leftJoin('sample.bin', 'bin')
     .where('sample.importRecordId = :recordId', {recordId})

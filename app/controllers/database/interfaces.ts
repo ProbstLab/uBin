@@ -12,6 +12,9 @@ export enum dbActions {
   getTaxonomiesForImport = 'database.getTaxonomiesForImport',
   getTaxonomiesForImportPending = 'database.getTaxonomiesForImport_PENDING',
   getTaxonomiesForImportPendingDone = 'database.getTaxonomiesForImport_PENDING_DONE',
+  getTaxonomies = 'database.getTaxonomies',
+  getTaxonomiesPending = 'database.getTaxonomies_PENDING',
+  getTaxonomiesPendingDone = 'database.getTaxonomies_PENDING_DONE',
   getEnzymeDistribution = 'database.getEnzymeDistribution',
   getEnzymeDistributionPending = 'database.getEnzymeDistribution_PENDING',
   getAllEnzymeTypes = 'database.getAllEnzymeTypes',
@@ -42,6 +45,19 @@ export interface IGetTaxonomiesForImportPending extends Action {
 }
 export interface IGetTaxonomiesForImportPendingDone extends Action {
   type: dbActions.getTaxonomiesForImportPendingDone
+  taxonomiesPending: boolean
+}
+
+export interface IGetTaxonomies extends Action {
+  type: dbActions.getTaxonomies
+  payload: Promise<any>
+}
+export interface IGetTaxonomiesPending extends Action {
+  type: dbActions.getTaxonomiesPending
+  taxonomiesPending: boolean
+}
+export interface IGetTaxonomiesPendingDone extends Action {
+  type: dbActions.getTaxonomiesPendingDone
   taxonomiesPending: boolean
 }
 

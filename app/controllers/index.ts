@@ -15,6 +15,7 @@ export interface IClientState {
 export const samplesReducer = createReducer(samples.getInitialState(), {
   [samplesActions.getImportsPending]: samples.getImportsPending,
   [samplesActions.getImportsFulfilled]: samples.getImportsFulfilled,
+  [samplesActions.getTaxonomiesFulfilled]: samples.getTaxonomiesFulfilled,
   [samplesActions.getTaxonomiesForImportFulfilled]: samples.getTaxonomiesForImportFulfilled,
   [samplesActions.getEnzymeDistributionFulfilled]: samples.getEnzymeDistributionFulfilled,
   [samplesActions.getAllEnzymeTypesFulfilled]: samples.getAllEnzymeTypesFulfilled,
