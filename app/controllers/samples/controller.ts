@@ -68,7 +68,6 @@ export const setImportedRecord = (state: ISamplesState, action: ISetImportedReco
   }
 }
 export const getSamplesFulfilled = (state: ISamplesState, action: IGetSamplesFulfilled): ISamplesState => {
-  console.log("Payload:", action.payload)
   return {
     ...state,
     samples: action.payload,

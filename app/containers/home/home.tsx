@@ -4,7 +4,7 @@ import {AnyAction, bindActionCreators, Dispatch} from 'redux'
 import {connect} from 'react-redux'
 import {withRouter, RouteComponentProps} from 'react-router'
 import {IClientState} from '../../controllers'
-import {Button, Popover, Position, ButtonGroup, Spinner, Icon, Checkbox} from '@blueprintjs/core'
+import {Button, Popover, Position, ButtonGroup, Checkbox} from '@blueprintjs/core'
 import {
   getImportRecords,
   getTaxonomyTreeFull,
@@ -19,15 +19,16 @@ import {
 import {DBActions, getSamplesStatePending} from '../../controllers/database'
 import {Connection} from 'typeorm'
 import {ITaxonomyForSunburst} from '../../utils/interfaces'
-import {UBinSunburst} from '../../components/uBinSunburst'
 import {ThunkAction} from 'redux-thunk'
-import {UBinScatter} from '../../components/uBinScatter'
 import {IBin, IDomain} from 'samples'
 import {SampleMenu} from '../../components/sampleMenu'
-import {GCCoverageBarCharts} from '../../components/gCCoverageBarCharts'
-import {EnzymeDistributionBarCharts} from '../../components/enzymeDistributionBarCharts'
 import {BinMenu} from '../../components/binMenu'
 import {Bin} from '../../db/entities/Bin'
+import {Crossfilter} from 'crossfilter2'
+import {Sample} from '../../db/entities/Sample'
+import {UBinPlotsWrappers} from '../../components/uBinPlotsWrappers'
+// import * as crossfilter from 'crossfilter2'
+// import {IBarCharState} from '../../components/uBinBarChart'
 
 interface IProps extends RouteComponentProps {
 }
@@ -62,6 +63,10 @@ interface IActionsFromState {
   resetFilters(): void
 }
 
+export interface IHomeState {
+  cf?: Crossfilter<Sample>
+}
+
 const homeStyle = {
   display: 'flex',
   flexDirection: 'row',
@@ -87,49 +92,6 @@ class CHome extends React.Component<TProps> {
     let { samples, samplesPending, taxonomyTreeFull, domain, archaealEnzymeTypes, bacterialEnzymeTypes,
           updateSelectedTaxonomy, updateDomain, updateDomainX, updateDomainY, connection, importRecords,
           importRecordsState, getImportData, resetFilters, bins, binView, selectedBin} = this.props
-    const showScatter = (isReady: boolean): any => {
-      if (isReady) {
-        return <UBinScatter data={samples} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin} binView={binView}/>
-      } else {
-        return <Spinner size={20}/>
-      }
-    }
-    const getCharts = (): JSX.Element => {
-      if (samplesPending) {
-        return (
-          <div style={{alignItems: 'center', justifyContent: 'center', display: 'flex', height: '80vh', width: '100%'}}>
-            <Spinner size={100}/>
-          </div>
-        )
-      } else if (!samples.length) {
-        return (
-          <div style={{alignItems: 'center', justifyContent: 'center', display: 'flex', height: '80vh', width: '100%'}}>
-            <h2>Click on <span style={{backgroundColor: '#efefef', borderRadius: '4px', padding: '6px', margin: '6px', fontSize: 'initial', fontWeight: 400}}>
-              <Icon icon={'import'}/> Import</span> to import your datasets and get started!</h2>
-          </div>
-        )
-      }
-      return (
-        <>
-          <div style={{width: '70%'}}>
-            <div style={{width: '100%', display: 'flex'}}>
-              <div style={{width: '50%'}}>
-                {showScatter(!!samples.length)}
-              </div>
-              <div style={{width: '40%', marginTop: '30px'}}>
-                {taxonomyTreeFull &&
-                <UBinSunburst data={{ children: taxonomyTreeFull}} clickEvent={updateSelectedTaxonomy}/>}
-              </div>
-            </div>
-            <GCCoverageBarCharts samples={samples} samplesPending={samplesPending} domain={domain}
-                                 setDomainX={updateDomainX} setDomainY={updateDomainY}
-                                 domainChangeHandler={updateDomain} bin={selectedBin} binView={binView}/>
-          </div>
-          <EnzymeDistributionBarCharts samples={samples} samplesPending={samplesPending} domain={domain} bin={selectedBin}
-                                       archaealLabels={archaealEnzymeTypes} bacterialLabels={bacterialEnzymeTypes} binView={binView}/>
-        </>
-      )
-    }
 
     const getBinDropdown = (): JSX.Element => {
       return (
@@ -155,7 +117,11 @@ class CHome extends React.Component<TProps> {
           </div>
 
           <div style={{width: '100%', display: 'flex'}}>
-            {getCharts()}
+            <UBinPlotsWrappers connection={connection} importRecords={importRecords} archaealEnzymeTypes={archaealEnzymeTypes}
+                               bacterialEnzymeTypes={bacterialEnzymeTypes} samples={samples} importRecordsState={importRecordsState}
+                               samplesPending={samplesPending} bins={bins} binView={binView} selectedBin={selectedBin}
+                               updateDomain={updateDomain} updateDomainX={updateDomainX} updateDomainY={updateDomainY}
+                               updateSelectedTaxonomy={updateSelectedTaxonomy} taxonomyTreeFull={taxonomyTreeFull} domain={domain}/>
           </div>
         </div>
       </div>

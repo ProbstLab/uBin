@@ -155,12 +155,15 @@ export class UBinScatter extends React.PureComponent<IProps> {
       if (bottom && top) {
         scalingFactor = 20 / Math.sqrt((top.gc ** 2 - bottom.gc ** 2))
       }
+      let sum: number = 0
       let returnVals: any = combDim.group().reduce(this.reduceAdd, this.reduceRemove, this.reduceInitial).all().
                               filter((value: any) => value.value.count).map((value: any) => {
         let valObj: IScatterDetails = value.value
+        sum += valObj.lengthSum
         let size: number = Math.log(valObj.lengthSum)*scalingFactor
         return {gc: valObj.xSum/valObj.count, coverage: valObj.ySum/valObj.count, size, colour: valObj.colour}
       })
+      console.log(sum)
       return returnVals
     }
     return []

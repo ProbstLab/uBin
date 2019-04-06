@@ -109,6 +109,7 @@ export class DBActions {
             dispatch(DBActions.getBins(connection, recordId)),
             dispatch(DBActions.getSamples(connection, recordId, filters)),
             dispatch(SamplesActions.setImportedRecord(recordId)),
+            // dispatch(SamplesActions.resetFilters()),
           ]).then(() =>
               Promise.all([dispatch(DBActions.setImportDataFinished())]).then(() => resolve()))
         } else {

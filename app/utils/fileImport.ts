@@ -163,7 +163,7 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
   let samplePromises: Promise<ISample[]>[] = []
   while (itemList.length > 0) {
     // samplePromises.push(connection.createQueryBuilder().insert().into('sample').values([...itemList.splice(0, 100)]).execute())
-    await connection.getRepository('sample').save([...itemList.splice(0, 5000)])
+    await connection.getRepository('sample').save([...itemList.splice(0, 500)])
     console.log("saved", itemList.length, "left")
   }
   await Promise.all(samplePromises)
