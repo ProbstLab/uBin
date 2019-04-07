@@ -3,6 +3,8 @@ import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryBrushContain
 import {Crossfilter, Dimension} from 'crossfilter2'
 import {IBin} from 'samples'
 import {Sample} from '../db/entities/Sample'
+import {compareArrayToString} from '../utils/compare'
+import {Taxonomy} from '../db/entities/Taxonomy'
 
 interface IProps {
   cf: Crossfilter<Sample>
@@ -11,6 +13,8 @@ interface IProps {
   xName?: 'gc' | 'length' | 'coverage'
   yName?: 'gc' | 'length' | 'coverage'
   bin?: IBin
+  selectedTaxonomy?: Taxonomy
+  excludedTaxonomies?: Taxonomy[]
   binView: boolean
   setRange(range: [number, number]): void
 }
@@ -20,6 +24,7 @@ export interface IBarCharState {
   zoomDomain?: any
   groupDim?: Dimension<Sample, number>
   binDim?: Dimension<Sample, number>
+  taxonomyDim?: Dimension<Sample, string>
   originalXDomain?: [number, number]
 }
 
@@ -37,10 +42,12 @@ export class UBinSelectBarChartOverview extends React.Component<IProps> {
       if (this.props.xName === 'coverage') {
         this.setState({
           groupDim: cf.dimension((d: Sample) => Math.round(d.coverage/10)*10),
+          taxonomyDim: cf.dimension((d: Sample) => d.taxonomiesRelationString),
         })
       } else if (this.props.xName === 'gc') {
         this.setState({
           groupDim: cf.dimension((d: Sample) => Math.round(d.gc)),
+          taxonomyDim: cf.dimension((d: Sample) => d.taxonomiesRelationString),
         })
       }
     }
@@ -92,13 +99,27 @@ export class UBinSelectBarChartOverview extends React.Component<IProps> {
   }
 
   public getData(): any[] {
-    let { groupDim, binDim } = this.state
-    if (groupDim && binDim) {
-      let { bin, binView, xName, yName } = this.props
+    let { groupDim, binDim, taxonomyDim } = this.state
+    if (groupDim && binDim && taxonomyDim) {
+      let { bin, binView, xName, yName, selectedTaxonomy, excludedTaxonomies } = this.props
       if (bin && binView) {
         binDim.filterExact(bin.id)
       } else {
         binDim.filterAll()
+      }
+      if (selectedTaxonomy) {
+        let taxonomyString: string = ';'+selectedTaxonomy.id.toString()+';'
+        let excludedTaxonomyStrings: string[] = excludedTaxonomies ? excludedTaxonomies.map(excludedTaxonomy => ';'+excludedTaxonomy.id.toString()+';') : []
+        if (excludedTaxonomyStrings.length) {
+          taxonomyDim.filterFunction((d: string) => d.indexOf(taxonomyString) >= 0 && !compareArrayToString(d, excludedTaxonomyStrings))
+        } else {
+          taxonomyDim.filterFunction((d: string) => d.indexOf(taxonomyString) >= 0)
+        }
+      } else if (excludedTaxonomies && excludedTaxonomies.length) {
+        let excludedTaxonomyStrings: string[] = excludedTaxonomies ? excludedTaxonomies.map(excludedTaxonomy => ';'+excludedTaxonomy.id.toString()+';') : []
+        taxonomyDim.filterFunction((d: string) => !compareArrayToString(d, excludedTaxonomyStrings))
+      } else {
+        taxonomyDim.filterAll()
       }
       let grouped: any[] = []
       switch (xName) {

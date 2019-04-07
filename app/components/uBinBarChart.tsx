@@ -104,7 +104,7 @@ export class UBinBarChart extends React.Component<IProps> {
     return (
       <VictoryChart theme={VictoryTheme.material} domainPadding={20}
                     height={400}
-                    animate={{duration: 300}}
+                    // animate={{duration: 300}}
                     padding={{ left: 40, top: 40, right: 10, bottom: 204 }}>
         <VictoryAxis
           tickValues={this.props.xLabels}

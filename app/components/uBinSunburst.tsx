@@ -6,6 +6,7 @@ import {Sample} from '../db/entities/Sample'
 import {Taxonomy} from '../db/entities/Taxonomy'
 import {IValueMap} from "common"
 import {TreeCreator} from '../utils/treeCreator'
+import {Hotkeys, HotkeysTarget, Hotkey} from '@blueprintjs/core'
 
 const sunburstLabelStyle = {
   fontSize: '14px',
@@ -59,7 +60,8 @@ interface IProps {
   data: any
   cf: Crossfilter<Sample>
   taxonomies: IValueMap<Taxonomy>
-  clickEvent(id: number): void
+  selectTaxonomy(id: Taxonomy): void
+  excludeTaxonomy(id: Taxonomy): void
 }
 
 export interface ISunburstState {
@@ -71,7 +73,9 @@ export interface ISunburstState {
   tree?: any
 }
 
-export class UBinSunburst extends React.PureComponent<IProps> {
+@HotkeysTarget
+export class UBinSunburst extends React.Component<IProps> {
+  shouldExclude: boolean = false
 
   public state: ISunburstState = {
     namePathValue: '',
@@ -105,6 +109,18 @@ export class UBinSunburst extends React.PureComponent<IProps> {
     }
   }
 
+  public renderHotkeys() {
+    return <Hotkeys>
+      <Hotkey
+        global={true}
+        combo={'e'}
+        label={'Hold shift to exclude'}
+        onKeyDown={() => this.shouldExclude = true}
+        onKeyUp={() => this.shouldExclude = false}
+      />
+    </Hotkeys>
+  }
+
   public getData(): any {
     let {tree} = this.state
     return tree ? tree : {}
@@ -125,8 +141,10 @@ export class UBinSunburst extends React.PureComponent<IProps> {
   }
 
   public selectTaxonomy(datapoint: any): void {
-    if (!this.state.clicked) {
-      this.props.clickEvent(datapoint.id)
+    if (this.shouldExclude) {
+      this.props.excludeTaxonomy(this.props.taxonomies[datapoint.id])
+    } else {
+      this.props.selectTaxonomy(this.props.taxonomies[datapoint.id])
     }
   }
 
@@ -151,7 +169,7 @@ export class UBinSunburst extends React.PureComponent<IProps> {
             this.setState({
               finalValue: namePath[namePath.length - 1],
               namePathValue: namePath.slice(1).join(' > '),
-              data: updateData(this.props.data, pathAsMap)
+              data: updateData(this.props.data, pathAsMap),
             })
           }}
           onValueMouseOut={() =>
@@ -163,7 +181,7 @@ export class UBinSunburst extends React.PureComponent<IProps> {
                 data: updateData(this.props.data, false),
               })
           }
-          onValueClick={(datapoint: any, event: MouseEvent<HTMLElement>) => { this.selectTaxonomy(datapoint); this.setState({clicked: !clicked})}}
+          onValueClick={(datapoint: any, event: MouseEvent<HTMLElement>) => this.selectTaxonomy(datapoint)}
           style={{
             stroke: '#ddd',
             strokeOpacity: 0.3,

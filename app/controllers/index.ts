@@ -29,7 +29,12 @@ export const samplesReducer = createReducer(samples.getInitialState(), {
   [samplesActions.setBinView]: samples.setBinView,
   [samplesActions.removeFilters]: samples.removeFilters,
   [samplesActions.resetDomain]: samples.resetDomain,
+  [samplesActions.resetGC]: samples.resetGC,
+  [samplesActions.resetCoverage]: samples.resetCoverage,
+  [samplesActions.resetTaxonomies]: samples.resetTaxonomies,
+  [samplesActions.resetBin]: samples.resetBin,
   [samplesActions.setSelectedTaxonomy]: samples.setSelectedTaxonomy,
+  [samplesActions.addExcludedTaxonomy]: samples.addExcludedTaxonomy,
 })
 
 export const fileTreeReducer = createReducer(files.getInitialState(), {

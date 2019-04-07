@@ -40,8 +40,13 @@ export enum samplesActions {
   setDomainX = 'samples.setDomainX',
   setDomainY = 'samples.setDomainY',
   setSelectedTaxonomy = 'samples.setSelectedTaxonomy',
+  addExcludedTaxonomy = 'samples.addExcludedTaxonomy',
   removeFilters = 'samples.removeFilters',
   resetDomain = 'samples.resetDomain',
+  resetGC = 'samples.resetGC',
+  resetCoverage = 'samples.resetCoverage',
+  resetTaxonomies = 'samples.resetTaxonomies',
+  resetBin = 'samples.resetBin',
   setBinFilter = 'samples.setBinFilter',
   setBinView = 'samples.setBinView',
 }
@@ -85,6 +90,18 @@ export interface IRemoveFilters extends Action {
 export interface IResetDomain extends Action {
   type: samplesActions.resetDomain
 }
+export interface IResetGC extends Action {
+  type: samplesActions.resetGC
+}
+export interface IResetCoverage extends Action {
+  type: samplesActions.resetCoverage
+}
+export interface IResetTaxonomies extends Action {
+  type: samplesActions.resetTaxonomies
+}
+export interface IResetBin extends Action {
+  type: samplesActions.resetBin
+}
 
 export interface ISetImportedRecord extends Action {
   type: samplesActions.setImportedRecord
@@ -92,7 +109,11 @@ export interface ISetImportedRecord extends Action {
 }
 export interface ISetSelectedTaxonomy extends Action {
   type: samplesActions.setSelectedTaxonomy
-  taxonomyId: number | undefined
+  taxonomy: Taxonomy
+}
+export interface IAddExcludedTaxonomy extends Action {
+  type: samplesActions.addExcludedTaxonomy
+  taxonomy: Taxonomy
 }
 
 export interface ISetDomain extends Action {

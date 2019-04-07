@@ -4,7 +4,7 @@ import {AnyAction, bindActionCreators, Dispatch} from 'redux'
 import {connect} from 'react-redux'
 import {withRouter, RouteComponentProps} from 'react-router'
 import {IClientState} from '../../controllers'
-import {Button, Popover, Position, ButtonGroup, Checkbox, Spinner, Icon} from '@blueprintjs/core'
+import {Button, Popover, Position, ButtonGroup, Spinner, Icon} from '@blueprintjs/core'
 import {
   getImportRecords,
   IImportRecord,
@@ -13,7 +13,7 @@ import {
   getDomain,
   getImportRecordsState,
   getBacterialEnzymeTypes,
-  getArchaealEnzymeTypes, getBins, getSelectedBin, getBinView, getTaxonomiesMap, getSelectedTaxonomy,
+  getArchaealEnzymeTypes, getBins, getSelectedBin, getBinView, getTaxonomiesMap, getSelectedTaxonomy, getExcludedTaxonomies,
 } from '../../controllers/samples'
 import {DBActions, getSamplesStatePending} from '../../controllers/database'
 import {Connection} from 'typeorm'
@@ -27,6 +27,7 @@ import {Sample} from '../../db/entities/Sample'
 import {UBinPlotsWrappers} from '../../components/uBinPlotsWrappers'
 import {Taxonomy} from '../../db/entities/Taxonomy'
 import {IValueMap} from 'common'
+import {ResetMenu} from '../../components/resetMenu'
 
 interface IProps extends RouteComponentProps {
 }
@@ -44,14 +45,14 @@ interface IPropsFromState {
   bins: Bin[]
   binView: boolean
   selectedBin?: IBin
-  selectedTaxonomy?: number
+  selectedTaxonomy?: Taxonomy
+  excludedTaxonomies: Taxonomy[]
 }
 
 interface IActionsFromState {
   changePage(page: string): void
   startDb(): void
   getImportData(recordId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
-  updateSelectedTaxonomy(taxonomyId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   refreshImports(): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   updateDomain(domain: IDomain): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   setDomain(domain: IDomain): void
@@ -59,8 +60,13 @@ interface IActionsFromState {
   updateDomainY(domain: [number, number]): void
   updateBinView(isActive: boolean): void
   setSelectedBin(bin: Bin): void
-  setSelectedTaxonomy(id: number): void
+  setSelectedTaxonomy(taxonomy: Taxonomy): void
+  addExcludedTaxonomy(taxonomy: Taxonomy): void
   resetFilters(): void
+  resetGC(): void
+  resetCoverage(): void
+  resetTaxonomies(): void
+  resetBin(): void
 }
 
 export interface IHomeState {
@@ -89,14 +95,14 @@ class CHome extends React.Component<TProps> {
   }
 
   render(): JSX.Element {
-    let { samples, samplesPending, taxonomiesMap, domain, archaealEnzymeTypes, bacterialEnzymeTypes,
-          setSelectedTaxonomy, updateDomain, updateDomainX, updateDomainY, connection, importRecords,
-          importRecordsState, getImportData, resetFilters, bins, binView, selectedBin, selectedTaxonomy} = this.props
+    let { samples, samplesPending, taxonomiesMap, domain, archaealEnzymeTypes, bacterialEnzymeTypes, excludedTaxonomies,
+          setSelectedTaxonomy, updateDomain, updateDomainX, updateDomainY, connection, importRecords, addExcludedTaxonomy,
+          importRecordsState, getImportData, resetFilters, bins, binView, selectedBin, selectedTaxonomy, resetBin, resetGC, resetCoverage, resetTaxonomies} = this.props
 
     const getBinDropdown = (): JSX.Element => {
       return (
         <Popover content={<BinMenu bins={bins} setSelectedBin={this.props.setSelectedBin}/>} position={Position.BOTTOM}>
-          <Button intent={'primary'} disabled={!bins.length} rightIcon={'layout-group-by'} text='Select Bin'/>
+          <Button disabled={!bins.length} icon={'layout-group-by'} text='Select Bin'/>
         </Popover>)
     }
 
@@ -118,26 +124,32 @@ class CHome extends React.Component<TProps> {
       } else {
         return (<UBinPlotsWrappers connection={connection} importRecords={importRecords} archaealEnzymeTypes={archaealEnzymeTypes}
                                    bacterialEnzymeTypes={bacterialEnzymeTypes} samples={samples} importRecordsState={importRecordsState}
-                                   bins={bins} binView={binView} selectedBin={selectedBin} selectedTaxonomy={selectedTaxonomy}
-                                   taxonomies={taxonomiesMap} domain={domain}
+                                   bins={bins} binView={binView} selectedBin={selectedBin} taxonomies={taxonomiesMap} domain={domain}
+                                   selectedTaxonomy={selectedTaxonomy} excludedTaxonomies={excludedTaxonomies}
                                    updateDomain={updateDomain} updateDomainX={updateDomainX} updateDomainY={updateDomainY}
-                                   updateSelectedTaxonomy={setSelectedTaxonomy}/>)
+                                   setSelectedTaxonomy={setSelectedTaxonomy} addExcludedTaxonomy={addExcludedTaxonomy}/>)
       }
     }
     return (
       <div>
         <div style={homeStyle}>
           <div style={{width: '100%', display: 'flex'}}>
-            <Popover content={<SampleMenu importRecords={importRecords} importRecordsState={importRecordsState}
-                                          connection={connection} getImportData={getImportData}/>}
-                     position={Position.RIGHT_BOTTOM}>
-              <Button icon='settings' text='Data Settings/Import' />
-            </Popover>
-            <ButtonGroup style={{marginLeft: '12px'}}>
-              <Button intent={'warning'} icon={'filter-remove'} text='Reset filters' onClick={() => resetFilters()}/>
+            <ButtonGroup>
+              <Popover content={<SampleMenu importRecords={importRecords} importRecordsState={importRecordsState}
+                                            connection={connection} getImportData={getImportData}/>}
+                       position={Position.RIGHT_BOTTOM}>
+                <Button icon='settings' text='Data Settings/Import' />
+              </Popover>
               {getBinDropdown()}
+              <Popover content={<ResetMenu resetAll={resetFilters} resetGC={resetGC} resetCoverage={resetCoverage}
+                                           resetTaxonomies={resetTaxonomies} resetBin={resetBin}/>}
+                       position={Position.RIGHT_BOTTOM}>
+                <Button icon={'filter-remove'} text='Reset filters'/>
+              </Popover>
+              <Button text={binView ? 'Show all (filtered) scaffolds' : 'Limit to Bin'} icon={binView ? 'selection' : 'circle'}
+                      onClick={() => this.toggleBinView()}/>
             </ButtonGroup>
-            <Checkbox checked={binView} onClick={() => this.toggleBinView()}/>
+            {/*<Checkbox checked={binView} onClick={() => this.toggleBinView()}/>*/}
           </div>
 
           <div style={{width: '100%', display: 'flex'}}>
@@ -164,6 +176,7 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   binView: getBinView(state),
   selectedBin: getSelectedBin(state),
   selectedTaxonomy: getSelectedTaxonomy(state),
+  excludedTaxonomies: getExcludedTaxonomies(state),
 })
 
 const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
@@ -173,7 +186,6 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       startDb: DBActions.startDatabase,
       refreshImports: DBActions.refreshImports,
       getImportData: recordId => DBActions.getImportData(recordId),
-      updateSelectedTaxonomy: taxonomyIds => SamplesActions.updateSelectedTaxonomy(taxonomyIds),
       setDomain: domain => SamplesActions.setDomain(domain),
       updateDomain: domain => SamplesActions.updateDomain(domain),
       updateDomainX: domainX => SamplesActions.updateDomainX(domainX),
@@ -181,7 +193,12 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       updateBinView: isActive => SamplesActions.updateBinView(isActive),
       setSelectedBin: binId => SamplesActions.setSelectedBin(binId),
       setSelectedTaxonomy: taxonomyId => SamplesActions.setSelectedTaxonomy(taxonomyId),
+      addExcludedTaxonomy: taxonomyId => SamplesActions.addExcludedTaxonomy(taxonomyId),
       resetFilters: SamplesActions.resetFilters,
+      resetGC: SamplesActions.resetGC,
+      resetCoverage: SamplesActions.resetCoverage,
+      resetTaxonomies: SamplesActions.resetTaxonomies,
+      resetBin: SamplesActions.resetBin,
     },
     dispatch,
   )

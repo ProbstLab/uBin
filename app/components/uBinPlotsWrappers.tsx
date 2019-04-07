@@ -32,8 +32,10 @@ interface IProps {
   bins: Bin[]
   binView: boolean
   selectedBin?: IBin
-  selectedTaxonomy?: number
-  updateSelectedTaxonomy(taxonomyId: number): void
+  selectedTaxonomy?: Taxonomy
+  excludedTaxonomies: Taxonomy[]
+  setSelectedTaxonomy(taxonomy: Taxonomy): void
+  addExcludedTaxonomy(taxonomy: Taxonomy): void
   updateDomain(domain: IDomain): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   updateDomainX(domain: [number, number]): void
   updateDomainY(domain: [number, number]): void
@@ -50,24 +52,24 @@ export class UBinPlotsWrappers extends React.PureComponent<IProps> {
   }
 
   render(): JSX.Element {
-    let {samples, taxonomies, domain, selectedBin, binView, archaealEnzymeTypes, bacterialEnzymeTypes, selectedTaxonomy,
-        updateSelectedTaxonomy, updateDomain, updateDomainX, updateDomainY} = this.props
+    let {samples, taxonomies, domain, selectedBin, binView, archaealEnzymeTypes, bacterialEnzymeTypes, selectedTaxonomy, excludedTaxonomies,
+         setSelectedTaxonomy, addExcludedTaxonomy, updateDomain, updateDomainX, updateDomainY} = this.props
     let {cf} = this.state
     return (
       <>
         <div style={{width: '70%'}}>
           <div style={{width: '100%', display: 'flex'}}>
             <div style={{width: '50%'}}>
-              <UBinScatter cf={cf} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin}
+              <UBinScatter cf={cf} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin} excludedTaxonomies={excludedTaxonomies}
                            selectedTaxonomy={selectedTaxonomy} binView={binView}/>
             </div>
             <div style={{width: '60%', marginTop: '30px'}}>
-              {taxonomies &&
-              <UBinSunburst data={{ children: []}} taxonomies={taxonomies} cf={cf} clickEvent={updateSelectedTaxonomy}/>}
+              <UBinSunburst data={{ children: []}} taxonomies={taxonomies} cf={cf}
+                            selectTaxonomy={setSelectedTaxonomy} excludeTaxonomy={addExcludedTaxonomy}/>
             </div>
           </div>
-          <GCCoverageBarCharts samples={samples} domain={domain}
-                               setDomainX={updateDomainX} setDomainY={updateDomainY}
+          <GCCoverageBarCharts samples={samples} domain={domain} selectedTaxonomy={selectedTaxonomy}
+                               setDomainX={updateDomainX} setDomainY={updateDomainY} excludedTaxonomies={excludedTaxonomies}
                                domainChangeHandler={updateDomain} bin={selectedBin} binView={binView}/>
         </div>
         <EnzymeDistributionBarCharts domain={domain} bin={selectedBin} cf={cf}

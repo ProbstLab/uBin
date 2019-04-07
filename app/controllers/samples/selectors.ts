@@ -81,6 +81,10 @@ export const getSelectedTaxonomy = createSelector(
   getSamplesState,
   (state: ISamplesState) => state.filters.selectedTaxonomy,
 )
+export const getExcludedTaxonomies = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.filters.excludedTaxonomies,
+)
 
 export const getBinView = createSelector(
   getSamplesState,

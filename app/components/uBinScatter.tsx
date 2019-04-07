@@ -6,6 +6,8 @@ import {Dimension} from 'crossfilter2'
 import {Checkbox} from '@blueprintjs/core'
 import {Sample} from '../db/entities/Sample'
 import {numToColour} from '../utils/convert'
+import {compareArrayToString} from '../utils/compare'
+import {Taxonomy} from '../db/entities/Taxonomy'
 
 
 interface IProps {
@@ -15,7 +17,8 @@ interface IProps {
   domain?: IDomain
   bin?: IBin
   binView: boolean
-  selectedTaxonomy?: number
+  selectedTaxonomy?: Taxonomy
+  excludedTaxonomies?: Taxonomy[]
 }
 
 interface IScatterDetails {
@@ -113,7 +116,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
 
   public getData(): any {
     let { covDim, gcDim, combDim, binDim, taxonomyDim, originalDomain } = this.state
-    let { domain, bin, binView, cf, selectedTaxonomy } = this.props
+    let { domain, bin, binView, cf, selectedTaxonomy, excludedTaxonomies } = this.props
 
     if (domain && domain.x && domain.y && originalDomain && originalDomain.x && originalDomain.y) {
       let origSize: number = Math.sqrt((originalDomain.x[1] - originalDomain.x[0])**2) * Math.sqrt((originalDomain.y[1] - originalDomain.y[0])**2)
@@ -133,9 +136,13 @@ export class UBinScatter extends React.PureComponent<IProps> {
       if (domain) {
         if (domain.x) {
           gcDim.filterRange(domain.x)
+        } else {
+          gcDim.filterAll()
         }
         if (domain.y) {
           covDim.filterRange(domain.y)
+        } else {
+          covDim.filterAll()
         }
       } else {
         gcDim.filterAll()
@@ -148,8 +155,16 @@ export class UBinScatter extends React.PureComponent<IProps> {
         binDim.filterAll()
       }
       if (selectedTaxonomy) {
-        let taxonomyString: string = ';'+selectedTaxonomy.toString()+';'
-        taxonomyDim.filterFunction((d: string) => d.indexOf(taxonomyString) >= 0)
+        let taxonomyString: string = ';'+selectedTaxonomy.id.toString()+';'
+        let excludedTaxonomyStrings: string[] = excludedTaxonomies ? excludedTaxonomies.map(excludedTaxonomy => ';'+excludedTaxonomy.id.toString()+';') : []
+        if (excludedTaxonomyStrings.length) {
+          taxonomyDim.filterFunction((d: string) => d.indexOf(taxonomyString) >= 0 && !compareArrayToString(d, excludedTaxonomyStrings))
+        } else {
+          taxonomyDim.filterFunction((d: string) => d.indexOf(taxonomyString) >= 0)
+        }
+      } else if (excludedTaxonomies && excludedTaxonomies.length) {
+        let excludedTaxonomyStrings: string[] = excludedTaxonomies ? excludedTaxonomies.map(excludedTaxonomy => ';'+excludedTaxonomy.id.toString()+';') : []
+        taxonomyDim.filterFunction((d: string) => !compareArrayToString(d, excludedTaxonomyStrings))
       } else {
         taxonomyDim.filterAll()
       }

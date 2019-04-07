@@ -12,12 +12,12 @@ import {
   ISetDomainY,
   IGetAllEnzymeTypesFulfilled,
   IGetBinsFulfilled,
-  IResetDomain, ISetBinView, IGetTaxonomiesFulfilled, ISetSelectedTaxonomy
+  IResetDomain, ISetBinView, IGetTaxonomiesFulfilled, ISetSelectedTaxonomy, IResetCoverage, IResetGC, IResetBin, IResetTaxonomies
 } from './interfaces'
 import {ISetBinFilter} from './index'
 
 export const getInitialState = (): ISamplesState => ({
-  filters: {binView: true},
+  filters: {binView: true, excludedTaxonomies: []},
   importRecords: [],
   importsLoaded: false,
   importRecordsPending: false,
@@ -89,7 +89,27 @@ export const setSelectedTaxonomy = (state: ISamplesState, action: ISetSelectedTa
     ...state,
     filters: {
       ...state.filters,
-      selectedTaxonomy: action.taxonomyId,
+      selectedTaxonomy: action.taxonomy,
+    },
+  }
+}
+
+export const addExcludedTaxonomy = (state: ISamplesState, action: ISetSelectedTaxonomy): ISamplesState => {
+  return {
+    ...state,
+    filters: {
+      ...state.filters,
+      excludedTaxonomies: [...state.filters.excludedTaxonomies, action.taxonomy],
+    },
+  }
+}
+export const resetTaxonomies = (state: ISamplesState, action: IResetTaxonomies): ISamplesState => {
+  return {
+    ...state,
+    filters: {
+      ...state.filters,
+      excludedTaxonomies: [],
+      selectedTaxonomy: undefined,
     },
   }
 }
@@ -137,6 +157,15 @@ export const setBinFilter = (state: ISamplesState, action: ISetBinFilter): ISamp
     },
   }
 }
+export const resetBin = (state: ISamplesState, action: IResetBin): ISamplesState => {
+  return {
+    ...state,
+    filters: {
+      ...state.filters,
+      bin: undefined,
+    },
+  }
+}
 
 export const setBinView = (state: ISamplesState, action: ISetBinView): ISamplesState => {
   return {
@@ -151,7 +180,7 @@ export const setBinView = (state: ISamplesState, action: ISetBinView): ISamplesS
 export const removeFilters = (state: ISamplesState, action: IRemoveFilters): ISamplesState => {
   return {
     ...state,
-    filters: {binView: true},
+    filters: {binView: true, excludedTaxonomies: []},
   }
 }
 export const resetDomain = (state: ISamplesState, action: IResetDomain): ISamplesState => {
@@ -160,6 +189,30 @@ export const resetDomain = (state: ISamplesState, action: IResetDomain): ISample
     filters: {
       ...state.filters,
       domain: undefined,
+    },
+  }
+}
+export const resetGC = (state: ISamplesState, action: IResetGC): ISamplesState => {
+  return {
+    ...state,
+    filters: {
+      ...state.filters,
+      domain: {
+        ...state.filters.domain,
+        x: undefined,
+      },
+    },
+  }
+}
+export const resetCoverage = (state: ISamplesState, action: IResetCoverage): ISamplesState => {
+  return {
+    ...state,
+    filters: {
+      ...state.filters,
+      domain: {
+        ...state.filters.domain,
+        y: undefined,
+      },
     },
   }
 }

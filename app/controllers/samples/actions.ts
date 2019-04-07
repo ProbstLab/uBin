@@ -10,7 +10,14 @@ import {
   IGetImportsPending,
   ISetDomainX,
   ISetDomainY,
-  IGetAllEnzymeTypesFulfilled, IGetBinsFulfilled, ISetBinFilter, IResetDomain, ISetBinView, IGetTaxonomiesFulfilled, ISetSelectedTaxonomy
+  IGetAllEnzymeTypesFulfilled,
+  IGetBinsFulfilled,
+  ISetBinFilter,
+  IResetDomain,
+  ISetBinView,
+  IGetTaxonomiesFulfilled,
+  ISetSelectedTaxonomy,
+  IAddExcludedTaxonomy, IResetGC, IResetCoverage, IResetTaxonomies, IResetBin
 } from './interfaces'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
 import {IClientState} from '../index'
@@ -21,6 +28,7 @@ import {DBActions} from '../database'
 import {IDomain} from 'samples'
 // import {getImportRecordId} from './selectors'
 import {Bin} from '../../db/entities/Bin'
+import {Taxonomy} from '../../db/entities/Taxonomy'
 
 export class SamplesActions {
   static getImportsPending(payload: any): IGetImportsPending {
@@ -54,11 +62,26 @@ export class SamplesActions {
   static resetDomain(): IResetDomain {
     return {type: samplesActions.resetDomain}
   }
+  static resetGC(): IResetGC {
+    return {type: samplesActions.resetGC}
+  }
+  static resetCoverage(): IResetCoverage {
+    return {type: samplesActions.resetCoverage}
+  }
+  static resetTaxonomies(): IResetTaxonomies {
+    return {type: samplesActions.resetTaxonomies}
+  }
+  static resetBin(): IResetBin {
+    return {type: samplesActions.resetBin}
+  }
   static setImportedRecord(recordId: number): ISetImportedRecord {
     return {type: samplesActions.setImportedRecord, recordId}
   }
-  static setSelectedTaxonomy(taxonomyId: number): ISetSelectedTaxonomy {
-    return {type: samplesActions.setSelectedTaxonomy, taxonomyId}
+  static setSelectedTaxonomy(taxonomy: Taxonomy): ISetSelectedTaxonomy {
+    return {type: samplesActions.setSelectedTaxonomy, taxonomy}
+  }
+  static addExcludedTaxonomy(taxonomy: Taxonomy): IAddExcludedTaxonomy {
+    return {type: samplesActions.addExcludedTaxonomy, taxonomy}
   }
   static setDomain(domain: IDomain): ISetDomain {
     return {type: samplesActions.setDomain, domain}
@@ -76,14 +99,14 @@ export class SamplesActions {
     return {type: samplesActions.setBinView, binView}
   }
 
-  static updateSelectedTaxonomy(taxonomyId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
+  static updateSelectedTaxonomy(taxonomy: Taxonomy): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>(resolve => {
         let connection: Connection | undefined = getDBConnection(getState())
         let recordId: number | undefined = getState().samples.recordId
         if (connection && recordId) {
           Promise.all([
-            dispatch(SamplesActions.setSelectedTaxonomy(taxonomyId)),
+            dispatch(SamplesActions.setSelectedTaxonomy(taxonomy)),
           ]).then(() =>
           Promise.all([dispatch(DBActions.getImportData(recordId || 0))]).then(() => resolve()))
         } else {

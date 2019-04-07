@@ -4,6 +4,8 @@ import {Crossfilter, Dimension} from 'crossfilter2'
 import {IBin, IDomain} from 'samples'
 import {Sample} from '../db/entities/Sample'
 import {numToColour} from '../utils/convert'
+import {compareArrayToString} from '../utils/compare'
+import {Taxonomy} from '../db/entities/Taxonomy'
 
 interface IProps {
   cf: Crossfilter<Sample>
@@ -14,6 +16,8 @@ interface IProps {
   yName?: 'gc' | 'length' | 'coverage'
   bin?: IBin
   binView: boolean
+  selectedTaxonomy?: Taxonomy
+  excludedTaxonomies?: Taxonomy[]
   range?: [number, number]
   setWorldDomain(domain: [number, number]): void
   domainChangeHandler(domain: IDomain): void
@@ -26,6 +30,7 @@ export interface IBarCharState {
   coverageDim?: Dimension<Sample, number>
   gcDim?: Dimension<Sample, number>
   binDim?: Dimension<Sample, number>
+  taxonomyDim?: Dimension<Sample, string>
   originalXDomain?: [number, number]
 }
 
@@ -46,6 +51,7 @@ export class UBinCoverageBarChart extends React.Component<IProps> {
         coverageDim: cf.dimension((d: Sample) => d.coverage),
         gcDim: cf.dimension((d: Sample) => d.gc),
         groupDim: cf.dimension((d: Sample) => Math.round(d.coverage)),
+        taxonomyDim: cf.dimension((d: Sample) => d.taxonomiesRelationString),
       })
     }
   }
@@ -94,10 +100,10 @@ export class UBinCoverageBarChart extends React.Component<IProps> {
   }
 
   public getData(): any[] {
-    let { groupDim, gcDim, coverageDim, binDim } = this.state
-    if (groupDim && coverageDim && gcDim && binDim) {
+    let { groupDim, gcDim, coverageDim, binDim, taxonomyDim } = this.state
+    if (groupDim && coverageDim && gcDim && binDim && taxonomyDim) {
       let binChanged: boolean = false
-      let {xName, yName, bin, binView, range, gcRange} = this.props
+      let {xName, yName, bin, binView, range, gcRange, selectedTaxonomy, excludedTaxonomies} = this.props
 
       if (range) {
         coverageDim.filterRange(range)
@@ -118,6 +124,20 @@ export class UBinCoverageBarChart extends React.Component<IProps> {
         gcDim.filterRange(gcRange)
       } else {
         gcDim.filterAll()
+      }
+      if (selectedTaxonomy) {
+        let taxonomyString: string = ';'+selectedTaxonomy.id.toString()+';'
+        let excludedTaxonomyStrings: string[] = excludedTaxonomies ? excludedTaxonomies.map(excludedTaxonomy => ';'+excludedTaxonomy.id.toString()+';') : []
+        if (excludedTaxonomyStrings.length) {
+          taxonomyDim.filterFunction((d: string) => d.indexOf(taxonomyString) >= 0 && !compareArrayToString(d, excludedTaxonomyStrings))
+        } else {
+          taxonomyDim.filterFunction((d: string) => d.indexOf(taxonomyString) >= 0)
+        }
+      } else if (excludedTaxonomies && excludedTaxonomies.length) {
+        let excludedTaxonomyStrings: string[] = excludedTaxonomies ? excludedTaxonomies.map(excludedTaxonomy => ';'+excludedTaxonomy.id.toString()+';') : []
+        taxonomyDim.filterFunction((d: string) => !compareArrayToString(d, excludedTaxonomyStrings))
+      } else {
+        taxonomyDim.filterAll()
       }
       if (xName) {
         this.yMax = 0
