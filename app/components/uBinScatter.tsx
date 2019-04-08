@@ -44,6 +44,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
   xAxis?: [number, number]
   yAxis?: [number, number]
   zoom?: number
+  currentRanges?: {x: number, y: number}
 
   public state: IUBinScatterState = {
     logScale: false,
@@ -52,12 +53,13 @@ export class UBinScatter extends React.PureComponent<IProps> {
   public componentWillMount(): void {
     let {cf} = this.props
     this.setState({
-      combDim: cf.dimension((d: Sample) => d.gc+':'+Math.round(d.coverage)+':'+(d.bin ? d.bin.id : '')),
+      combDim: cf.dimension((d: Sample) => Math.round(d.gc/2)*2+':'+Math.round(d.coverage/50)*50+':'+(d.bin ? d.bin.id : '')),
       binDim: cf.dimension((d: Sample) => d.bin ? d.bin.id : 0),
       covDim: cf.dimension((d: Sample) => d.coverage),
       taxonomyDim: cf.dimension((d: Sample) => d.taxonomiesRelationString),
       gcDim: cf.dimension((d: Sample) => d.gc),
     })
+    this.setScatterScaling()
   }
 
   public componentDidMount(): void {
@@ -80,6 +82,33 @@ export class UBinScatter extends React.PureComponent<IProps> {
           },
         })
       }
+    }
+  }
+
+  public componentWillUpdate(): void {
+    this.setScatterScaling()
+  }
+
+  public setScatterScaling(): void {
+    let {domain, cf} = this.props
+    if (domain && domain.x && domain.y) {
+      let currentXRange: number = Math.sqrt((domain.x[1] - domain.x[0])**2)
+      let currentYRange: number = Math.sqrt((domain.y[1] - domain.y[0])**2)
+      // console.log("currentXRange:", currentXRange, "currentYRange:", currentYRange, "this.currentRanges:", this.currentRanges)
+      // console.log("True?", (!this.currentRanges || this.currentRanges.x !== currentXRange || this.currentRanges.y !== currentYRange))
+      if (!this.currentRanges || this.currentRanges.y !== currentYRange) {
+        this.currentRanges = {x: currentXRange, y: currentYRange}
+        // let xRoundTo = Math.round(currentXRange/25) > 0 ? Math.round(currentXRange/25) : 0.5
+        let yRoundTo = Math.round(currentYRange/100) > 10 ? Math.round(currentYRange/100) : 10
+        // console.log("Round to:", yRoundTo, "range: ", currentYRange)
+        this.setState({combDim: cf.dimension(
+            (d: Sample) => d.gc+':'+this.round(d.coverage, yRoundTo, 0).toString()+':'+(d.bin ? d.bin.id : ''))},
+        )
+      }
+    } else if (this.currentRanges) {
+      this.setState({
+        combDim: cf.dimension((d: Sample) => Math.round(d.gc / 2) * 2 + ':' + Math.round(d.coverage / 50) * 50 + ':' + (d.bin ? d.bin.id : ''))
+      })
     }
   }
 
@@ -111,26 +140,13 @@ export class UBinScatter extends React.PureComponent<IProps> {
   }
 
   public round(num: number, x: number, o: number): number {
+    // console.log("Num:", num, "x:", x, "o:", o, "return:", Math.round((o + Math.ceil((num - o)/ x ) * x)*10)/10)
     return Math.round((o + Math.ceil((num - o)/ x ) * x)*10)/10
   }
 
   public getData(): any {
-    let { covDim, gcDim, combDim, binDim, taxonomyDim, originalDomain } = this.state
-    let { domain, bin, binView, cf, selectedTaxonomy, excludedTaxonomies } = this.props
-
-    if (domain && domain.x && domain.y && originalDomain && originalDomain.x && originalDomain.y) {
-      let origSize: number = Math.sqrt((originalDomain.x[1] - originalDomain.x[0])**2) * Math.sqrt((originalDomain.y[1] - originalDomain.y[0])**2)
-      let currentSize: number = Math.sqrt((domain.x[1] - domain.x[0])**2) * Math.sqrt((domain.y[1] - domain.y[0])**2)
-      if (origSize && currentSize) {
-        let roundedStepSize: number = Math.round(currentSize/origSize * 100)/100
-        if (this.zoom !== roundedStepSize) {
-          this.zoom = roundedStepSize
-          this.setState({combDim: cf.dimension(
-            (d: Sample) => d.gc+':'+this.round(d.coverage, this.zoom || 0.1, 0).toString()+':'+(d.bin ? d.bin.id : ''))},
-            )
-        }
-      }
-    }
+    let { covDim, gcDim, combDim, binDim, taxonomyDim } = this.state
+    let { domain, bin, binView, selectedTaxonomy, excludedTaxonomies } = this.props
 
     if (gcDim && covDim && combDim && binDim && taxonomyDim) {
       if (domain) {
