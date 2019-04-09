@@ -34,11 +34,16 @@ interface IProps {
   selectedBin?: IBin
   selectedTaxonomy?: Taxonomy
   excludedTaxonomies: Taxonomy[]
+  consensusName?: string
+  sampleName?: string
   setSelectedTaxonomy(taxonomy: Taxonomy): void
   addExcludedTaxonomy(taxonomy: Taxonomy): void
   updateDomain(domain: IDomain): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   updateDomainX(domain: [number, number]): void
   updateDomainY(domain: [number, number]): void
+  setConsensus(consensus: Taxonomy): void
+  setGCAverage(avg: number): void
+  setCoverageAverage(avg: number): void
 }
 
 interface IUBinPlotsWrappersState {
@@ -46,14 +51,22 @@ interface IUBinPlotsWrappersState {
 }
 
 export class UBinPlotsWrappers extends React.PureComponent<IProps> {
+  oldConsensusName?: string
+  oldSampleName?: string
 
   public state: IUBinPlotsWrappersState = {
     cf: crossfilter(this.props.samples),
   }
+  // public shouldComponentUpdate(nextProps: IProps): boolean {
+  //   const shouldUpdate = this.oldConsensusName === this.props.consensusName && this.oldSampleName === this.props.sampleName
+  //   this.oldConsensusName = this.props.consensusName
+  //   this.oldSampleName = this.props.sampleName
+  //   return shouldUpdate
+  // }
 
   render(): JSX.Element {
     let {samples, taxonomies, domain, selectedBin, binView, archaealEnzymeTypes, bacterialEnzymeTypes, selectedTaxonomy, excludedTaxonomies,
-         setSelectedTaxonomy, addExcludedTaxonomy, updateDomain, updateDomainX, updateDomainY} = this.props
+         setSelectedTaxonomy, addExcludedTaxonomy, updateDomain, updateDomainX, updateDomainY, setConsensus, setGCAverage, setCoverageAverage} = this.props
     let {cf} = this.state
     return (
       <>
@@ -61,10 +74,10 @@ export class UBinPlotsWrappers extends React.PureComponent<IProps> {
           <div style={{width: '100%', display: 'flex'}}>
             <div style={{width: '50%'}}>
               <UBinScatter cf={cf} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin} excludedTaxonomies={excludedTaxonomies}
-                           selectedTaxonomy={selectedTaxonomy} binView={binView}/>
+                           selectedTaxonomy={selectedTaxonomy} binView={binView} setGCAverage={setGCAverage} setCoverageAverage={setCoverageAverage}/>
             </div>
             <div style={{width: '60%', marginTop: '30px'}}>
-              <UBinSunburst data={{ children: []}} taxonomies={taxonomies} cf={cf}
+              <UBinSunburst data={{ children: []}} taxonomies={taxonomies} cf={cf} setConsensus={setConsensus}
                             selectTaxonomy={setSelectedTaxonomy} excludeTaxonomy={addExcludedTaxonomy}/>
             </div>
           </div>

@@ -15,7 +15,7 @@ import {
   IGetTaxonomiesForImportPendingDone,
   IGetSamplesForBin,
   IGetTaxonomies,
-  IGetTaxonomiesPending, IGetTaxonomiesPendingDone,
+  IGetTaxonomiesPending, IGetTaxonomiesPendingDone, ISaveBin,
 } from './interfaces'
 import {Connection} from 'typeorm'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
@@ -29,7 +29,7 @@ import {
   getSamplesForBinQuery,
   getSamplesQuery,
   getTaxonomiesAndCountQuery,
-  getAllTaxonomiesQuery
+  getAllTaxonomiesQuery, saveBinQuery
 } from './queries'
 import {SamplesActions} from '../samples'
 import {ISampleFilter} from 'samples'
@@ -99,6 +99,11 @@ export class DBActions {
 
   static getImports(connection: Connection): IGetImports {
     return {type: dbActions.getImports, payload: connection.getRepository('import_record').find()}
+  }
+
+  static saveBin(connection: Connection, recordId: number, data: any[], filters: ISampleFilter,
+                 name: {covAvg?: number, gcAvg?: number, consensusName?: string, sampleName?: string}): ISaveBin {
+    return {type: dbActions.saveBin, payload: saveBinQuery(connection, recordId, data, filters, name)}
   }
 
   static startDatabase(): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {

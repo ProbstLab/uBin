@@ -12,7 +12,16 @@ import {
   ISetDomainY,
   IGetAllEnzymeTypesFulfilled,
   IGetBinsFulfilled,
-  IResetDomain, ISetBinView, IGetTaxonomiesFulfilled, ISetSelectedTaxonomy, IResetCoverage, IResetGC, IResetBin, IResetTaxonomies
+  IResetDomain,
+  ISetBinView,
+  IGetTaxonomiesFulfilled,
+  ISetSelectedTaxonomy,
+  IResetCoverage,
+  IResetGC,
+  IResetBin,
+  IResetTaxonomies,
+  ISetConsensus,
+  ISetGCAverage, ISetCoverageAverage, ISetConsensusName, ISetSampleName, ISetSavingBins
 } from './interfaces'
 import {ISetBinFilter} from './index'
 
@@ -214,5 +223,43 @@ export const resetCoverage = (state: ISamplesState, action: IResetCoverage): ISa
         y: undefined,
       },
     },
+  }
+}
+
+export const setConsensus = (state: ISamplesState, action: ISetConsensus): ISamplesState => {
+  return {
+    ...state,
+    consensus: action.consensus,
+  }
+}
+export const setConsensusName = (state: ISamplesState, action: ISetConsensusName): ISamplesState => {
+  return {
+    ...state,
+    consensusName: action.consensusName,
+  }
+}
+export const setSampleName = (state: ISamplesState, action: ISetSampleName): ISamplesState => {
+  return {
+    ...state,
+    sampleName: action.sampleName,
+  }
+}
+export const setGCAverage = (state: ISamplesState, action: ISetGCAverage): ISamplesState => {
+  return {
+    ...state,
+    gcAvg: action.avg,
+  }
+}
+export const setCoverageAverage = (state: ISamplesState, action: ISetCoverageAverage): ISamplesState => {
+  return {
+    ...state,
+    coverageAvg: action.avg,
+  }
+}
+
+export const setSavingBins = (state: ISamplesState, action: ISetSavingBins): ISamplesState => {
+  return {
+    ...state,
+    savingBins: action.saving,
   }
 }

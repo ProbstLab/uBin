@@ -13,7 +13,13 @@ import {
   getDomain,
   getImportRecordsState,
   getBacterialEnzymeTypes,
-  getArchaealEnzymeTypes, getBins, getSelectedBin, getBinView, getTaxonomiesMap, getSelectedTaxonomy, getExcludedTaxonomies,
+  getArchaealEnzymeTypes,
+  getBins,
+  getSelectedBin,
+  getBinView,
+  getTaxonomiesMap,
+  getSelectedTaxonomy,
+  getExcludedTaxonomies,
 } from '../../controllers/samples'
 import {DBActions, getSamplesStatePending} from '../../controllers/database'
 import {Connection} from 'typeorm'
@@ -22,12 +28,11 @@ import {IBin, IDomain} from 'samples'
 import {SampleMenu} from '../../components/sampleMenu'
 import {BinMenu} from '../../components/binMenu'
 import {Bin} from '../../db/entities/Bin'
-import {Crossfilter} from 'crossfilter2'
-import {Sample} from '../../db/entities/Sample'
 import {UBinPlotsWrappers} from '../../components/uBinPlotsWrappers'
 import {Taxonomy} from '../../db/entities/Taxonomy'
 import {IValueMap} from 'common'
 import {ResetMenu} from '../../components/resetMenu'
+import {BinNaming} from '../../components/binNaming'
 
 interface IProps extends RouteComponentProps {
 }
@@ -67,10 +72,9 @@ interface IActionsFromState {
   resetCoverage(): void
   resetTaxonomies(): void
   resetBin(): void
-}
-
-export interface IHomeState {
-  cf?: Crossfilter<Sample>
+  setConsensus(consensus: Taxonomy): void
+  setGCAverage(avg: number): void
+  setCoverageAverage(avg: number): void
 }
 
 const homeStyle = {
@@ -96,8 +100,9 @@ class CHome extends React.Component<TProps> {
 
   render(): JSX.Element {
     let { samples, samplesPending, taxonomiesMap, domain, archaealEnzymeTypes, bacterialEnzymeTypes, excludedTaxonomies,
-          setSelectedTaxonomy, updateDomain, updateDomainX, updateDomainY, connection, importRecords, addExcludedTaxonomy,
-          importRecordsState, getImportData, resetFilters, bins, binView, selectedBin, selectedTaxonomy, resetBin, resetGC, resetCoverage, resetTaxonomies} = this.props
+          setSelectedTaxonomy, updateDomain, updateDomainX, updateDomainY, connection, importRecords, addExcludedTaxonomy, setConsensus,
+          importRecordsState, getImportData, resetFilters, bins, binView, selectedBin, selectedTaxonomy, resetBin, resetGC, resetCoverage,
+          resetTaxonomies, setGCAverage, setCoverageAverage} = this.props
 
     const getBinDropdown = (): JSX.Element => {
       return (
@@ -125,31 +130,37 @@ class CHome extends React.Component<TProps> {
         return (<UBinPlotsWrappers connection={connection} importRecords={importRecords} archaealEnzymeTypes={archaealEnzymeTypes}
                                    bacterialEnzymeTypes={bacterialEnzymeTypes} samples={samples} importRecordsState={importRecordsState}
                                    bins={bins} binView={binView} selectedBin={selectedBin} taxonomies={taxonomiesMap} domain={domain}
-                                   selectedTaxonomy={selectedTaxonomy} excludedTaxonomies={excludedTaxonomies}
+                                   selectedTaxonomy={selectedTaxonomy} excludedTaxonomies={excludedTaxonomies} setConsensus={setConsensus}
                                    updateDomain={updateDomain} updateDomainX={updateDomainX} updateDomainY={updateDomainY}
-                                   setSelectedTaxonomy={setSelectedTaxonomy} addExcludedTaxonomy={addExcludedTaxonomy}/>)
+                                   setSelectedTaxonomy={setSelectedTaxonomy} addExcludedTaxonomy={addExcludedTaxonomy}
+                                   setGCAverage={setGCAverage} setCoverageAverage={setCoverageAverage}/>)
       }
     }
+    let dataLoaded: boolean = !samplesPending && samples.length > 0
     return (
       <div>
         <div style={homeStyle}>
           <div style={{width: '100%', display: 'flex'}}>
-            <ButtonGroup>
-              <Popover content={<SampleMenu importRecords={importRecords} importRecordsState={importRecordsState}
-                                            connection={connection} getImportData={getImportData}/>}
-                       position={Position.RIGHT_BOTTOM}>
-                <Button icon='settings' text='Data Settings/Import' />
-              </Popover>
-              {getBinDropdown()}
-              <Popover content={<ResetMenu resetAll={resetFilters} resetGC={resetGC} resetCoverage={resetCoverage}
-                                           resetTaxonomies={resetTaxonomies} resetBin={resetBin}/>}
-                       position={Position.RIGHT_BOTTOM}>
-                <Button icon={'filter-remove'} text='Reset filters'/>
-              </Popover>
-              <Button text={binView ? 'Show all (filtered) scaffolds' : 'Limit to Bin'} icon={binView ? 'selection' : 'circle'}
-                      onClick={() => this.toggleBinView()}/>
-            </ButtonGroup>
-            {/*<Checkbox checked={binView} onClick={() => this.toggleBinView()}/>*/}
+            <div style={{width: '60%', minWidth: '400px'}}>
+              <ButtonGroup>
+                <Popover content={<SampleMenu importRecords={importRecords} importRecordsState={importRecordsState}
+                                              connection={connection} getImportData={getImportData}/>}
+                         position={Position.RIGHT_BOTTOM}>
+                  <Button icon='settings' text='Data Settings/Import' />
+                </Popover>
+                {getBinDropdown()}
+                <Popover content={<ResetMenu resetAll={resetFilters} resetGC={resetGC} resetCoverage={resetCoverage}
+                                             resetTaxonomies={resetTaxonomies} resetBin={resetBin}/>}
+                         position={Position.RIGHT_BOTTOM}>
+                  <Button icon={'filter-remove'} text='Reset filters'/>
+                </Popover>
+                <Button text={binView ? 'Show all (filtered) scaffolds' : 'Limit to Bin'} icon={binView ? 'selection' : 'circle'}
+                        onClick={() => this.toggleBinView()}/>
+              </ButtonGroup>
+            </div>
+            <div style={{width: '40%', minWidth: '300px', display: 'flex'}}>
+              <BinNaming dataLoaded={dataLoaded}/>
+            </div>
           </div>
 
           <div style={{width: '100%', display: 'flex'}}>
@@ -194,6 +205,9 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       setSelectedBin: binId => SamplesActions.setSelectedBin(binId),
       setSelectedTaxonomy: taxonomyId => SamplesActions.setSelectedTaxonomy(taxonomyId),
       addExcludedTaxonomy: taxonomyId => SamplesActions.addExcludedTaxonomy(taxonomyId),
+      setConsensus: consensus => SamplesActions.setConsensus(consensus),
+      setGCAverage: consensus => SamplesActions.setGCAverage(consensus),
+      setCoverageAverage: consensus => SamplesActions.setCoverageAverage(consensus),
       resetFilters: SamplesActions.resetFilters,
       resetGC: SamplesActions.resetGC,
       resetCoverage: SamplesActions.resetCoverage,

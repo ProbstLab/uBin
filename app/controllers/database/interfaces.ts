@@ -24,6 +24,7 @@ export enum dbActions {
   getBins = 'database.getBins',
   getBinsPending = 'database.getBins_PENDING',
   getSamplesForBin = 'database.getSamplesForBin',
+  saveBin = 'database.saveBin',
 }
 
 export interface IConnectDatabase extends Action {
@@ -99,5 +100,9 @@ export interface IGetBins extends Action {
 }
 export interface IGetSamplesForBin extends Action {
   type: dbActions.getSamplesForBin
+  payload: Promise<any>
+}
+export interface ISaveBin extends Action {
+  type: dbActions.saveBin
   payload: Promise<any>
 }

@@ -100,3 +100,29 @@ export const getImportRecordsState = createSelector(
   getSamplesState,
   (state: ISamplesState) => {return {pending: state.importRecordsPending, loaded: state.importsLoaded}},
 )
+
+export const getConsensus = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.consensus,
+)
+export const getConsensusName = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.consensusName,
+)
+export const getSampleName = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.sampleName,
+)
+export const getGCAverage = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.gcAvg,
+)
+export const getCoverageAverage = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.coverageAvg,
+)
+export const getBinName = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => {return {covAvg: state.coverageAvg, gcAvg: state.gcAvg,
+                                              consensusName: state.consensusName, sampleName: state.sampleName}},
+)

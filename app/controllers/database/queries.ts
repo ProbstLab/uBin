@@ -1,5 +1,8 @@
 import {Connection} from 'typeorm'
 import {ISampleFilter} from 'samples'
+import {Sample} from '../../db/entities/Sample'
+import {compareArrayToString} from '../../utils/compare'
+import {IBin} from '../../utils/interfaces'
 
 export const scatterFilter = (query: any, filter?: ISampleFilter): any => {
   if (filter) {
@@ -104,4 +107,61 @@ export const getSamplesForBinQuery = async (connection: Connection, recordId: nu
     .where('sample.importRecordId = :recordId', {recordId})
     .andWhere('sample.binId = :binId', {binId})
   return query.getMany()
+}
+
+const compareScaffoldWithFilters = (sample: Sample, filter: ISampleFilter, excludedTaxonomyStrings: string[], selectedTaxonomy?: string): boolean => {
+  if (selectedTaxonomy) {
+    if (sample.taxonomiesRelationString.indexOf(selectedTaxonomy) < 0) { return false }
+  }
+  if (excludedTaxonomyStrings.length) {
+    if (!compareArrayToString(sample.taxonomiesRelationString, excludedTaxonomyStrings)) { return false }
+  }
+  if (filter.domain) {
+    if (filter.domain.x) {
+      if (sample.gc < filter.domain.x[0] || sample.gc > filter.domain.x[1]) {
+        return false
+      }
+    }
+    if (filter.domain.y) {
+      if (sample.coverage < filter.domain.y[0] || sample.coverage > filter.domain.y[1]) {
+        return false
+      }
+    }
+  }
+  return true
+}
+
+export const saveBinQuery = async (connection: Connection, recordId: number, data: any[], filter: ISampleFilter,
+                                   name: {covAvg?: number, gcAvg?: number, consensusName?: string, sampleName?: string}): Promise<any> => {
+  let idList: number[] = []
+  let selectedTaxonomy: string|undefined = filter.selectedTaxonomy ? ';'+filter.selectedTaxonomy.id+';' : undefined
+  let excludedTaxonomyStrings: string[] = filter.excludedTaxonomies ? filter.excludedTaxonomies.map(excludedTaxonomy => ';'+excludedTaxonomy.id.toString()+';') : []
+
+  if (filter.binView && filter.bin) {
+    for (let i: number = 0; i < data.length; i++) {
+      if (data[i].bin && data[i].bin.id === filter.bin.id) {
+        if (compareScaffoldWithFilters(data[i], filter, excludedTaxonomyStrings, selectedTaxonomy)) {
+          idList.push(data[i].id)
+        }
+      }
+    }
+  } else {
+    for (let i: number = 0; i < data.length; i++) {
+      if (compareScaffoldWithFilters(data[i], filter, excludedTaxonomyStrings, selectedTaxonomy)) {
+        idList.push(data[i].id)
+      }
+    }
+  }
+  let binName: string = [name.sampleName, name.consensusName, name.gcAvg, name.covAvg].join('_')
+  let exists: number = await connection.getRepository('bin').createQueryBuilder('bin')
+                            .select('bin.id')
+                            .where('bin.name = :binName', {binName})
+                            .andWhere('bin.importRecord = :recordId', {recordId})
+                            .getCount()
+  if (exists) {
+    binName = [name.sampleName, name.consensusName+'2', name.gcAvg, name.covAvg].join('_')
+  }
+  let newBin: IBin = await connection.getRepository('bin').save({name: binName, importRecord: recordId})
+  return connection.getRepository('sample').createQueryBuilder('sample')
+                   .update('sample').set({bin: newBin.id}).where('id IN (:...idList)', {idList}).execute()
 }

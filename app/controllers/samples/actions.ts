@@ -17,7 +17,16 @@ import {
   ISetBinView,
   IGetTaxonomiesFulfilled,
   ISetSelectedTaxonomy,
-  IAddExcludedTaxonomy, IResetGC, IResetCoverage, IResetTaxonomies, IResetBin
+  IAddExcludedTaxonomy,
+  IResetGC,
+  IResetCoverage,
+  IResetTaxonomies,
+  IResetBin,
+  ISetConsensus,
+  ISetGCAverage,
+  ISetCoverageAverage,
+  ISetConsensusName,
+  ISetSampleName, ISetSavingBins
 } from './interfaces'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
 import {IClientState} from '../index'
@@ -29,6 +38,7 @@ import {IDomain} from 'samples'
 // import {getImportRecordId} from './selectors'
 import {Bin} from '../../db/entities/Bin'
 import {Taxonomy} from '../../db/entities/Taxonomy'
+import {getBinName, getImportRecordId, getSamples, getSamplesFilters} from './selectors'
 
 export class SamplesActions {
   static getImportsPending(payload: any): IGetImportsPending {
@@ -97,6 +107,26 @@ export class SamplesActions {
   }
   static setBinView(binView: boolean): ISetBinView {
     return {type: samplesActions.setBinView, binView}
+  }
+
+  static setConsensus(consensus: Taxonomy): ISetConsensus {
+    return {type: samplesActions.setConsensus, consensus}
+  }
+  static setConsensusName(consensusName: string): ISetConsensusName {
+    return {type: samplesActions.setConsensusName, consensusName}
+  }
+  static setSampleName(sampleName: string): ISetSampleName {
+    return {type: samplesActions.setSampleName, sampleName}
+  }
+  static setGCAverage(avg: number): ISetGCAverage {
+    return {type: samplesActions.setGCAverage, avg}
+  }
+  static setCoverageAverage(avg: number): ISetCoverageAverage {
+    return {type: samplesActions.setCoverageAverage, avg}
+  }
+
+  static setSavingBins(saving: boolean): ISetSavingBins {
+    return {type: samplesActions.setSavingBins, saving}
   }
 
   static updateSelectedTaxonomy(taxonomy: Taxonomy): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
@@ -187,6 +217,26 @@ export class SamplesActions {
                             dispatch(SamplesActions.setBinView(true))]).then(
           () => SamplesActions.updateTaxonomy(dispatch, resolve, getState()),
         )
+      })
+    }
+  }
+
+  static saveBin(): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
+    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
+      return new Promise<void>(resolve => {
+        let binName = getBinName(getState())
+        let data = getSamples(getState())
+        let filters = getSamplesFilters(getState())
+        let connection = getDBConnection(getState())
+        let recordId = getImportRecordId(getState())
+        if (connection && recordId) {
+          Promise.all([dispatch(DBActions.saveBin(connection, recordId, data, filters, binName)),
+            dispatch(SamplesActions.setSavingBins(true))]).then(
+            () => resolve(),
+          )
+        } else {
+          resolve()
+        }
       })
     }
   }

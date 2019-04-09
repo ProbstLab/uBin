@@ -24,6 +24,12 @@ export interface ISamplesState {
   bins: Bin[]
   importRecordsPending: boolean
   importsLoaded: boolean
+  consensus?: Taxonomy
+  consensusName?: string
+  sampleName?: string
+  gcAvg?: number
+  coverageAvg?: number
+  savingBins?: boolean
 }
 
 export enum samplesActions {
@@ -49,6 +55,12 @@ export enum samplesActions {
   resetBin = 'samples.resetBin',
   setBinFilter = 'samples.setBinFilter',
   setBinView = 'samples.setBinView',
+  setConsensus = 'samples.setConsensus',
+  setConsensusName = 'samples.setConsensusName',
+  setSampleName = 'samples.setSampleName',
+  setGCAverage = 'samples.setGCAverage',
+  setCoverageAverage = 'samples.setCoverageAverage',
+  setSavingBins = 'samples.setSavingBins',
 }
 export interface IGetImportsPending extends Action {
   type: samplesActions.getImportsPending
@@ -135,4 +147,30 @@ export interface ISetBinFilter extends Action {
 export interface ISetBinView extends Action {
   type: samplesActions.setBinView
   binView: boolean
+}
+
+export interface ISetConsensus extends Action {
+  type: samplesActions.setConsensus
+  consensus: Taxonomy
+}
+export interface ISetConsensusName extends Action {
+  type: samplesActions.setConsensusName
+  consensusName: string
+}
+export interface ISetSampleName extends Action {
+  type: samplesActions.setSampleName
+  sampleName: string
+}
+export interface ISetGCAverage extends Action {
+  type: samplesActions.setGCAverage
+  avg: number
+}
+export interface ISetCoverageAverage extends Action {
+  type: samplesActions.setCoverageAverage
+  avg: number
+}
+
+export interface ISetSavingBins extends Action {
+  type: samplesActions.setSavingBins
+  saving: boolean
 }

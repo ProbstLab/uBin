@@ -62,6 +62,7 @@ interface IProps {
   taxonomies: IValueMap<Taxonomy>
   selectTaxonomy(id: Taxonomy): void
   excludeTaxonomy(id: Taxonomy): void
+  setConsensus(consensus: Taxonomy): void
 }
 
 export interface ISunburstState {
@@ -76,6 +77,8 @@ export interface ISunburstState {
 @HotkeysTarget
 export class UBinSunburst extends React.Component<IProps> {
   shouldExclude: boolean = false
+  consensus?: string
+  lastUpdateLength?: number
 
   public state: ISunburstState = {
     namePathValue: '',
@@ -99,11 +102,30 @@ export class UBinSunburst extends React.Component<IProps> {
     }
   }
 
+  // public shouldComponentUpdate(nextProps: IProps): boolean {
+  //   let {groupDim} = this.state
+  //   if (!groupDim || this.lastUpdateLength === undefined) { this.lastUpdateLength = 0; return true }
+  //   let nextLength = nextProps.cf.dimension((d: Sample) => d.taxonomiesRelationString).group().all().filter(d => d.value).length
+  //   if (this.lastUpdateLength !== nextLength){
+  //     this.lastUpdateLength = nextLength
+  //     return true
+  //   }
+  //   return false
+  // }
+
   public componentWillUpdate(): void {
     let {groupDim, pastLength} = this.state
     if (groupDim) {
-      let grouped: Grouping<NaturallyOrderedValue, NaturallyOrderedValue>[] = groupDim.group().all().filter(d => d.value)
+      let grouped: Grouping<NaturallyOrderedValue, NaturallyOrderedValue>[] = groupDim.group().top(Infinity).filter(d => d.value)
       if (grouped.length !== pastLength) {
+        if (grouped.length) {
+          let taxonomyPath: string = grouped[0].key as string
+          let taxonomyKey: string|undefined = taxonomyPath.split(';').slice(1, -1).pop()
+          if (taxonomyKey && taxonomyKey !== this.consensus) {
+            this.props.setConsensus(this.props.taxonomies[taxonomyKey])
+            this.consensus = taxonomyKey
+          }
+        }
         this.setState({tree: TreeCreator.createTreeFromCFData(grouped, this.props.taxonomies), pastLength: grouped.length})
       }
     }
@@ -150,6 +172,7 @@ export class UBinSunburst extends React.Component<IProps> {
 
   render(): JSX.Element {
     const {finalValue, clicked, namePathValue} = this.state
+    console.log("render sunburst")
     return (
       <div>
         <Sunburst

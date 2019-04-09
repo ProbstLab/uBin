@@ -3,7 +3,7 @@ import {VictoryAxis, VictoryScatter, VictoryChart, VictoryTheme, VictoryBrushCon
 import {IBin, IDomain} from 'samples'
 import {Crossfilter} from 'crossfilter2'
 import {Dimension} from 'crossfilter2'
-import {Checkbox} from '@blueprintjs/core'
+import {Switch, Tag} from '@blueprintjs/core'
 import {Sample} from '../db/entities/Sample'
 import {numToColour} from '../utils/convert'
 import {compareArrayToString} from '../utils/compare'
@@ -14,6 +14,8 @@ interface IProps {
   cf: Crossfilter<Sample>
   title?: string
   domainChangeHandler(domain: IDomain): void
+  setGCAverage(avg: number): void
+  setCoverageAverage(avg: number): void
   domain?: IDomain
   bin?: IBin
   binView: boolean
@@ -45,6 +47,10 @@ export class UBinScatter extends React.PureComponent<IProps> {
   yAxis?: [number, number]
   zoom?: number
   currentRanges?: {x: number, y: number}
+  allowUpdate: boolean = true
+  lengthTotal: number = 0
+  gcAverage?: number
+  coverageAverage?: number
 
   public state: IUBinScatterState = {
     logScale: false,
@@ -104,11 +110,13 @@ export class UBinScatter extends React.PureComponent<IProps> {
         this.setState({combDim: cf.dimension(
             (d: Sample) => d.gc+':'+this.round(d.coverage, yRoundTo, 0).toString()+':'+(d.bin ? d.bin.id : ''))},
         )
+        this.allowUpdate = true
       }
-    } else if (this.currentRanges) {
+    } else if (this.allowUpdate && this.currentRanges) {
       this.setState({
         combDim: cf.dimension((d: Sample) => Math.round(d.gc / 2) * 2 + ':' + Math.round(d.coverage / 50) * 50 + ':' + (d.bin ? d.bin.id : ''))
       })
+      this.allowUpdate = false
     }
   }
 
@@ -193,15 +201,54 @@ export class UBinScatter extends React.PureComponent<IProps> {
       if (bottom && top) {
         scalingFactor = 20 / Math.sqrt((top.gc ** 2 - bottom.gc ** 2))
       }
-      let sum: number = 0
+      // let groupedGc = gcDim.group().all().filter(d => d.value)
+      // let gcCount: number = 0
+      // let gcSum: number = 0
+      // for (let i: number = 0; i < groupedGc.length; i++){
+      //   let c = groupedGc[i].value as number
+      //   let s = groupedGc[i].key as number
+      //   gcCount += c; gcSum += s*c
+      // }
+      // console.log(gcCount, gcSum)
+      // if (gcSum/gcCount !== this.gcAverage) {
+      //   this.props.setGCAverage(Math.round(gcSum/gcCount))
+      // }
+      // let groupedCoverage = covDim.group().all()
+      // let covCount: number = 0
+      // let covSum: number = 0
+      // console.log(groupedCoverage)
+      // for (let i: number = 0; i < groupedCoverage.length; i++){
+      //   let c = groupedCoverage[i].value as number
+      //   let s = groupedCoverage[i].key as number
+      //   // console.log("g", groupedCoverage[i])
+      //   covCount += c; covSum += s*c
+      // }
+      // console.log(covCount, covSum)
+      // if (covSum/covCount !== this.coverageAverage) {
+      //   this.props.setCoverageAverage(Math.round(covSum/covCount))
+      // }
+      this.lengthTotal = 0
+      let gcSum: number = 0
+      let covSum: number = 0
+      let c: number = 0
       let returnVals: any = combDim.group().reduce(this.reduceAdd, this.reduceRemove, this.reduceInitial).all().
                               filter((value: any) => value.value.count).map((value: any) => {
         let valObj: IScatterDetails = value.value
-        sum += valObj.lengthSum
+        this.lengthTotal += valObj.lengthSum
+        gcSum += valObj.xSum
+        covSum += valObj.ySum
+        c += valObj.count
         let size: number = Math.log(valObj.lengthSum)*scalingFactor
         return {gc: valObj.xSum/valObj.count, coverage: valObj.ySum/valObj.count, size, colour: valObj.colour}
       })
-      console.log(sum)
+      if (this.coverageAverage !== covSum/c) {
+        this.props.setCoverageAverage(Math.round(covSum/c))
+        this.coverageAverage = covSum/c
+      }
+      if (this.gcAverage !== gcSum/c) {
+        this.props.setGCAverage(Math.round(gcSum/c))
+        this.gcAverage = gcSum/c
+      }
       return returnVals
     }
     return []
@@ -224,6 +271,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
 }
   public render(): JSX.Element {
     let {logScale} = this.state
+    console.log("render scatter")
     return (
       <div>
         <VictoryChart containerComponent={<VictoryBrushContainer
@@ -234,7 +282,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
                       height={500}
                       width={400}
                       padding={{ left: 50, top: 40, right: 10, bottom: 40 }}
-                      domainPadding={{x: 10, y: [logScale ? 0.01 : 10, 100]}}
+                      domainPadding={{x: 20, y: [logScale ? 0 : 20, logScale ? 0 : 20]}}
                       scale={{ x: 'linear', y: logScale ? 'log' : 'linear' }}>
           <VictoryAxis
             tickFormat={(t: number) => Math.round(t*10)/10}
@@ -256,7 +304,10 @@ export class UBinScatter extends React.PureComponent<IProps> {
             y={'coverage'}
           />
         </VictoryChart>
-        <Checkbox checked={this.state.logScale} label={'Log Scaling'} onClick={() => this.handleLogScaleChange()}/>
+        <div style={{display: 'flex', justifyContent: 'space-around'}}>
+          <Switch checked={this.state.logScale} label={'Log Scaling'} onChange={() => this.handleLogScaleChange()}/>
+          <Tag style={{maxHeight: '20px'}} key={'lengthTotal'}>Length in total: {this.lengthTotal}</Tag>
+        </div>
       </div>
     )
   }
