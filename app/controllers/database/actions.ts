@@ -15,7 +15,7 @@ import {
   IGetTaxonomiesForImportPendingDone,
   IGetSamplesForBin,
   IGetTaxonomies,
-  IGetTaxonomiesPending, IGetTaxonomiesPendingDone, ISaveBin,
+  IGetTaxonomiesPending, IGetTaxonomiesPendingDone, ISaveBin, ISetSaveBinPending, ISetSaveBinRejected, ISetSaveBinFulfilled,
 } from './interfaces'
 import {Connection} from 'typeorm'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
@@ -42,7 +42,7 @@ export class DBActions {
     return {
       type: dbActions.connectDatabase, payload: orm.createConnection().then(async (connection: Connection) => {
         return connection
-      }).catch((error: any) => console.log('wtf?', error))
+      }).catch((error: any) => console.log('wtf?', error)),
     }
   }
   static connectDatabaseFulfilled(connection: Connection): IConnectDatabaseFulfilled {
@@ -105,6 +105,15 @@ export class DBActions {
                  name: {covAvg?: number, gcAvg?: number, consensusName?: string, sampleName?: string}): ISaveBin {
     return {type: dbActions.saveBin, payload: saveBinQuery(connection, recordId, data, filters, name)}
   }
+  static saveBinPending(payload: any): ISetSaveBinPending{
+    return {type: dbActions.saveBinPending, payload}
+  }
+  static saveBinRejected(payload: any): ISetSaveBinRejected{
+    return {type: dbActions.saveBinRejected, payload}
+  }
+  static saveBinFulfilled(payload: any): ISetSaveBinFulfilled{
+    return {type: dbActions.saveBinFulfilled, payload}
+  }
 
   static startDatabase(): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
@@ -119,7 +128,7 @@ export class DBActions {
             dispatch(DBActions.getImports(connection))
             resolve()
           }
-        }, 1000)
+        }, 2000)
       })
     }
   }

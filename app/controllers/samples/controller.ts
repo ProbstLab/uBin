@@ -21,7 +21,7 @@ import {
   IResetBin,
   IResetTaxonomies,
   ISetConsensus,
-  ISetGCAverage, ISetCoverageAverage, ISetConsensusName, ISetSampleName, ISetSavingBins
+  ISetGCAverage, ISetCoverageAverage, ISetConsensusName, ISetSampleName, ISetSavingBins, ISetTotalLength
 } from './interfaces'
 import {ISetBinFilter} from './index'
 
@@ -31,6 +31,7 @@ export const getInitialState = (): ISamplesState => ({
   importsLoaded: false,
   importRecordsPending: false,
   bins: [],
+  totalLength: 0,
 })
 
 export const getImportsPending = (state: ISamplesState, action: IGetImportsPending): ISamplesState => {
@@ -254,6 +255,13 @@ export const setCoverageAverage = (state: ISamplesState, action: ISetCoverageAve
   return {
     ...state,
     coverageAvg: action.avg,
+  }
+}
+
+export const setTotalLength = (state: ISamplesState, action: ISetTotalLength): ISamplesState => {
+  return {
+    ...state,
+    totalLength: action.length,
   }
 }
 

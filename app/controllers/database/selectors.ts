@@ -18,3 +18,8 @@ export const getTaxonomiesStatePending = createSelector(
   getDBState,
   (state: IDBState) => state.taxonomiesPending,
 )
+
+export const getSavingBinState = createSelector(
+  getDBState,
+  (state: IDBState) => state.savingBinState,
+)

@@ -30,6 +30,7 @@ export interface ISamplesState {
   gcAvg?: number
   coverageAvg?: number
   savingBins?: boolean
+  totalLength: number
 }
 
 export enum samplesActions {
@@ -60,6 +61,7 @@ export enum samplesActions {
   setSampleName = 'samples.setSampleName',
   setGCAverage = 'samples.setGCAverage',
   setCoverageAverage = 'samples.setCoverageAverage',
+  setTotalLength = 'samples.setTotalLength',
   setSavingBins = 'samples.setSavingBins',
 }
 export interface IGetImportsPending extends Action {
@@ -168,6 +170,11 @@ export interface ISetGCAverage extends Action {
 export interface ISetCoverageAverage extends Action {
   type: samplesActions.setCoverageAverage
   avg: number
+}
+
+export interface ISetTotalLength extends Action {
+  type: samplesActions.setTotalLength
+  length: number
 }
 
 export interface ISetSavingBins extends Action {

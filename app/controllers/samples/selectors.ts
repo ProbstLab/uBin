@@ -12,10 +12,22 @@ export const getImportRecords = createSelector(
   getSamplesState,
   (state: ISamplesState) => state.importRecords,
 )
-
 export const getImportRecordId = createSelector(
   getSamplesState,
   (state: ISamplesState) => state.recordId,
+)
+export const getActiveRecord = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => {
+    if (state.importRecords.length && state.recordId) {
+      for (let i: number = 0; i < state.importRecords.length; i++) {
+        if (state.importRecords[i].id === state.recordId) {
+          return state.importRecords[i]
+        }
+      }
+    }
+    return undefined
+  },
 )
 
 export const getTaxonomies = createSelector(
@@ -125,4 +137,8 @@ export const getBinName = createSelector(
   getSamplesState,
   (state: ISamplesState) => {return {covAvg: state.coverageAvg, gcAvg: state.gcAvg,
                                               consensusName: state.consensusName, sampleName: state.sampleName}},
+)
+export const getTotalLength = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.totalLength,
 )

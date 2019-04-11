@@ -40,6 +40,7 @@ export const samplesReducer = createReducer(samples.getInitialState(), {
   [samplesActions.setSampleName]: samples.setSampleName,
   [samplesActions.setGCAverage]: samples.setGCAverage,
   [samplesActions.setCoverageAverage]: samples.setCoverageAverage,
+  [samplesActions.setTotalLength]: samples.setTotalLength,
   [samplesActions.setSavingBins]: samples.setSavingBins,
 })
 
@@ -59,7 +60,10 @@ export const dbReducer = createReducer(db.getInitialState(), {
   [dbActions.getSamplesPending]: db.getSamplesPending,
   [dbActions.getSamplesPendingDone]: db.getSamplesPending,
   [dbActions.getTaxonomiesForImportPending]: db.getTaxonomiesPending,
-  [dbActions.getTaxonomiesForImportPendingDone]: db.getTaxonomiesPending
+  [dbActions.getTaxonomiesForImportPendingDone]: db.getTaxonomiesPending,
+  [dbActions.saveBinPending]: db.setSaveBinPending,
+  [dbActions.saveBinRejected]: db.setSaveBinRejected,
+  [dbActions.saveBinFulfilled]: db.setSaveBinFulfilled,
 })
 
 // Utils

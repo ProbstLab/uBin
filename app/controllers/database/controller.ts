@@ -1,4 +1,10 @@
-import {IConnectDatabaseFulfilled, IDBState, IGetSamplesPending, IGetTaxonomiesForImportPending} from './interfaces'
+import {
+  IConnectDatabaseFulfilled,
+  IDBState,
+  IGetSamplesPending,
+  IGetTaxonomiesForImportPending,
+  ISetSaveBinFulfilled, ISetSaveBinPending, ISetSaveBinRejected
+} from './interfaces'
 
 export const getInitialState = (): IDBState => ({
   id: 'default-db',
@@ -32,5 +38,24 @@ export const getTaxonomiesPending = (state: IDBState, action: IGetTaxonomiesForI
   return {
     ...state,
     taxonomiesPending: pendingState,
+  }
+}
+
+export const setSaveBinPending = (state: IDBState, action: ISetSaveBinPending): IDBState => {
+  return {
+    ...state,
+    savingBinState: 'pending',
+  }
+}
+export const setSaveBinRejected = (state: IDBState, action: ISetSaveBinRejected): IDBState => {
+  return {
+    ...state,
+    savingBinState: 'rejected',
+  }
+}
+export const setSaveBinFulfilled = (state: IDBState, action: ISetSaveBinFulfilled): IDBState => {
+  return {
+    ...state,
+    savingBinState: 'fulfilled',
   }
 }

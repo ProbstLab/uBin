@@ -3,7 +3,7 @@ import {VictoryAxis, VictoryScatter, VictoryChart, VictoryTheme, VictoryBrushCon
 import {IBin, IDomain} from 'samples'
 import {Crossfilter} from 'crossfilter2'
 import {Dimension} from 'crossfilter2'
-import {Switch, Tag} from '@blueprintjs/core'
+import {Switch} from '@blueprintjs/core'
 import {Sample} from '../db/entities/Sample'
 import {numToColour} from '../utils/convert'
 import {compareArrayToString} from '../utils/compare'
@@ -16,6 +16,7 @@ interface IProps {
   domainChangeHandler(domain: IDomain): void
   setGCAverage(avg: number): void
   setCoverageAverage(avg: number): void
+  setTotalLength(length: number): void
   domain?: IDomain
   bin?: IBin
   binView: boolean
@@ -241,6 +242,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
         let size: number = Math.log(valObj.lengthSum)*scalingFactor
         return {gc: valObj.xSum/valObj.count, coverage: valObj.ySum/valObj.count, size, colour: valObj.colour}
       })
+      this.props.setTotalLength(this.lengthTotal)
       if (this.coverageAverage !== covSum/c) {
         this.props.setCoverageAverage(Math.round(covSum/c))
         this.coverageAverage = covSum/c
@@ -304,9 +306,9 @@ export class UBinScatter extends React.PureComponent<IProps> {
             y={'coverage'}
           />
         </VictoryChart>
-        <div style={{display: 'flex', justifyContent: 'space-around'}}>
+        <div style={{display: 'flex', marginLeft: '50px'}}>
           <Switch checked={this.state.logScale} label={'Log Scaling'} onChange={() => this.handleLogScaleChange()}/>
-          <Tag style={{maxHeight: '20px'}} key={'lengthTotal'}>Length in total: {this.lengthTotal}</Tag>
+          {/*<Tag style={{maxHeight: '20px'}} key={'lengthTotal'}>Length in total: {this.lengthTotal}</Tag>*/}
         </div>
       </div>
     )

@@ -26,7 +26,7 @@ import {
   ISetGCAverage,
   ISetCoverageAverage,
   ISetConsensusName,
-  ISetSampleName, ISetSavingBins
+  ISetSampleName, ISetTotalLength,
 } from './interfaces'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
 import {IClientState} from '../index'
@@ -125,8 +125,8 @@ export class SamplesActions {
     return {type: samplesActions.setCoverageAverage, avg}
   }
 
-  static setSavingBins(saving: boolean): ISetSavingBins {
-    return {type: samplesActions.setSavingBins, saving}
+  static setTotalLength(length: number): ISetTotalLength {
+    return {type: samplesActions.setTotalLength, length}
   }
 
   static updateSelectedTaxonomy(taxonomy: Taxonomy): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
@@ -230,10 +230,14 @@ export class SamplesActions {
         let connection = getDBConnection(getState())
         let recordId = getImportRecordId(getState())
         if (connection && recordId) {
-          Promise.all([dispatch(DBActions.saveBin(connection, recordId, data, filters, binName)),
-            dispatch(SamplesActions.setSavingBins(true))]).then(
-            () => resolve(),
-          )
+          Promise.all([dispatch(DBActions.saveBin(connection, recordId, data, filters, binName))])
+            .then(() => {
+              if (connection && recordId) {
+                Promise.all([dispatch(DBActions.getBins(connection, recordId))]).then(() => resolve())
+              } else {
+                resolve()
+              }
+            })
         } else {
           resolve()
         }
