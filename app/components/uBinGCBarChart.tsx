@@ -157,7 +157,7 @@ export class UBinGCBarChart extends React.Component<IProps> {
     if (bin && xName) {
       binColour = numToColour(bin.id)
     }
-    console.log("render gc bar")
+    // console.log("render gc bar")
     return (
       <VictoryChart theme={VictoryTheme.material} domainPadding={20}
                     height={300}

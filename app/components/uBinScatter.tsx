@@ -106,17 +106,19 @@ export class UBinScatter extends React.PureComponent<IProps> {
       if (!this.currentRanges || this.currentRanges.y !== currentYRange) {
         this.currentRanges = {x: currentXRange, y: currentYRange}
         // let xRoundTo = Math.round(currentXRange/25) > 0 ? Math.round(currentXRange/25) : 0.5
-        let yRoundTo = Math.round(currentYRange/100) > 10 ? Math.round(currentYRange/100) : 10
-        // console.log("Round to:", yRoundTo, "range: ", currentYRange)
+        let yRoundTo = Math.round(currentYRange/100) > 1 ? Math.round(currentYRange/100) : 2
+        console.log("Round to:", yRoundTo, "range: ", currentYRange)
         this.setState({combDim: cf.dimension(
-            (d: Sample) => d.gc+':'+this.round(d.coverage, yRoundTo, 0).toString()+':'+(d.bin ? d.bin.id : ''))},
+            (d: Sample) => (currentYRange > 1000 ? Math.round(d.gc / 2) * 2 : Math.round(d.gc))+':'+this.round(d.coverage, yRoundTo, 0).toString()+':'+(d.bin ? d.bin.id : ''))},
         )
         this.allowUpdate = true
       }
     } else if (this.allowUpdate && this.currentRanges) {
-      this.setState({
-        combDim: cf.dimension((d: Sample) => Math.round(d.gc / 2) * 2 + ':' + Math.round(d.coverage / 50) * 50 + ':' + (d.bin ? d.bin.id : ''))
-      })
+      let currentYRange = this.currentRanges.y
+      let yRoundTo = Math.round(currentYRange/100) > 1 ? Math.round(currentYRange/100) : 2
+      this.setState({combDim: cf.dimension(
+          (d: Sample) => (currentYRange > 1000 ? Math.round(d.gc / 2) * 2 : Math.round(d.gc))+':'+this.round(d.coverage, yRoundTo, 0).toString()+':'+(d.bin ? d.bin.id : ''))},
+      )
       this.allowUpdate = false
     }
   }
@@ -251,6 +253,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
         this.props.setGCAverage(Math.round(gcSum/c))
         this.gcAverage = gcSum/c
       }
+      // console.log("Return vals:", returnVals)
       return returnVals
     }
     return []

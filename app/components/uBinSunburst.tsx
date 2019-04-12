@@ -95,9 +95,19 @@ export class UBinSunburst extends React.Component<IProps> {
   }
 
   public componentDidMount(): void {
-    let {groupDim} = this.state
+    let {groupDim, pastLength} = this.state
     if (groupDim) {
       let grouped: Grouping<NaturallyOrderedValue, NaturallyOrderedValue>[] = groupDim.group().all().filter(d => d.value)
+      if (grouped.length !== pastLength) {
+        if (grouped.length) {
+          let taxonomyPath: string = grouped[0].key as string
+          let taxonomyKey: string | undefined = taxonomyPath.split(';').slice(1, -1).pop()
+          if (taxonomyKey && taxonomyKey !== this.consensus) {
+            this.props.setConsensus(this.props.taxonomies[taxonomyKey])
+            this.consensus = taxonomyKey
+          }
+        }
+      }
       this.setState({tree: TreeCreator.createTreeFromCFData(grouped, this.props.taxonomies), pastLength: grouped.length})
     }
   }
@@ -172,7 +182,7 @@ export class UBinSunburst extends React.Component<IProps> {
 
   render(): JSX.Element {
     const {finalValue, clicked, namePathValue} = this.state
-    console.log("render sunburst")
+    // console.log("render sunburst")
     return (
       <div>
         <Sunburst

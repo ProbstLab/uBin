@@ -6,5 +6,6 @@ declare module 'database' {
     connection?: Connection
     samplesPending: boolean
     taxonomiesPending: boolean
+    savingBinState?: string
   }
 }
