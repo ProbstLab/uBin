@@ -4,30 +4,35 @@ import {AnyAction, bindActionCreators, Dispatch} from 'redux'
 import {connect} from 'react-redux'
 import {withRouter, RouteComponentProps} from 'react-router'
 import {IClientState} from '../../controllers'
-import {Button, Popover, Position, ButtonGroup, Spinner, Icon, Checkbox} from '@blueprintjs/core'
+import {Button, Popover, Position, ButtonGroup, Spinner, Icon, Tag} from '@blueprintjs/core'
 import {
   getImportRecords,
-  getTaxonomyTreeFull,
   IImportRecord,
   SamplesActions,
   getSamples,
   getDomain,
   getImportRecordsState,
   getBacterialEnzymeTypes,
-  getArchaealEnzymeTypes, getBins, getSelectedBin, getBinView,
+  getArchaealEnzymeTypes,
+  getBins,
+  getSelectedBin,
+  getBinView,
+  getTaxonomiesMap,
+  getSelectedTaxonomy,
+  getExcludedTaxonomies, getActiveRecord, getTotalLength, getReloadSamples, getSelectedCount,
 } from '../../controllers/samples'
 import {DBActions, getSamplesStatePending} from '../../controllers/database'
 import {Connection} from 'typeorm'
-import {ITaxonomyForSunburst} from '../../utils/interfaces'
-import {UBinSunburst} from '../../components/uBinSunburst'
 import {ThunkAction} from 'redux-thunk'
-import {UBinScatter} from '../../components/uBinScatter'
 import {IBin, IDomain} from 'samples'
 import {SampleMenu} from '../../components/sampleMenu'
-import {GCCoverageBarCharts} from '../../components/gCCoverageBarCharts'
-import {EnzymeDistributionBarCharts} from '../../components/enzymeDistributionBarCharts'
 import {BinMenu} from '../../components/binMenu'
 import {Bin} from '../../db/entities/Bin'
+import {UBinPlotsWrappers} from '../../components/uBinPlotsWrappers'
+import {Taxonomy} from '../../db/entities/Taxonomy'
+import {IValueMap} from 'common'
+import {ResetMenu} from '../../components/resetMenu'
+import {BinNaming} from '../../components/binNaming'
 
 interface IProps extends RouteComponentProps {
 }
@@ -35,7 +40,7 @@ interface IProps extends RouteComponentProps {
 interface IPropsFromState {
   connection: Connection | undefined
   importRecords: IImportRecord[]
-  taxonomyTreeFull?: ITaxonomyForSunburst[]
+  taxonomiesMap: IValueMap<Taxonomy>
   archaealEnzymeTypes: string[]
   bacterialEnzymeTypes: string[]
   samples: any[]
@@ -44,14 +49,19 @@ interface IPropsFromState {
   samplesPending: boolean
   bins: Bin[]
   binView: boolean
+  activeRecord?: IImportRecord
   selectedBin?: IBin
+  selectedTaxonomy?: Taxonomy
+  excludedTaxonomies: Taxonomy[]
+  totalLength: number
+  reloadSamples?: boolean
+  selectedCount?: number
 }
 
 interface IActionsFromState {
   changePage(page: string): void
   startDb(): void
   getImportData(recordId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
-  updateSelectedTaxonomy(taxonomyId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   refreshImports(): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   updateDomain(domain: IDomain): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   setDomain(domain: IDomain): void
@@ -59,7 +69,18 @@ interface IActionsFromState {
   updateDomainY(domain: [number, number]): void
   updateBinView(isActive: boolean): void
   setSelectedBin(bin: Bin): void
+  setSelectedTaxonomy(taxonomy: Taxonomy): void
+  addExcludedTaxonomy(taxonomy: Taxonomy): void
   resetFilters(): void
+  resetGC(): void
+  resetCoverage(): void
+  resetTaxonomies(): void
+  resetBin(): void
+  setConsensus(consensus: Taxonomy): void
+  setGCAverage(avg: number): void
+  setCoverageAverage(avg: number): void
+  setTotalLength(length: number): void
+  setSelectedCount(selectedCount: number): void
 }
 
 const homeStyle = {
@@ -74,6 +95,8 @@ const homeStyle = {
 type TProps = IProps & IPropsFromState & IActionsFromState
 
 class CHome extends React.Component<TProps> {
+  wrapperKey: string = new Date().toISOString().toString()
+  lastReloadState: boolean|undefined
 
   public componentDidMount(): void {
     this.props.refreshImports()
@@ -84,17 +107,19 @@ class CHome extends React.Component<TProps> {
   }
 
   render(): JSX.Element {
-    let { samples, samplesPending, taxonomyTreeFull, domain, archaealEnzymeTypes, bacterialEnzymeTypes,
-          updateSelectedTaxonomy, updateDomain, updateDomainX, updateDomainY, connection, importRecords,
-          importRecordsState, getImportData, resetFilters, bins, binView, selectedBin} = this.props
-    const showScatter = (isReady: boolean): any => {
-      if (isReady) {
-        return <UBinScatter data={samples} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin} binView={binView}/>
-      } else {
-        return <Spinner size={20}/>
-      }
+    let { samples, samplesPending, taxonomiesMap, domain, archaealEnzymeTypes, bacterialEnzymeTypes, excludedTaxonomies, reloadSamples,
+          setSelectedTaxonomy, updateDomain, updateDomainX, updateDomainY, connection, importRecords, addExcludedTaxonomy, setConsensus,
+          importRecordsState, getImportData, resetFilters, bins, binView, selectedBin, selectedTaxonomy, resetBin, resetGC, resetCoverage,
+          resetTaxonomies, setGCAverage, setCoverageAverage, setTotalLength} = this.props
+
+    const getBinDropdown = (): JSX.Element => {
+      return (
+        <Popover content={<BinMenu bins={bins} setSelectedBin={this.props.setSelectedBin}/>} position={Position.BOTTOM}>
+          <Button disabled={!bins.length} icon={'layout-group-by'} text='Select Bin'/>
+        </Popover>)
     }
-    const getCharts = (): JSX.Element => {
+
+    const showCharts = (show: boolean): JSX.Element => {
       if (samplesPending) {
         return (
           <div style={{alignItems: 'center', justifyContent: 'center', display: 'flex', height: '80vh', width: '100%'}}>
@@ -104,58 +129,76 @@ class CHome extends React.Component<TProps> {
       } else if (!samples.length) {
         return (
           <div style={{alignItems: 'center', justifyContent: 'center', display: 'flex', height: '80vh', width: '100%'}}>
-            <h2>Click on <span style={{backgroundColor: '#efefef', borderRadius: '4px', padding: '6px', margin: '6px', fontSize: 'initial', fontWeight: 400}}>
+            <h2>Click on <span
+              style={{backgroundColor: '#efefef', borderRadius: '4px', padding: '6px', margin: '6px', fontSize: 'initial', fontWeight: 400}}>
               <Icon icon={'import'}/> Import</span> to import your datasets and get started!</h2>
           </div>
         )
+      } else {
+        return (<UBinPlotsWrappers key={this.wrapperKey} connection={connection} archaealEnzymeTypes={archaealEnzymeTypes}
+                                   bacterialEnzymeTypes={bacterialEnzymeTypes} samples={samples}
+                                   bins={bins} binView={binView} selectedBin={selectedBin} taxonomies={taxonomiesMap} domain={domain}
+                                   selectedTaxonomy={selectedTaxonomy} excludedTaxonomies={excludedTaxonomies} setConsensus={setConsensus}
+                                   updateDomain={updateDomain} updateDomainX={updateDomainX} updateDomainY={updateDomainY}
+                                   setSelectedTaxonomy={setSelectedTaxonomy} addExcludedTaxonomy={addExcludedTaxonomy}
+                                   setGCAverage={setGCAverage} setCoverageAverage={setCoverageAverage} setTotalLength={setTotalLength}
+                                   setSelectedCount={this.props.setSelectedCount}/>)
       }
-      return (
-        <>
-          <div style={{width: '70%'}}>
-            <div style={{width: '100%', display: 'flex'}}>
-              <div style={{width: '50%'}}>
-                {showScatter(!!samples.length)}
-              </div>
-              <div style={{width: '40%', marginTop: '30px'}}>
-                {taxonomyTreeFull &&
-                <UBinSunburst data={{ children: taxonomyTreeFull}} clickEvent={updateSelectedTaxonomy}/>}
-              </div>
-            </div>
-            <GCCoverageBarCharts samples={samples} samplesPending={samplesPending} domain={domain}
-                                 setDomainX={updateDomainX} setDomainY={updateDomainY}
-                                 domainChangeHandler={updateDomain} bin={selectedBin} binView={binView}/>
-          </div>
-          <EnzymeDistributionBarCharts samples={samples} samplesPending={samplesPending} domain={domain} bin={selectedBin}
-                                       archaealLabels={archaealEnzymeTypes} bacterialLabels={bacterialEnzymeTypes} binView={binView}/>
-        </>
-      )
     }
-
-    const getBinDropdown = (): JSX.Element => {
-      return (
-        <Popover content={<BinMenu bins={bins} setSelectedBin={this.props.setSelectedBin}/>} position={Position.BOTTOM}>
-          <Button intent={'primary'} disabled={!bins.length} rightIcon={'layout-group-by'} text='Select Bin'/>
-        </Popover>)
+    let dataLoaded: boolean = !samplesPending && samples.length > 0
+    if (reloadSamples && this.lastReloadState !== reloadSamples) {
+      this.wrapperKey = new Date().toISOString().toString()
+      console.log("new key")
     }
-
+    this.lastReloadState = reloadSamples
     return (
       <div>
         <div style={homeStyle}>
           <div style={{width: '100%', display: 'flex'}}>
-            <Popover content={<SampleMenu importRecords={importRecords} importRecordsState={importRecordsState}
-                                          connection={connection} getImportData={getImportData}/>}
-                     position={Position.RIGHT_BOTTOM}>
-              <Button icon='settings' text='Data Settings/Import' />
-            </Popover>
-            <ButtonGroup style={{marginLeft: '12px'}}>
-              <Button intent={'warning'} icon={'filter-remove'} text='Reset filters' onClick={() => resetFilters()}/>
-              {getBinDropdown()}
-            </ButtonGroup>
-            <Checkbox checked={binView} onClick={() => this.toggleBinView()}/>
+            <div style={{width: '60%', minWidth: '400px'}}>
+              <ButtonGroup>
+                <Popover content={<SampleMenu importRecords={importRecords} importRecordsState={importRecordsState}
+                                              connection={connection} getImportData={getImportData}/>}
+                         position={Position.RIGHT_BOTTOM}>
+                  <Button icon='settings' text='Import/Export' />
+                </Popover>
+                {getBinDropdown()}
+                <Popover disabled={!dataLoaded} content={<ResetMenu resetAll={resetFilters} resetGC={resetGC} resetCoverage={resetCoverage}
+                                             resetTaxonomies={resetTaxonomies} resetBin={resetBin}/>}
+                         position={Position.RIGHT_BOTTOM}>
+                  <Button disabled={!dataLoaded} icon={'filter-remove'} text='Reset filters'/>
+                </Popover>
+                <Button disabled={!dataLoaded} text={binView ? 'Show all (filtered) scaffolds' : 'Limit to Bin'} icon={binView ? 'selection' : 'circle'}
+                        onClick={() => this.toggleBinView()}/>
+              </ButtonGroup>
+            </div>
+            <div style={{width: '40%', minWidth: '300px', display: 'flex'}}>
+              <BinNaming dataLoaded={dataLoaded} activeRecord={this.props.activeRecord} data={samples} taxonomies={taxonomiesMap}/>
+            </div>
+          </div>
+
+          <div>
+          <div style={{marginTop: '8px'}}>
+            {this.props.activeRecord && <Tag style={{maxHeight: '20px', margin: '4px'}} intent={'primary'} key={'activeRecord'}>Active Record: {this.props.activeRecord.name}</Tag>}
+            {this.props.activeRecord && <Tag style={{maxHeight: '20px', margin: '4px'}} key={'lengthTotal'}>Length in total: {(this.props.totalLength/1000000).toFixed(2)} Mbps</Tag>}
+            {this.props.selectedBin && <Tag style={{maxHeight: '20px', margin: '4px'}} intent={'success'} key={'selectedBin'}>Active Bin: {this.props.selectedBin.name}</Tag>}
+            {this.props.selectedTaxonomy && <Tag style={{maxHeight: '20px', margin: '4px'}} intent={'warning'} key={'selectedTaxonomy'}>Selected Taxonomy: {this.props.selectedTaxonomy.name}</Tag>}
+          </div>
+          <div>
+            {!!samples.length && <Tag style={{maxHeight: '20px', margin: '4px'}} intent={'primary'} key={'selectedScaffolds'}>
+                Selected: {this.props.selectedCount ? this.props.selectedCount : samples.length}/{samples.length}
+            </Tag>}
+            {domain && domain.x && <Tag style={{maxHeight: '20px', margin: '4px'}} intent={'primary'} key={'gcRange'}>
+                GC Range: {Math.round(domain.x[0]*10)/10} - {Math.round(domain.x[1]*10)/10}
+            </Tag>}
+            {domain && domain.y && <Tag style={{maxHeight: '20px', margin: '4px'}} intent={'primary'} key={'coverageRange'}>
+                Coverage Range: {Math.round(domain.y[0]*10)/10} - {Math.round(domain.y[1]*10)/10}
+            </Tag>}
+          </div>
           </div>
 
           <div style={{width: '100%', display: 'flex'}}>
-            {getCharts()}
+            {showCharts(!!samples.length)}
           </div>
         </div>
       </div>
@@ -165,9 +208,10 @@ class CHome extends React.Component<TProps> {
 }
 
 const mapStateToProps = (state: IClientState): IPropsFromState => ({
+  activeRecord: getActiveRecord(state),
   importRecords: getImportRecords(state),
   connection: state.database.connection,
-  taxonomyTreeFull: getTaxonomyTreeFull(state),
+  taxonomiesMap: getTaxonomiesMap(state),
   samples: getSamples(state),
   samplesPending: getSamplesStatePending(state),
   importRecordsState: getImportRecordsState(state),
@@ -177,6 +221,11 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   bins: getBins(state),
   binView: getBinView(state),
   selectedBin: getSelectedBin(state),
+  selectedTaxonomy: getSelectedTaxonomy(state),
+  excludedTaxonomies: getExcludedTaxonomies(state),
+  totalLength: getTotalLength(state),
+  reloadSamples: getReloadSamples(state),
+  selectedCount: getSelectedCount(state),
 })
 
 const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
@@ -186,14 +235,24 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       startDb: DBActions.startDatabase,
       refreshImports: DBActions.refreshImports,
       getImportData: recordId => DBActions.getImportData(recordId),
-      updateSelectedTaxonomy: taxonomyIds => SamplesActions.updateSelectedTaxonomy(taxonomyIds),
       setDomain: domain => SamplesActions.setDomain(domain),
       updateDomain: domain => SamplesActions.updateDomain(domain),
       updateDomainX: domainX => SamplesActions.updateDomainX(domainX),
       updateDomainY: domainY => SamplesActions.updateDomainY(domainY),
       updateBinView: isActive => SamplesActions.updateBinView(isActive),
       setSelectedBin: binId => SamplesActions.setSelectedBin(binId),
+      setSelectedTaxonomy: taxonomyId => SamplesActions.setSelectedTaxonomy(taxonomyId),
+      addExcludedTaxonomy: taxonomyId => SamplesActions.addExcludedTaxonomy(taxonomyId),
+      setConsensus: consensus => SamplesActions.setConsensus(consensus),
+      setGCAverage: consensus => SamplesActions.setGCAverage(consensus),
+      setCoverageAverage: consensus => SamplesActions.setCoverageAverage(consensus),
+      setTotalLength: length => SamplesActions.setTotalLength(length),
+      setSelectedCount: selectedCount => SamplesActions.setSelectedCount(selectedCount),
       resetFilters: SamplesActions.resetFilters,
+      resetGC: SamplesActions.resetGC,
+      resetCoverage: SamplesActions.resetCoverage,
+      resetTaxonomies: SamplesActions.resetTaxonomies,
+      resetBin: SamplesActions.resetBin,
     },
     dispatch,
   )

@@ -1,6 +1,10 @@
-import {IGenericAssociativeArray, ITaxonomy, ITaxonomyAssociativeArray, ITaxonomyForSunburst} from "./interfaces";
+import {IGenericAssociativeArray, ISunburstItem, ITaxonomy, ITaxonomyAssociativeArray, ITaxonomyForSunburst} from "./interfaces"
 import * as colorConvert from 'color-convert'
 import {KeyValueCreator} from './keyValueCreator'
+// import {Sample} from '../db/entities/Sample'
+import {IValueMap} from 'common'
+import {Taxonomy} from '../db/entities/Taxonomy'
+import {Grouping, NaturallyOrderedValue} from 'crossfilter2'
 
 export class TreeCreator {
   static createTree = (queries: any[]): IGenericAssociativeArray => {
@@ -30,6 +34,47 @@ export class TreeCreator {
       tree[value].hex = hexVal
     })
     return tree
+  }
+
+  // This currently replaces the old tree creation completely
+  static createTreeFromCFData = (occurrences: Grouping<NaturallyOrderedValue, NaturallyOrderedValue>[],
+                                 taxonomies: IValueMap<Taxonomy>): ISunburstItem => {
+    let tree: ISunburstItem = {'title': 'uBin', 'color': '#12939A', children: [], size: 1}
+    for (let i: number = 0; i < occurrences.length; i++) {
+      let occurrence = occurrences[i] as Grouping<string, number>
+      let keys: string[] = occurrence.key.split(';').slice(1, -1)
+      let children: ISunburstItem[] = tree.children
+      children = TreeCreator.taxonomyRecursion(keys, children, tree.color || '#12939A', occurrence, taxonomies)
+    }
+    return tree
+  }
+
+  static taxonomyRecursion(keys: string[], children: ISunburstItem[], color: string,
+                           occurrence: Grouping<string, number>, taxonomies: IValueMap<Taxonomy>): ISunburstItem[] {
+    let key = keys.shift()
+    if (key === undefined) { return children }
+    let ids: (string | number)[] = children.map((x: any) => x.id)
+    let index: number = ids.indexOf(key)
+    let child: ISunburstItem
+    if (index >= 0) {
+      child = children[index]
+      if (!keys.length) {
+        child.size += occurrence.value
+      } else {
+        child.size += 1
+      }
+    } else {
+      let taxonomy: Taxonomy = taxonomies[key]
+      if (!keys.length) {
+        child = {id: key, title: taxonomy.name, children: [], size: occurrence.value, color: TreeCreator.setColour(taxonomy, color)}
+      } else {
+        child = {id: key, title: taxonomy.name, children: [], size: 1, color: TreeCreator.setColour(taxonomy, color)}
+      }
+      children.push(child)
+    }
+    color = child.color || color
+    children = child.children
+    return TreeCreator.taxonomyRecursion(keys, children, color, occurrence, taxonomies)
   }
 
   // Finding "root" of taxonomy recursively. Basically just looking up parents and then adding children to it
@@ -89,7 +134,9 @@ export class TreeCreator {
     return {id: taxonomy.id, name: taxonomy.name, children, value: taxonomy.occurrences || 1, order: taxonomy.order}
   }
 
-  static setColour = (taxonomy: ITaxonomy, hex?: string, step?: number): string => {
+  static setColour = (taxonomy: ITaxonomy|Taxonomy, hex?: string, step?: number): string => {
+    if (taxonomy.order === 0) {
+    }
     switch (taxonomy.order) {
       case (0):
         switch (taxonomy.name) {

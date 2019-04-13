@@ -172,7 +172,8 @@
     "webpack-merge": "^4.1.1"
   },
   "dependencies": {
-    "@blueprintjs/core": "^3.14.0",
+    "@blueprintjs/core":"^3.15.1",
+    "@blueprintjs/select":"^3.8.0",
     "color-convert": "^1.9.3",
     "connected-react-router": "^6.2.1",
     "crossfilter2": "^1.4.6",
@@ -194,7 +195,7 @@
     "reselect": "^4.0.0",
     "sqlite3": "^4.0.6",
     "source-map-support": "^0.5.10",
-    "typeorm": "^0.2.14",
+    "typeorm":"^0.2.16",
     "victory": "^32.0.0"
   },
   "devEngines": {

@@ -6,13 +6,15 @@ import {IBin, IDomain} from "samples"
 import {Sample} from '../db/entities/Sample'
 import {CoverageBarChartsWrapper} from './coverageBarChartsWrapper'
 import {UBinGCBarChart} from './uBinGCBarChart'
+import {Taxonomy} from '../db/entities/Taxonomy'
 
 interface IProps {
   samples: any[]
-  samplesPending: boolean
   binView: boolean
   domain?: IDomain
   bin?: IBin
+  selectedTaxonomy?: Taxonomy
+  excludedTaxonomies?: Taxonomy[]
   setDomainX(domain: [number, number]): void
   setDomainY(domain: [number, number]): void
   domainChangeHandler(domain: IDomain): void
@@ -32,16 +34,16 @@ export class GCCoverageBarCharts extends React.PureComponent<TProps> {
 
   render(): JSX.Element {
     let {cf} = this.state
-    let {domain, setDomainX, setDomainY, domainChangeHandler, bin, binView, samples, samplesPending} = this.props
+    let {domain, setDomainX, setDomainY, domainChangeHandler, bin, binView, samples, selectedTaxonomy, excludedTaxonomies} = this.props
     return (
       <div style={{width: '100%', display: 'flex'}}>
         <div style={{width: '50%', height: '360px'}}>
-          <UBinGCBarChart data={this.props.samples} title='GC/Length' xName='gc' yName='length' xDomain={domain ? domain.x : undefined}
-                          coverageRange={domain ? domain.y : undefined} setWorldDomain={setDomainX}
-                          domainChangeHandler={domainChangeHandler} bin={bin} binView={binView}/>
+          <UBinGCBarChart data={samples} title='GC/Length' xName='gc' yName='length' xDomain={domain ? domain.x : undefined}
+                          coverageRange={domain ? domain.y : undefined} setWorldDomain={setDomainX} selectedTaxonomy={selectedTaxonomy}
+                          domainChangeHandler={domainChangeHandler} bin={bin} binView={binView} excludedTaxonomies={excludedTaxonomies}/>
         </div>
         <div style={{width: '50%', height: '360px'}}>
-          <CoverageBarChartsWrapper cf={cf} samples={samples} samplesPending={samplesPending} setDomainY={setDomainY}
+          <CoverageBarChartsWrapper cf={cf} samples={samples} setDomainY={setDomainY} selectedTaxonomy={selectedTaxonomy} excludedTaxonomies={excludedTaxonomies}
                                     domainChangeHandler={domainChangeHandler} bin={bin} binView={binView} worldDomain={domain}/>
         </div>
       </div>

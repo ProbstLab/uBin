@@ -6,15 +6,17 @@ import {IBin, IDomain} from "samples"
 import {Sample} from '../db/entities/Sample'
 import {UBinSelectBarChartOverview} from './uBinSelectBarChartOverview'
 import {UBinCoverageBarChart} from './uBinCoverageBarChart'
+import {Taxonomy} from '../db/entities/Taxonomy'
 
 interface IProps {
   samples: any[]
-  samplesPending: boolean
   domain?: IDomain
   cf: Crossfilter<Sample>
   worldDomain?: IDomain
   bin?: IBin
   binView: boolean
+  selectedTaxonomy?: Taxonomy
+  excludedTaxonomies?: Taxonomy[]
   setDomainY(domain: [number, number]): void
   domainChangeHandler(domain: IDomain): void
 }
@@ -39,14 +41,14 @@ export class CoverageBarChartsWrapper extends React.PureComponent<TProps> {
   render(): JSX.Element {
     let {cf} = this.props
     let {overviewCf, range} = this.state
-    let {worldDomain, setDomainY, domainChangeHandler, bin, binView} = this.props
+    let {worldDomain, setDomainY, domainChangeHandler, bin, binView, selectedTaxonomy, excludedTaxonomies} = this.props
     return (
         <div>
           <UBinCoverageBarChart cf={cf} title='Coverage/Length' xName='coverage' yName='length' coverageRange={worldDomain ? worldDomain.y : undefined}
                                 setWorldDomain={setDomainY} domainChangeHandler={domainChangeHandler} bin={bin} range={range} binView={binView}
-                                gcRange={worldDomain ? worldDomain.x : undefined}/>
-          <UBinSelectBarChartOverview cf={overviewCf} title='Coverage/Length' xName='coverage' yName='length' binView={binView}
-                                      worldDomain={worldDomain ? worldDomain.y : undefined} bin={bin} setRange={this.setRange.bind(this)}/>
+                                gcRange={worldDomain ? worldDomain.x : undefined} selectedTaxonomy={selectedTaxonomy} excludedTaxonomies={excludedTaxonomies}/>
+          <UBinSelectBarChartOverview cf={overviewCf} title='Coverage/Length' xName='coverage' yName='length' binView={binView} selectedTaxonomy={selectedTaxonomy}
+                                      worldDomain={worldDomain ? worldDomain.y : undefined} bin={bin} setRange={this.setRange.bind(this)} excludedTaxonomies={excludedTaxonomies}/>
         </div>
     )}
   }

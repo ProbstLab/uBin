@@ -1,10 +1,12 @@
 import * as React from 'react'
 import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryBrushContainer} from 'victory'
-import {Crossfilter, Dimension} from 'crossfilter2'
+import {Crossfilter, Dimension, Grouping} from 'crossfilter2'
 import {IBin, IDomain} from 'samples'
 import {Sample} from '../db/entities/Sample'
 import crossfilter = require('crossfilter2')
 import {numToColour} from '../utils/convert'
+import {compareArrayToString} from '../utils/compare'
+import {Taxonomy} from '../db/entities/Taxonomy'
 
 interface IProps {
   data: any[]
@@ -18,6 +20,8 @@ interface IProps {
   range?: [number, number]
   setWorldDomain(domain: [number, number]): void
   domainChangeHandler(domain: IDomain): void
+  selectedTaxonomy?: Taxonomy
+  excludedTaxonomies?: Taxonomy[]
 }
 
 export interface IBarCharState {
@@ -27,7 +31,7 @@ export interface IBarCharState {
   groupDim?: Dimension<Sample, number>
   coverageDim?: Dimension<Sample, number>
   binDim?: Dimension<Sample, number>
-  originalXDomain?: [number, number]
+  taxonomyDim?: Dimension<Sample, string>
 }
 
 export class UBinGCBarChart extends React.Component<IProps> {
@@ -48,15 +52,8 @@ export class UBinGCBarChart extends React.Component<IProps> {
       this.setState({
         coverageDim: cf.dimension((d: Sample) => d.coverage),
         groupDim: cf.dimension((d: Sample) => Math.round(d.gc)),
+        taxonomyDim: cf.dimension((d: Sample) => d.taxonomiesRelationString),
       })
-    }
-  }
-
-  public componentDidMount(): void {
-    let { groupDim } = this.state
-    let { xName } = this.props
-    if (groupDim && xName) {
-        this.setState({originalXDomain: [groupDim.bottom(1)[0][xName], groupDim.top(1)[0][xName]]})
     }
   }
 
@@ -92,10 +89,10 @@ export class UBinGCBarChart extends React.Component<IProps> {
   }
 
   public getData(): any[] {
-    let { groupDim, coverageDim, binDim } = this.state
-    if (groupDim && coverageDim && binDim) {
+    let {groupDim, coverageDim, binDim, taxonomyDim} = this.state
+    if (groupDim && coverageDim && binDim && taxonomyDim) {
       let binChanged: boolean = false
-      let {xName, yName, bin, binView, coverageRange} = this.props
+      let {xName, yName, bin, binView, coverageRange, selectedTaxonomy, excludedTaxonomies} = this.props
       if (coverageRange) {
         coverageDim.filterRange(coverageRange)
       } else {
@@ -111,9 +108,25 @@ export class UBinGCBarChart extends React.Component<IProps> {
       } else {
         binDim.filterAll()
       }
+      if (selectedTaxonomy) {
+        let taxonomyString: string = ';'+selectedTaxonomy.id.toString()+';'
+        let excludedTaxonomyStrings: string[] = excludedTaxonomies ? excludedTaxonomies.map(excludedTaxonomy => ';'+excludedTaxonomy.id.toString()+';') : []
+        if (excludedTaxonomyStrings.length) {
+          taxonomyDim.filterFunction((d: string) => d.indexOf(taxonomyString) >= 0 && !compareArrayToString(d, excludedTaxonomyStrings))
+        } else {
+          taxonomyDim.filterFunction((d: string) => d.indexOf(taxonomyString) >= 0)
+        }
+      } else if (excludedTaxonomies && excludedTaxonomies.length) {
+        let excludedTaxonomyStrings: string[] = excludedTaxonomies ? excludedTaxonomies.map(excludedTaxonomy => ';'+excludedTaxonomy.id.toString()+';') : []
+        taxonomyDim.filterFunction((d: string) => !compareArrayToString(d, excludedTaxonomyStrings))
+      } else {
+        taxonomyDim.filterAll()
+      }
       if (xName) {
-        let grouped: any[] = groupDim.group().reduce(this.reduceAddLength, this.reduceRemoveLength, this.reduceInitial).all()
-        if (binChanged) {
+        let bottom: Sample =  groupDim.bottom(1)[0]
+        let top: Sample =  groupDim.top(1)[0]
+        let grouped: Array<Grouping<any, any>> = groupDim.group().reduce(this.reduceAddLength, this.reduceRemoveLength, this.reduceInitial).all()
+        if (bottom && top && binChanged) {
           this.binRange = [groupDim.bottom(1)[0][xName], groupDim.top(1)[0][xName]]
         }
         if (grouped) {
@@ -137,6 +150,7 @@ export class UBinGCBarChart extends React.Component<IProps> {
     if (bin && xName) {
       binColour = numToColour(bin.id)
     }
+    // console.log("render gc bar")
     return (
       <VictoryChart theme={VictoryTheme.material} domainPadding={20}
                     height={300}

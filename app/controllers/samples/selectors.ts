@@ -3,24 +3,44 @@ import { createSelector } from 'reselect'
 import { ISamplesState } from './interfaces'
 
 import { IClientState } from '..'
-// import {IEnzyme} from '../../utils/interfaces'8
 import {Enzyme} from '../../db/entities/Enzyme'
+import {normaliseArray} from '../../utils/arrayToDict'
 
 const getSamplesState = (state: IClientState) => state.samples
 
 export const getImportRecords = createSelector(
   getSamplesState,
-  (state: ISamplesState) => state.importRecords
+  (state: ISamplesState) => state.importRecords,
 )
-
 export const getImportRecordId = createSelector(
   getSamplesState,
-  (state: ISamplesState) => state.recordId
+  (state: ISamplesState) => state.recordId,
+)
+export const getActiveRecord = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => {
+    if (state.importRecords.length && state.recordId) {
+      for (let i: number = 0; i < state.importRecords.length; i++) {
+        if (state.importRecords[i].id === state.recordId) {
+          return state.importRecords[i]
+        }
+      }
+    }
+    return undefined
+  },
 )
 
-export const getTaxonomyTreeFull = createSelector(
+export const getTaxonomies = createSelector(
   getSamplesState,
-  (state: ISamplesState) => state.taxonomyTreeFull ? Object.keys(state.taxonomyTreeFull).map(value => state.taxonomyTreeFull ? state.taxonomyTreeFull[value] : null) : undefined
+  (state: ISamplesState) => state.taxonomies,
+)
+export const getTaxonomiesMap = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => normaliseArray(state.taxonomies, 'id'),
+)
+export const getBinsMap = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => normaliseArray(state.bins, 'id'),
 )
 
 export const getBacterialEnzymeDistributionForChart = createSelector(
@@ -73,6 +93,15 @@ export const getSelectedBin = createSelector(
   (state: ISamplesState) => state.filters.bin,
 )
 
+export const getSelectedTaxonomy = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.filters.selectedTaxonomy,
+)
+export const getExcludedTaxonomies = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.filters.excludedTaxonomies,
+)
+
 export const getBinView = createSelector(
   getSamplesState,
   (state: ISamplesState) => state.filters.binView
@@ -86,4 +115,44 @@ export const getDomain = createSelector(
 export const getImportRecordsState = createSelector(
   getSamplesState,
   (state: ISamplesState) => {return {pending: state.importRecordsPending, loaded: state.importsLoaded}},
+)
+
+export const getConsensus = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.consensus,
+)
+export const getConsensusName = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.consensusName,
+)
+export const getSampleName = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.sampleName,
+)
+export const getGCAverage = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.gcAvg,
+)
+export const getCoverageAverage = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.coverageAvg,
+)
+export const getBinName = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => {return {covAvg: state.coverageAvg, gcAvg: state.gcAvg,
+                                              consensusName: state.consensusName, sampleName: state.sampleName}},
+)
+export const getTotalLength = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.totalLength,
+)
+
+export const getReloadSamples = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.reloadSamples,
+)
+
+export const getSelectedCount = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.selectedCount,
 )

@@ -2,7 +2,7 @@ import {
   IAddFile,
   IFileTreeState,
   IImportFileFulfilled,
-  IInitFileTree, IISetImportName,
+  IInitFileTree, IISaveExportFileFulfilled, IISaveExportFilePending, IISaveExportFileRejected, IISetImportName,
   IOpenFile,
   IPopulateFileTree,
   IRemoveAddedFile,
@@ -114,5 +114,24 @@ export const setImportName = (state: IFileTreeState, action: IISetImportName): I
   return {
     ...state,
     importName: action.importName,
+  }
+}
+
+export const saveExportFilePending = (state: IFileTreeState, action: IISaveExportFilePending): IFileTreeState => {
+  return {
+    ...state,
+    exportState: 'pending',
+  }
+}
+export const saveExportFileRejected = (state: IFileTreeState, action: IISaveExportFileRejected): IFileTreeState => {
+  return {
+    ...state,
+    exportState: 'rejected',
+  }
+}
+export const saveExportFileFulfilled = (state: IFileTreeState, action: IISaveExportFileFulfilled): IFileTreeState => {
+  return {
+    ...state,
+    exportState: 'fulfilled',
   }
 }

@@ -12,6 +12,9 @@ export enum dbActions {
   getTaxonomiesForImport = 'database.getTaxonomiesForImport',
   getTaxonomiesForImportPending = 'database.getTaxonomiesForImport_PENDING',
   getTaxonomiesForImportPendingDone = 'database.getTaxonomiesForImport_PENDING_DONE',
+  getTaxonomies = 'database.getTaxonomies',
+  getTaxonomiesPending = 'database.getTaxonomies_PENDING',
+  getTaxonomiesPendingDone = 'database.getTaxonomies_PENDING_DONE',
   getEnzymeDistribution = 'database.getEnzymeDistribution',
   getEnzymeDistributionPending = 'database.getEnzymeDistribution_PENDING',
   getAllEnzymeTypes = 'database.getAllEnzymeTypes',
@@ -21,6 +24,10 @@ export enum dbActions {
   getBins = 'database.getBins',
   getBinsPending = 'database.getBins_PENDING',
   getSamplesForBin = 'database.getSamplesForBin',
+  saveBin = 'database.saveBin',
+  saveBinPending = 'database.saveBin_PENDING',
+  saveBinRejected = 'database.saveBin_REJECTED',
+  saveBinFulfilled = 'database.saveBin_FULFILLED',
 }
 
 export interface IConnectDatabase extends Action {
@@ -42,6 +49,19 @@ export interface IGetTaxonomiesForImportPending extends Action {
 }
 export interface IGetTaxonomiesForImportPendingDone extends Action {
   type: dbActions.getTaxonomiesForImportPendingDone
+  taxonomiesPending: boolean
+}
+
+export interface IGetTaxonomies extends Action {
+  type: dbActions.getTaxonomies
+  payload: Promise<any>
+}
+export interface IGetTaxonomiesPending extends Action {
+  type: dbActions.getTaxonomiesPending
+  taxonomiesPending: boolean
+}
+export interface IGetTaxonomiesPendingDone extends Action {
+  type: dbActions.getTaxonomiesPendingDone
   taxonomiesPending: boolean
 }
 
@@ -84,4 +104,20 @@ export interface IGetBins extends Action {
 export interface IGetSamplesForBin extends Action {
   type: dbActions.getSamplesForBin
   payload: Promise<any>
+}
+export interface ISaveBin extends Action {
+  type: dbActions.saveBin
+  payload: Promise<any>
+}
+export interface ISetSaveBinPending extends Action {
+  type: dbActions.saveBinPending
+  payload: any
+}
+export interface ISetSaveBinRejected extends Action {
+  type: dbActions.saveBinRejected
+  payload: any
+}
+export interface ISetSaveBinFulfilled extends Action {
+  type: dbActions.saveBinFulfilled
+  payload: any
 }

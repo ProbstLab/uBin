@@ -15,6 +15,7 @@ export interface IClientState {
 export const samplesReducer = createReducer(samples.getInitialState(), {
   [samplesActions.getImportsPending]: samples.getImportsPending,
   [samplesActions.getImportsFulfilled]: samples.getImportsFulfilled,
+  [samplesActions.getTaxonomiesFulfilled]: samples.getTaxonomiesFulfilled,
   [samplesActions.getTaxonomiesForImportFulfilled]: samples.getTaxonomiesForImportFulfilled,
   [samplesActions.getEnzymeDistributionFulfilled]: samples.getEnzymeDistributionFulfilled,
   [samplesActions.getAllEnzymeTypesFulfilled]: samples.getAllEnzymeTypesFulfilled,
@@ -28,7 +29,22 @@ export const samplesReducer = createReducer(samples.getInitialState(), {
   [samplesActions.setBinView]: samples.setBinView,
   [samplesActions.removeFilters]: samples.removeFilters,
   [samplesActions.resetDomain]: samples.resetDomain,
-  [samplesActions.setTaxonomyId]: samples.setTaxonomyId,
+  [samplesActions.resetGC]: samples.resetGC,
+  [samplesActions.resetCoverage]: samples.resetCoverage,
+  [samplesActions.resetTaxonomies]: samples.resetTaxonomies,
+  [samplesActions.resetBin]: samples.resetBin,
+  [samplesActions.setSelectedTaxonomy]: samples.setSelectedTaxonomy,
+  [samplesActions.addExcludedTaxonomy]: samples.addExcludedTaxonomy,
+  [samplesActions.setConsensus]: samples.setConsensus,
+  [samplesActions.setConsensusName]: samples.setConsensusName,
+  [samplesActions.setSampleName]: samples.setSampleName,
+  [samplesActions.setGCAverage]: samples.setGCAverage,
+  [samplesActions.setCoverageAverage]: samples.setCoverageAverage,
+  [samplesActions.setTotalLength]: samples.setTotalLength,
+  [samplesActions.setSavingBins]: samples.setSavingBins,
+  [samplesActions.setNewBinToData]: samples.setNewBinToData,
+  [samplesActions.setReloadSamples]: samples.setReloadSamples,
+  [samplesActions.setSelectedCount]: samples.setSelectedCount,
 })
 
 export const fileTreeReducer = createReducer(files.getInitialState(), {
@@ -40,6 +56,9 @@ export const fileTreeReducer = createReducer(files.getInitialState(), {
   [fileTreeActions.importFilePending]: files.importFilePending,
   [fileTreeActions.importFileFulfilled]: files.importFileFulfilled,
   [fileTreeActions.setImportName]: files.setImportName,
+  [fileTreeActions.saveExportFilePending]: files.saveExportFilePending,
+  [fileTreeActions.saveExportFileRejected]: files.saveExportFileRejected,
+  [fileTreeActions.saveExportFileFulfilled]: files.saveExportFileFulfilled,
 })
 
 export const dbReducer = createReducer(db.getInitialState(), {
@@ -48,6 +67,9 @@ export const dbReducer = createReducer(db.getInitialState(), {
   [dbActions.getSamplesPendingDone]: db.getSamplesPending,
   [dbActions.getTaxonomiesForImportPending]: db.getTaxonomiesPending,
   [dbActions.getTaxonomiesForImportPendingDone]: db.getTaxonomiesPending,
+  [dbActions.saveBinPending]: db.setSaveBinPending,
+  [dbActions.saveBinRejected]: db.setSaveBinRejected,
+  [dbActions.saveBinFulfilled]: db.setSaveBinFulfilled,
 })
 
 // Utils

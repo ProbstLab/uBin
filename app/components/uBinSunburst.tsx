@@ -1,6 +1,12 @@
 import {LabelSeries, Sunburst} from "react-vis"
 import * as React from "react"
 import {MouseEvent} from 'react'
+import {Crossfilter, Dimension, Grouping, NaturallyOrderedValue} from 'crossfilter2'
+import {Sample} from '../db/entities/Sample'
+import {Taxonomy} from '../db/entities/Taxonomy'
+import {IValueMap} from "common"
+import {TreeCreator} from '../utils/treeCreator'
+import {Hotkeys, HotkeysTarget, Hotkey} from '@blueprintjs/core'
 
 const sunburstLabelStyle = {
   fontSize: '14px',
@@ -13,7 +19,7 @@ function getNamePath(node: any): any {
   if (!node.parent) {
     return ['root']
   }
-  return [(node.data && node.data.name) || node.name].concat(getNamePath(node.parent))
+  return [(node.data && node.data.title) || node.title].concat(getNamePath(node.parent))
 }
 
 function getKeyPath(node: any): any {
@@ -28,7 +34,7 @@ function getKeyAndNamePath(node: any): any {
     return ['root']
   }
   return {keyPath: [(node.data && node.data.id) || node.id].concat(getKeyPath(node.parent)),
-          namePath: [(node.data && node.data.name) || node.name].concat(getNamePath(node.parent))}
+          namePath: [(node.data && node.data.title) || node.title].concat(getNamePath(node.parent))}
 }
 
 function updateData(data: any, keyPath: any): any {
@@ -52,21 +58,104 @@ function updateData(data: any, keyPath: any): any {
 
 interface IProps {
   data: any
-  clickEvent(id: number): void
+  cf: Crossfilter<Sample>
+  taxonomies: IValueMap<Taxonomy>
+  selectTaxonomy(id: Taxonomy): void
+  excludeTaxonomy(id: Taxonomy): void
+  setConsensus(consensus: Taxonomy): void
 }
 
 export interface ISunburstState {
   namePathValue: string,
   finalValue: string,
   clicked: boolean
+  pastLength: number
+  groupDim?: Dimension<Sample, string>
+  tree?: any
 }
 
-export class UBinSunburst extends React.PureComponent<IProps> {
+@HotkeysTarget
+export class UBinSunburst extends React.Component<IProps> {
+  shouldExclude: boolean = false
+  consensus?: string
+  lastUpdateLength?: number
 
   public state: ISunburstState = {
     namePathValue: '',
     finalValue: 'Taxonomy',
     clicked: false,
+    pastLength: 0,
+  }
+
+  public componentWillMount(): void {
+    let {cf} = this.props
+    this.setState({
+      groupDim: cf.dimension((d: Sample) => d.taxonomiesRelationString),
+    })
+  }
+
+  public componentDidMount(): void {
+    let {groupDim, pastLength} = this.state
+    if (groupDim) {
+      let grouped: Grouping<NaturallyOrderedValue, NaturallyOrderedValue>[] = groupDim.group().all().filter(d => d.value)
+      if (grouped.length !== pastLength) {
+        if (grouped.length) {
+          let taxonomyPath: string = grouped[0].key as string
+          let taxonomyKey: string | undefined = taxonomyPath.split(';').slice(1, -1).pop()
+          if (taxonomyKey && taxonomyKey !== this.consensus) {
+            this.props.setConsensus(this.props.taxonomies[taxonomyKey])
+            this.consensus = taxonomyKey
+          }
+        }
+      }
+      this.setState({tree: TreeCreator.createTreeFromCFData(grouped, this.props.taxonomies), pastLength: grouped.length})
+    }
+  }
+
+  // public shouldComponentUpdate(nextProps: IProps): boolean {
+  //   let {groupDim} = this.state
+  //   if (!groupDim || this.lastUpdateLength === undefined) { this.lastUpdateLength = 0; return true }
+  //   let nextLength = nextProps.cf.dimension((d: Sample) => d.taxonomiesRelationString).group().all().filter(d => d.value).length
+  //   if (this.lastUpdateLength !== nextLength){
+  //     this.lastUpdateLength = nextLength
+  //     return true
+  //   }
+  //   return false
+  // }
+
+  public componentWillUpdate(): void {
+    let {groupDim, pastLength} = this.state
+    if (groupDim) {
+      let grouped: Grouping<NaturallyOrderedValue, NaturallyOrderedValue>[] = groupDim.group().top(Infinity).filter(d => d.value)
+      if (grouped.length !== pastLength) {
+        if (grouped.length) {
+          let taxonomyPath: string = grouped[0].key as string
+          let taxonomyKey: string|undefined = taxonomyPath.split(';').slice(1, -1).pop()
+          if (taxonomyKey && taxonomyKey !== this.consensus) {
+            this.props.setConsensus(this.props.taxonomies[taxonomyKey])
+            this.consensus = taxonomyKey
+          }
+        }
+        this.setState({tree: TreeCreator.createTreeFromCFData(grouped, this.props.taxonomies), pastLength: grouped.length})
+      }
+    }
+  }
+
+  public renderHotkeys() {
+    return <Hotkeys>
+      <Hotkey
+        global={true}
+        combo={'e'}
+        label={'Hold shift to exclude'}
+        onKeyDown={() => this.shouldExclude = true}
+        onKeyUp={() => this.shouldExclude = false}
+      />
+    </Hotkeys>
+  }
+
+  public getData(): any {
+    let {tree} = this.state
+    return tree ? tree : {}
   }
 
   public getChildrenIds(datapoint: any): number[] {
@@ -84,13 +173,16 @@ export class UBinSunburst extends React.PureComponent<IProps> {
   }
 
   public selectTaxonomy(datapoint: any): void {
-    if (!this.state.clicked) {
-      this.props.clickEvent(datapoint.id)
+    if (this.shouldExclude) {
+      this.props.excludeTaxonomy(this.props.taxonomies[datapoint.id])
+    } else {
+      this.props.selectTaxonomy(this.props.taxonomies[datapoint.id])
     }
   }
 
   render(): JSX.Element {
     const {finalValue, clicked, namePathValue} = this.state
+    // console.log("render sunburst")
     return (
       <div>
         <Sunburst
@@ -110,7 +202,7 @@ export class UBinSunburst extends React.PureComponent<IProps> {
             this.setState({
               finalValue: namePath[namePath.length - 1],
               namePathValue: namePath.slice(1).join(' > '),
-              data: updateData(this.props.data, pathAsMap)
+              data: updateData(this.props.data, pathAsMap),
             })
           }}
           onValueMouseOut={() =>
@@ -122,16 +214,14 @@ export class UBinSunburst extends React.PureComponent<IProps> {
                 data: updateData(this.props.data, false),
               })
           }
-          onValueClick={(datapoint: any, event: MouseEvent<HTMLElement>) => { this.selectTaxonomy(datapoint); this.setState({clicked: !clicked})}}
+          onValueClick={(datapoint: any, event: MouseEvent<HTMLElement>) => this.selectTaxonomy(datapoint)}
           style={{
             stroke: '#ddd',
             strokeOpacity: 0.3,
             strokeWidth: '0.5',
           }}
           colorType="literal"
-          getSize={(d: any) => d.value}
-          getColor={(d: any) => d.hex}
-          data={this.props.data}
+          data={this.getData()}
           height={300}
           width={350}
         >

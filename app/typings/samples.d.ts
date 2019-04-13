@@ -29,8 +29,18 @@ declare module 'samples' {
     name: string
   }
 
+  interface ITaxonomyHelper {
+    id: number
+    name: string
+    order: number
+    samples: any
+    parent: any
+    sampleCount: number
+  }
+
   interface ISampleFilter {
-    taxonomyId?: number
+    selectedTaxonomy?: ITaxonomyHelper
+    excludedTaxonomies: ITaxonomyHelper[]
     domain?: IDomain
     gcLengthDomain?: IAxisFilter
     gcCoverageDomain?: IAxisFilter

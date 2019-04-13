@@ -3,14 +3,20 @@ import {
   IAddFile,
   IImportFile,
   IImportFileFulfilled, IImportFilePending,
-  IInitFileTree, IISetImportName,
+  IInitFileTree, IISaveExportFile, IISetImportName,
   IOpenFile,
   IPopulateFileTree,
   IRemoveAddedFile,
+  IISaveExportFilePending, IISaveExportFileRejected, IISaveExportFileFulfilled,
 } from './interfaces'
 import {IFile} from 'files'
-import {Connection} from "typeorm";
-import {importFiles} from '../../utils/fileImport';
+import {Connection} from "typeorm"
+import {importFiles} from '../../utils/fileImport'
+import {exportData} from '../../utils/fileExport'
+import {Sample} from '../../db/entities/Sample'
+import {Taxonomy} from '../../db/entities/Taxonomy'
+import {Bin} from '../../db/entities/Bin'
+import {IValueMap} from "common"
 
 export class FileTreeActions {
   static populateFileTree(file: IFile): IPopulateFileTree {
@@ -39,5 +45,18 @@ export class FileTreeActions {
   }
   static setImportName(importName: string): IISetImportName {
     return {type: fileTreeActions.setImportName, importName}
+  }
+
+  static saveExportFile(exportDir: string, exportName: string, data: Sample[], taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>): IISaveExportFile {
+    return {type: fileTreeActions.saveExportFile, payload: exportData(exportDir, exportName, data, taxonomies, bins)}
+  }
+  static saveExportFilePending(payload: any): IISaveExportFilePending {
+    return {type: fileTreeActions.saveExportFilePending, payload}
+  }
+  static saveExportFileRejected(payload: any): IISaveExportFileRejected {
+    return {type: fileTreeActions.saveExportFileRejected, payload}
+  }
+  static saveExportFileFulfilled(payload: any): IISaveExportFileFulfilled {
+    return {type: fileTreeActions.saveExportFileFulfilled, payload}
   }
 }

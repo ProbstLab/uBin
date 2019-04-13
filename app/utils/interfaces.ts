@@ -36,6 +36,15 @@ export interface ITaxonomy {
   occurrences?: number
 }
 
+export interface ISunburstItem {
+  id?: number | string
+  title: string
+  color?: string
+  order?: number
+  children: ISunburstItem[]
+  size: number
+}
+
 export interface ITaxonomyForSunburst {
   id?: number
   name: string

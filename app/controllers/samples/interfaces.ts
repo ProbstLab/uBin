@@ -1,10 +1,11 @@
 import { Action } from 'redux'
 // import { IValueMap } from 'common'
 // import { ISample } from 'samples'
-import {IGenericAssociativeArray, ITaxonomyForSunburst} from '../../utils/interfaces'
+import {ITaxonomyForSunburst} from '../../utils/interfaces'
 import {Enzyme} from '../../db/entities/Enzyme'
 import {ISampleFilter, IDomain} from 'samples'
 import {Bin} from '../../db/entities/Bin'
+import {Taxonomy} from '../../db/entities/Taxonomy'
 
 export interface IImportRecord {
   id: number
@@ -15,7 +16,7 @@ export interface ISamplesState {
   filters: ISampleFilter
   samples?: any[]
   importRecords: IImportRecord[]
-  taxonomyTreeFull?: IGenericAssociativeArray
+  taxonomies?: Taxonomy[]
   enzymeDistribution?: Enzyme[]
   enzymeTypes?: Enzyme[]
   selectedTaxonomy?: ITaxonomyForSunburst
@@ -23,11 +24,21 @@ export interface ISamplesState {
   bins: Bin[]
   importRecordsPending: boolean
   importsLoaded: boolean
+  consensus?: Taxonomy
+  consensusName?: string
+  sampleName?: string
+  gcAvg?: number
+  coverageAvg?: number
+  savingBins?: boolean
+  totalLength: number
+  reloadSamples?: boolean
+  selectedCount?: number
 }
 
 export enum samplesActions {
   getImportsPending = 'database.getImports_PENDING',
   getImportsFulfilled = 'database.getImports_FULFILLED',
+  getTaxonomiesFulfilled = 'database.getTaxonomies_FULFILLED',
   getTaxonomiesForImportFulfilled = 'database.getTaxonomiesForImport_FULFILLED',
   getEnzymeDistributionFulfilled = 'database.getEnzymeDistribution_FULFILLED',
   getAllEnzymeTypesFulfilled = 'database.getAllEnzymeTypes_FULFILLED',
@@ -37,11 +48,26 @@ export enum samplesActions {
   setDomain = 'samples.setDomain',
   setDomainX = 'samples.setDomainX',
   setDomainY = 'samples.setDomainY',
-  setTaxonomyId = 'samples.setTaxonomyId',
+  setSelectedTaxonomy = 'samples.setSelectedTaxonomy',
+  addExcludedTaxonomy = 'samples.addExcludedTaxonomy',
   removeFilters = 'samples.removeFilters',
   resetDomain = 'samples.resetDomain',
+  resetGC = 'samples.resetGC',
+  resetCoverage = 'samples.resetCoverage',
+  resetTaxonomies = 'samples.resetTaxonomies',
+  resetBin = 'samples.resetBin',
   setBinFilter = 'samples.setBinFilter',
   setBinView = 'samples.setBinView',
+  setConsensus = 'samples.setConsensus',
+  setConsensusName = 'samples.setConsensusName',
+  setSampleName = 'samples.setSampleName',
+  setGCAverage = 'samples.setGCAverage',
+  setCoverageAverage = 'samples.setCoverageAverage',
+  setTotalLength = 'samples.setTotalLength',
+  setNewBinToData = 'samples.setNewBinToData',
+  setReloadSamples = 'samples.setReloadSamples',
+  setSavingBins = 'samples.setSavingBins',
+  setSelectedCount = 'samples.setSelectedCount',
 }
 export interface IGetImportsPending extends Action {
   type: samplesActions.getImportsPending
@@ -54,6 +80,10 @@ export interface IGetImportsFulfilled extends Action {
 
 export interface IGetTaxonomiesForImportFulfilled extends Action {
   type: samplesActions.getTaxonomiesForImportFulfilled
+  payload: any
+}
+export interface IGetTaxonomiesFulfilled extends Action {
+  type: samplesActions.getTaxonomiesFulfilled
   payload: any
 }
 export interface IGetEnzymeDistributionFulfilled extends Action {
@@ -79,14 +109,30 @@ export interface IRemoveFilters extends Action {
 export interface IResetDomain extends Action {
   type: samplesActions.resetDomain
 }
+export interface IResetGC extends Action {
+  type: samplesActions.resetGC
+}
+export interface IResetCoverage extends Action {
+  type: samplesActions.resetCoverage
+}
+export interface IResetTaxonomies extends Action {
+  type: samplesActions.resetTaxonomies
+}
+export interface IResetBin extends Action {
+  type: samplesActions.resetBin
+}
 
 export interface ISetImportedRecord extends Action {
   type: samplesActions.setImportedRecord
   recordId: number
 }
-export interface ISetTaxonomyId extends Action {
-  type: samplesActions.setTaxonomyId
-  taxonomyId: number | undefined
+export interface ISetSelectedTaxonomy extends Action {
+  type: samplesActions.setSelectedTaxonomy
+  taxonomy: Taxonomy
+}
+export interface IAddExcludedTaxonomy extends Action {
+  type: samplesActions.addExcludedTaxonomy
+  taxonomy: Taxonomy
 }
 
 export interface ISetDomain extends Action {
@@ -108,4 +154,49 @@ export interface ISetBinFilter extends Action {
 export interface ISetBinView extends Action {
   type: samplesActions.setBinView
   binView: boolean
+}
+
+export interface ISetConsensus extends Action {
+  type: samplesActions.setConsensus
+  consensus: Taxonomy
+}
+export interface ISetConsensusName extends Action {
+  type: samplesActions.setConsensusName
+  consensusName: string
+}
+export interface ISetSampleName extends Action {
+  type: samplesActions.setSampleName
+  sampleName: string
+}
+export interface ISetGCAverage extends Action {
+  type: samplesActions.setGCAverage
+  avg: number
+}
+export interface ISetCoverageAverage extends Action {
+  type: samplesActions.setCoverageAverage
+  avg: number
+}
+
+export interface ISetTotalLength extends Action {
+  type: samplesActions.setTotalLength
+  length: number
+}
+
+export interface ISetSavingBins extends Action {
+  type: samplesActions.setSavingBins
+  saving: boolean
+}
+
+export interface ISetNewBinToData extends Action {
+  type: samplesActions.setNewBinToData
+  bin: Bin
+  ids: number[]
+}
+export interface ISetReloadSamples extends Action {
+  type: samplesActions.setReloadSamples
+  reload: boolean
+}
+export interface ISetSelectedCount extends Action {
+  type: samplesActions.setSelectedCount
+  selectedCount: number
 }
