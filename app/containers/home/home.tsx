@@ -19,7 +19,7 @@ import {
   getBinView,
   getTaxonomiesMap,
   getSelectedTaxonomy,
-  getExcludedTaxonomies, getActiveRecord, getTotalLength,
+  getExcludedTaxonomies, getActiveRecord, getTotalLength, getReloadSamples, getSelectedCount,
 } from '../../controllers/samples'
 import {DBActions, getSamplesStatePending} from '../../controllers/database'
 import {Connection} from 'typeorm'
@@ -54,6 +54,8 @@ interface IPropsFromState {
   selectedTaxonomy?: Taxonomy
   excludedTaxonomies: Taxonomy[]
   totalLength: number
+  reloadSamples?: boolean
+  selectedCount?: number
 }
 
 interface IActionsFromState {
@@ -78,6 +80,7 @@ interface IActionsFromState {
   setGCAverage(avg: number): void
   setCoverageAverage(avg: number): void
   setTotalLength(length: number): void
+  setSelectedCount(selectedCount: number): void
 }
 
 const homeStyle = {
@@ -92,6 +95,8 @@ const homeStyle = {
 type TProps = IProps & IPropsFromState & IActionsFromState
 
 class CHome extends React.Component<TProps> {
+  wrapperKey: string = new Date().toISOString().toString()
+  lastReloadState: boolean|undefined
 
   public componentDidMount(): void {
     this.props.refreshImports()
@@ -102,7 +107,7 @@ class CHome extends React.Component<TProps> {
   }
 
   render(): JSX.Element {
-    let { samples, samplesPending, taxonomiesMap, domain, archaealEnzymeTypes, bacterialEnzymeTypes, excludedTaxonomies,
+    let { samples, samplesPending, taxonomiesMap, domain, archaealEnzymeTypes, bacterialEnzymeTypes, excludedTaxonomies, reloadSamples,
           setSelectedTaxonomy, updateDomain, updateDomainX, updateDomainY, connection, importRecords, addExcludedTaxonomy, setConsensus,
           importRecordsState, getImportData, resetFilters, bins, binView, selectedBin, selectedTaxonomy, resetBin, resetGC, resetCoverage,
           resetTaxonomies, setGCAverage, setCoverageAverage, setTotalLength} = this.props
@@ -130,16 +135,22 @@ class CHome extends React.Component<TProps> {
           </div>
         )
       } else {
-        return (<UBinPlotsWrappers connection={connection} archaealEnzymeTypes={archaealEnzymeTypes}
+        return (<UBinPlotsWrappers key={this.wrapperKey} connection={connection} archaealEnzymeTypes={archaealEnzymeTypes}
                                    bacterialEnzymeTypes={bacterialEnzymeTypes} samples={samples}
                                    bins={bins} binView={binView} selectedBin={selectedBin} taxonomies={taxonomiesMap} domain={domain}
                                    selectedTaxonomy={selectedTaxonomy} excludedTaxonomies={excludedTaxonomies} setConsensus={setConsensus}
                                    updateDomain={updateDomain} updateDomainX={updateDomainX} updateDomainY={updateDomainY}
                                    setSelectedTaxonomy={setSelectedTaxonomy} addExcludedTaxonomy={addExcludedTaxonomy}
-                                   setGCAverage={setGCAverage} setCoverageAverage={setCoverageAverage} setTotalLength={setTotalLength}/>)
+                                   setGCAverage={setGCAverage} setCoverageAverage={setCoverageAverage} setTotalLength={setTotalLength}
+                                   setSelectedCount={this.props.setSelectedCount}/>)
       }
     }
     let dataLoaded: boolean = !samplesPending && samples.length > 0
+    if (reloadSamples && this.lastReloadState !== reloadSamples) {
+      this.wrapperKey = new Date().toISOString().toString()
+      console.log("new key")
+    }
+    this.lastReloadState = reloadSamples
     return (
       <div>
         <div style={homeStyle}>
@@ -149,27 +160,41 @@ class CHome extends React.Component<TProps> {
                 <Popover content={<SampleMenu importRecords={importRecords} importRecordsState={importRecordsState}
                                               connection={connection} getImportData={getImportData}/>}
                          position={Position.RIGHT_BOTTOM}>
-                  <Button icon='settings' text='Data Settings/Import' />
+                  <Button icon='settings' text='Import/Export' />
                 </Popover>
                 {getBinDropdown()}
-                <Popover content={<ResetMenu resetAll={resetFilters} resetGC={resetGC} resetCoverage={resetCoverage}
+                <Popover disabled={!dataLoaded} content={<ResetMenu resetAll={resetFilters} resetGC={resetGC} resetCoverage={resetCoverage}
                                              resetTaxonomies={resetTaxonomies} resetBin={resetBin}/>}
                          position={Position.RIGHT_BOTTOM}>
-                  <Button icon={'filter-remove'} text='Reset filters'/>
+                  <Button disabled={!dataLoaded} icon={'filter-remove'} text='Reset filters'/>
                 </Popover>
-                <Button text={binView ? 'Show all (filtered) scaffolds' : 'Limit to Bin'} icon={binView ? 'selection' : 'circle'}
+                <Button disabled={!dataLoaded} text={binView ? 'Show all (filtered) scaffolds' : 'Limit to Bin'} icon={binView ? 'selection' : 'circle'}
                         onClick={() => this.toggleBinView()}/>
               </ButtonGroup>
             </div>
             <div style={{width: '40%', minWidth: '300px', display: 'flex'}}>
-              <BinNaming dataLoaded={dataLoaded} activeRecord={this.props.activeRecord}/>
+              <BinNaming dataLoaded={dataLoaded} activeRecord={this.props.activeRecord} data={samples} taxonomies={taxonomiesMap}/>
             </div>
           </div>
 
+          <div>
           <div style={{marginTop: '8px'}}>
             {this.props.activeRecord && <Tag style={{maxHeight: '20px', margin: '4px'}} intent={'primary'} key={'activeRecord'}>Active Record: {this.props.activeRecord.name}</Tag>}
             {this.props.activeRecord && <Tag style={{maxHeight: '20px', margin: '4px'}} key={'lengthTotal'}>Length in total: {(this.props.totalLength/1000000).toFixed(2)} Mbps</Tag>}
             {this.props.selectedBin && <Tag style={{maxHeight: '20px', margin: '4px'}} intent={'success'} key={'selectedBin'}>Active Bin: {this.props.selectedBin.name}</Tag>}
+            {this.props.selectedTaxonomy && <Tag style={{maxHeight: '20px', margin: '4px'}} intent={'warning'} key={'selectedTaxonomy'}>Selected Taxonomy: {this.props.selectedTaxonomy.name}</Tag>}
+          </div>
+          <div>
+            {!!samples.length && <Tag style={{maxHeight: '20px', margin: '4px'}} intent={'primary'} key={'selectedScaffolds'}>
+                Selected: {this.props.selectedCount ? this.props.selectedCount : samples.length}/{samples.length}
+            </Tag>}
+            {domain && domain.x && <Tag style={{maxHeight: '20px', margin: '4px'}} intent={'primary'} key={'gcRange'}>
+                GC Range: {Math.round(domain.x[0]*10)/10} - {Math.round(domain.x[1]*10)/10}
+            </Tag>}
+            {domain && domain.y && <Tag style={{maxHeight: '20px', margin: '4px'}} intent={'primary'} key={'coverageRange'}>
+                Coverage Range: {Math.round(domain.y[0]*10)/10} - {Math.round(domain.y[1]*10)/10}
+            </Tag>}
+          </div>
           </div>
 
           <div style={{width: '100%', display: 'flex'}}>
@@ -199,6 +224,8 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   selectedTaxonomy: getSelectedTaxonomy(state),
   excludedTaxonomies: getExcludedTaxonomies(state),
   totalLength: getTotalLength(state),
+  reloadSamples: getReloadSamples(state),
+  selectedCount: getSelectedCount(state),
 })
 
 const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
@@ -220,6 +247,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       setGCAverage: consensus => SamplesActions.setGCAverage(consensus),
       setCoverageAverage: consensus => SamplesActions.setCoverageAverage(consensus),
       setTotalLength: length => SamplesActions.setTotalLength(length),
+      setSelectedCount: selectedCount => SamplesActions.setSelectedCount(selectedCount),
       resetFilters: SamplesActions.resetFilters,
       resetGC: SamplesActions.resetGC,
       resetCoverage: SamplesActions.resetCoverage,

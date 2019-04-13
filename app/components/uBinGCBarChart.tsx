@@ -1,6 +1,6 @@
 import * as React from 'react'
 import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryBrushContainer} from 'victory'
-import {Crossfilter, Dimension} from 'crossfilter2'
+import {Crossfilter, Dimension, Grouping} from 'crossfilter2'
 import {IBin, IDomain} from 'samples'
 import {Sample} from '../db/entities/Sample'
 import crossfilter = require('crossfilter2')
@@ -32,7 +32,6 @@ export interface IBarCharState {
   coverageDim?: Dimension<Sample, number>
   binDim?: Dimension<Sample, number>
   taxonomyDim?: Dimension<Sample, string>
-  originalXDomain?: [number, number]
 }
 
 export class UBinGCBarChart extends React.Component<IProps> {
@@ -55,14 +54,6 @@ export class UBinGCBarChart extends React.Component<IProps> {
         groupDim: cf.dimension((d: Sample) => Math.round(d.gc)),
         taxonomyDim: cf.dimension((d: Sample) => d.taxonomiesRelationString),
       })
-    }
-  }
-
-  public componentDidMount(): void {
-    let { groupDim } = this.state
-    let { xName } = this.props
-    if (groupDim && xName) {
-        this.setState({originalXDomain: [groupDim.bottom(1)[0][xName], groupDim.top(1)[0][xName]]})
     }
   }
 
@@ -132,8 +123,10 @@ export class UBinGCBarChart extends React.Component<IProps> {
         taxonomyDim.filterAll()
       }
       if (xName) {
-        let grouped: any[] = groupDim.group().reduce(this.reduceAddLength, this.reduceRemoveLength, this.reduceInitial).all()
-        if (binChanged) {
+        let bottom: Sample =  groupDim.bottom(1)[0]
+        let top: Sample =  groupDim.top(1)[0]
+        let grouped: Array<Grouping<any, any>> = groupDim.group().reduce(this.reduceAddLength, this.reduceRemoveLength, this.reduceInitial).all()
+        if (bottom && top && binChanged) {
           this.binRange = [groupDim.bottom(1)[0][xName], groupDim.top(1)[0][xName]]
         }
         if (grouped) {

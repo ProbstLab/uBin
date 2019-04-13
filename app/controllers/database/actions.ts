@@ -102,8 +102,9 @@ export class DBActions {
   }
 
   static saveBin(connection: Connection, recordId: number, data: any[], filters: ISampleFilter,
-                 name: {covAvg?: number, gcAvg?: number, consensusName?: string, sampleName?: string}): ISaveBin {
-    return {type: dbActions.saveBin, payload: saveBinQuery(connection, recordId, data, filters, name)}
+                 name: {covAvg?: number, gcAvg?: number, consensusName?: string, sampleName?: string},
+                 dispatch?: ThunkDispatch<{}, {}, AnyAction>): ISaveBin {
+    return {type: dbActions.saveBin, payload: saveBinQuery(connection, recordId, data, filters, name, dispatch)}
   }
   static saveBinPending(payload: any): ISetSaveBinPending{
     return {type: dbActions.saveBinPending, payload}

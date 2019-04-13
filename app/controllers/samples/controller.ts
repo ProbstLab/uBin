@@ -21,9 +21,18 @@ import {
   IResetBin,
   IResetTaxonomies,
   ISetConsensus,
-  ISetGCAverage, ISetCoverageAverage, ISetConsensusName, ISetSampleName, ISetSavingBins, ISetTotalLength
+  ISetGCAverage,
+  ISetCoverageAverage,
+  ISetConsensusName,
+  ISetSampleName,
+  ISetSavingBins,
+  ISetTotalLength,
+  ISetNewBinToData,
+  ISetReloadSamples,
+  ISetSelectedCount
 } from './interfaces'
 import {ISetBinFilter} from './index'
+import {Sample} from '../../db/entities/Sample'
 
 export const getInitialState = (): ISamplesState => ({
   filters: {binView: true, excludedTaxonomies: []},
@@ -269,5 +278,34 @@ export const setSavingBins = (state: ISamplesState, action: ISetSavingBins): ISa
   return {
     ...state,
     savingBins: action.saving,
+  }
+}
+
+export const setReloadSamples = (state: ISamplesState, action: ISetReloadSamples): ISamplesState => {
+  return {
+    ...state,
+    reloadSamples: action.reload,
+  }
+}
+
+export const setSelectedCount = (state: ISamplesState, action: ISetSelectedCount): ISamplesState => {
+  return {
+    ...state,
+    selectedCount: action.selectedCount,
+  }
+}
+
+export const setNewBinToData = (state: ISamplesState, action: ISetNewBinToData): ISamplesState => {
+  let newSamples: Sample[]|undefined = state.samples
+  if (newSamples && action.bin && action.ids.length) {
+    for (let i: number = 0; i < newSamples.length; i++) {
+      if (action.ids.includes(newSamples[i].id)) {
+        newSamples[i].bin = action.bin
+      }
+    }
+  }
+  return {
+    ...state,
+    samples: newSamples,
   }
 }

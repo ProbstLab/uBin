@@ -31,6 +31,8 @@ export interface ISamplesState {
   coverageAvg?: number
   savingBins?: boolean
   totalLength: number
+  reloadSamples?: boolean
+  selectedCount?: number
 }
 
 export enum samplesActions {
@@ -62,7 +64,10 @@ export enum samplesActions {
   setGCAverage = 'samples.setGCAverage',
   setCoverageAverage = 'samples.setCoverageAverage',
   setTotalLength = 'samples.setTotalLength',
+  setNewBinToData = 'samples.setNewBinToData',
+  setReloadSamples = 'samples.setReloadSamples',
   setSavingBins = 'samples.setSavingBins',
+  setSelectedCount = 'samples.setSelectedCount',
 }
 export interface IGetImportsPending extends Action {
   type: samplesActions.getImportsPending
@@ -180,4 +185,18 @@ export interface ISetTotalLength extends Action {
 export interface ISetSavingBins extends Action {
   type: samplesActions.setSavingBins
   saving: boolean
+}
+
+export interface ISetNewBinToData extends Action {
+  type: samplesActions.setNewBinToData
+  bin: Bin
+  ids: number[]
+}
+export interface ISetReloadSamples extends Action {
+  type: samplesActions.setReloadSamples
+  reload: boolean
+}
+export interface ISetSelectedCount extends Action {
+  type: samplesActions.setSelectedCount
+  selectedCount: number
 }

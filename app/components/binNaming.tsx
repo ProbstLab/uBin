@@ -1,29 +1,39 @@
 
 import * as React from 'react'
-import {Button, InputGroup} from '@blueprintjs/core'
+import {remote} from 'electron'
+import {Button, Dialog, InputGroup, Classes, ProgressBar} from '@blueprintjs/core'
 import {Taxonomy} from '../db/entities/Taxonomy'
 import {IClientState} from '../controllers'
-import {getConsensus, getCoverageAverage, getGCAverage, IImportRecord, SamplesActions} from '../controllers/samples'
+import {getBinsMap, getConsensus, getCoverageAverage, getGCAverage, IImportRecord, SamplesActions} from '../controllers/samples'
 import {AnyAction, bindActionCreators, Dispatch} from 'redux'
 import {connect} from 'react-redux'
 import {ThunkAction} from 'redux-thunk'
 import {getSavingBinState} from '../controllers/database'
 import {UBinToaster} from '../utils/uBinToaster'
+import {FileTreeActions, getExportState} from '../controllers/files'
+import {Sample} from '../db/entities/Sample'
+import {Bin} from '../db/entities/Bin'
+import {IValueMap} from "common"
 
 interface IPropsFromState {
   consensus?: Taxonomy
   gcAverage?: number
   coverageAverage?: number
   savingBinState?: string
+  bins?: IValueMap<Bin>
+  exportState?: string
 }
 
 interface IActionsFromState {
   setConsensusName(consensusName: string): void
   setSampleName(sampleName: string): void
   saveBin(): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
+  saveExportFile(exportDir: string, exportName: string, data: Sample[], taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>): void
 }
 
 interface IProps {
+  data?: any[]
+  taxonomies?: IValueMap<Taxonomy>
   dataLoaded: boolean
   activeRecord?: IImportRecord
 }
@@ -31,6 +41,9 @@ interface IProps {
 interface IState {
   consensusName: string
   sampleName: string
+  isOpen: boolean
+  exportFilePath?: string
+  exportFileName?: string
 }
 
 type TProps = IPropsFromState & IActionsFromState & IProps
@@ -39,11 +52,31 @@ class CBinNaming extends React.PureComponent<TProps> {
   currConsensusName?: string
   currSampleName?: string
   currSavingBinState?: string
+  currExportState?: string
 
   public state: IState = {
     consensusName: '',
     sampleName: '',
+    isOpen: false,
   }
+
+  private handleOpen = () => this.setState({ isOpen: true })
+  private handleClose = () => this.setState({ isOpen: false })
+  private handleExportFileNameChange = (name: string) => this.setState({ exportFileName: name })
+  private openDirBrowser = (): void => {
+    const dirPath: string[]|undefined = remote.dialog.showOpenDialog({properties: ['openDirectory']})
+    if (dirPath && dirPath.length) {
+      this.setState({exportFilePath: dirPath[0]})
+    }
+  }
+  private startExport = (): void => {
+    let {saveExportFile, data, bins, taxonomies} = this.props
+    let {exportFilePath, exportFileName} = this.state
+    if (exportFilePath && exportFileName && data && taxonomies && bins) {
+      saveExportFile(exportFilePath, exportFileName, data, taxonomies, bins)
+    }
+  }
+
   public componentWillMount(): void {
     let {consensus} = this.props
     if (consensus) {
@@ -64,7 +97,7 @@ class CBinNaming extends React.PureComponent<TProps> {
     }
   }
   public componentDidUpdate(): void {
-    let {savingBinState} = this.props
+    let {savingBinState, exportState} = this.props
     if (savingBinState && this.currSavingBinState === 'pending' && savingBinState !== this.currSavingBinState) {
       switch (savingBinState) {
         case 'rejected':
@@ -75,7 +108,18 @@ class CBinNaming extends React.PureComponent<TProps> {
           break
       }
     }
+    if (exportState && this.currExportState === 'pending' && exportState !== this.currExportState) {
+      switch (exportState) {
+        case 'rejected':
+          UBinToaster.show({message: 'Export failed', icon: 'error', intent: 'danger'})
+          break
+        case 'fulfilled':
+          UBinToaster.show({message: 'Export finished!!', icon: 'tick', intent: 'success'})
+          break
+      }
+    }
     this.currSavingBinState = savingBinState
+    this.currExportState = exportState
   }
 
   public handleConsensusChange(e: any): void {
@@ -87,16 +131,36 @@ class CBinNaming extends React.PureComponent<TProps> {
     this.props.setSampleName(e.target.value)
   }
   render(): JSX.Element {
-    let {dataLoaded, gcAverage, coverageAverage, savingBinState} = this.props
-    let {consensusName, sampleName} = this.state
+    let {dataLoaded, gcAverage, coverageAverage, savingBinState, exportState} = this.props
+    let {consensusName, sampleName, exportFilePath, exportFileName, isOpen} = this.state
     return (
       <>
         <InputGroup disabled={!dataLoaded} onChange={(e: any) => this.handleSampleName(e)} value={sampleName} name={'sample_name'} placeholder={'Name'}/><span style={{padding: '2px'}}></span>
         <InputGroup disabled={!dataLoaded} onChange={(e: any) => this.handleConsensusChange(e)} value={consensusName} name={'consensus'} placeholder={'Consensus'}/><span style={{padding: '2px'}}></span>
         <InputGroup style={{width: '38px'}} disabled={!dataLoaded} readOnly={true} value={gcAverage ? gcAverage.toString() : ''} name={'avg_gc'} placeholder={'GC Avg.'}/><span style={{padding: '2px'}}></span>
         <InputGroup style={{width: '52px'}} disabled={!dataLoaded} readOnly={true} value={coverageAverage ? coverageAverage.toString() : ''} name={'avg_coverage'} placeholder={'Coverage Avg.'}/><span style={{padding: '2px'}}></span>
-        <Button style={{minWidth: '80px'}} loading={savingBinState === 'pending'} onClick={this.props.saveBin} intent={'success'} text={'Save Bin'}/>
-      </>
+        <Button style={{minWidth: '80px'}} disabled={!dataLoaded} loading={savingBinState === 'pending'} onClick={this.props.saveBin} intent={'success'} text={'Save Bin'}/>
+        <Button style={{minWidth: '80px', marginLeft: '4px'}} rightIcon={'export'} onClick={this.handleOpen} text={'Export'}/>
+        <Dialog
+          icon='export'
+          onClose={this.handleClose}
+          title='Export'
+          isOpen={isOpen}>
+          <div className={Classes.DIALOG_BODY}>
+            <InputGroup style={{margin: '4px 0'}} value={exportFileName ? exportFileName : ''} placeholder={'Type in your file name...'} onChange={(e: any) => this.handleExportFileNameChange(e.target.value)}/>
+            <InputGroup readOnly={true} placeholder={exportFilePath ? exportFilePath : 'Choose directory...'} rightElement={
+              <Button text={'Browse'} onClick={this.openDirBrowser}/>
+            }/>
+            <Button style={{marginTop: '10px'}} disabled={!exportFilePath || !exportFileName} intent={'primary'} text={'Save'}
+                    onClick={() => this.startExport()}/>
+          </div>
+          {!!exportState && exportState === 'pending' &&
+          <div className={Classes.DIALOG_FOOTER}>
+              <ProgressBar intent={'primary'}/>
+          </div>
+          }
+        </Dialog>
+        </>
     )}
   }
 
@@ -105,6 +169,8 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   gcAverage: getGCAverage(state),
   coverageAverage: getCoverageAverage(state),
   savingBinState: getSavingBinState(state),
+  bins: getBinsMap(state),
+  exportState: getExportState(state),
 })
 
 const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
@@ -112,6 +178,8 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
     {
       setConsensusName: consensusName => SamplesActions.setConsensusName(consensusName),
       setSampleName: sampleName => SamplesActions.setSampleName(sampleName),
+      saveExportFile: (exportDir: string, exportName: string, data: Sample[], taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>) =>
+                      FileTreeActions.saveExportFile(exportDir, exportName, data, taxonomies, bins),
       saveBin: SamplesActions.saveBin,
     },
     dispatch,

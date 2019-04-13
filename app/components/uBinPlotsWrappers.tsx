@@ -38,6 +38,7 @@ interface IProps {
   setGCAverage(avg: number): void
   setCoverageAverage(avg: number): void
   setTotalLength(length: number): void
+  setSelectedCount(selectedCount: number): void
 }
 
 interface IUBinPlotsWrappersState {
@@ -45,8 +46,7 @@ interface IUBinPlotsWrappersState {
 }
 
 export class UBinPlotsWrappers extends React.Component<IProps> {
-  oldConsensusName?: string
-  oldSampleName?: string
+  lastState: any
 
   public state: IUBinPlotsWrappersState = {
     cf: crossfilter(this.props.samples),
@@ -66,8 +66,11 @@ export class UBinPlotsWrappers extends React.Component<IProps> {
 
   render(): JSX.Element {
     let {samples, taxonomies, domain, selectedBin, binView, archaealEnzymeTypes, bacterialEnzymeTypes, selectedTaxonomy, excludedTaxonomies,
-         setSelectedTaxonomy, addExcludedTaxonomy, updateDomain, updateDomainX, updateDomainY, setConsensus, setGCAverage, setCoverageAverage, setTotalLength} = this.props
+         setSelectedTaxonomy, addExcludedTaxonomy, updateDomain, updateDomainX, updateDomainY, setConsensus, setGCAverage, setCoverageAverage,
+         setSelectedCount, setTotalLength} = this.props
     let {cf} = this.state
+    this.lastState = cf
+
     return (
       <>
         <div style={{width: '70%'}}>
@@ -75,7 +78,7 @@ export class UBinPlotsWrappers extends React.Component<IProps> {
             <div style={{width: '50%'}}>
               <UBinScatter cf={cf} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin} excludedTaxonomies={excludedTaxonomies}
                            selectedTaxonomy={selectedTaxonomy} binView={binView} setGCAverage={setGCAverage} setCoverageAverage={setCoverageAverage}
-                           setTotalLength={setTotalLength}/>
+                           setTotalLength={setTotalLength} setSelectedCount={setSelectedCount}/>
             </div>
             <div style={{width: '60%', marginTop: '30px'}}>
               <UBinSunburst data={{ children: []}} taxonomies={taxonomies} cf={cf} setConsensus={setConsensus}

@@ -45,6 +45,11 @@ export const getAddedFilesArray = createSelector(
   (addedFiles: IValueMap<IFile>) => Object.keys(addedFiles).map((e, i) => addedFiles[i]),
 )
 
+export const getExportState = createSelector(
+  getFileTreeState,
+  (state: IFileTreeState) => state.exportState,
+)
+
 // export const getFilteredFileTree = createSelector(
 //   getFileTreeMap,
 //   (nodes: IFile[]) => Object.keys(nodes).map(id => nodes[id]),

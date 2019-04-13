@@ -25,7 +25,6 @@ export interface IBarCharState {
   groupDim?: Dimension<Sample, number>
   binDim?: Dimension<Sample, number>
   taxonomyDim?: Dimension<Sample, string>
-  originalXDomain?: [number, number]
 }
 
 export class UBinSelectBarChartOverview extends React.Component<IProps> {
@@ -49,20 +48,6 @@ export class UBinSelectBarChartOverview extends React.Component<IProps> {
           groupDim: cf.dimension((d: Sample) => Math.round(d.gc)),
           taxonomyDim: cf.dimension((d: Sample) => d.taxonomiesRelationString),
         })
-      }
-    }
-  }
-
-  public componentDidMount(): void {
-    let { groupDim } = this.state
-    if (groupDim) {
-      switch (this.props.xName) {
-        case ('coverage'):
-          this.setState({originalXDomain: [groupDim.bottom(1)[0][this.props.xName], groupDim.top(1)[0][this.props.xName]]})
-          break
-        case ('gc'):
-          this.setState({originalXDomain: [groupDim.bottom(1)[0][this.props.xName], groupDim.top(1)[0][this.props.xName]]})
-          break
       }
     }
   }

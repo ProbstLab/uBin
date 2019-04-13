@@ -38,6 +38,10 @@ export const getTaxonomiesMap = createSelector(
   getSamplesState,
   (state: ISamplesState) => normaliseArray(state.taxonomies, 'id'),
 )
+export const getBinsMap = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => normaliseArray(state.bins, 'id'),
+)
 
 export const getBacterialEnzymeDistributionForChart = createSelector(
   getSamplesState,
@@ -141,4 +145,14 @@ export const getBinName = createSelector(
 export const getTotalLength = createSelector(
   getSamplesState,
   (state: ISamplesState) => state.totalLength,
+)
+
+export const getReloadSamples = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.reloadSamples,
+)
+
+export const getSelectedCount = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.selectedCount,
 )

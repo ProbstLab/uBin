@@ -17,6 +17,7 @@ interface IProps {
   setGCAverage(avg: number): void
   setCoverageAverage(avg: number): void
   setTotalLength(length: number): void
+  setSelectedCount(selectedCount: number): void
   domain?: IDomain
   bin?: IBin
   binView: boolean
@@ -70,10 +71,10 @@ export class UBinScatter extends React.PureComponent<IProps> {
   }
 
   public componentDidMount(): void {
-    let { covDim, gcDim } = this.state
-    if (covDim && gcDim) {
-      let bottom: Sample = gcDim.bottom(1)[0]
-      let top: Sample = gcDim.top(1)[0]
+    let { combDim } = this.state
+    if (combDim) {
+      let bottom: Sample = combDim.bottom(1)[0]
+      let top: Sample = combDim.top(1)[0]
       if (bottom && top) {
         this.setState({
           originalDomain: {
@@ -238,22 +239,22 @@ export class UBinScatter extends React.PureComponent<IProps> {
                               filter((value: any) => value.value.count).map((value: any) => {
         let valObj: IScatterDetails = value.value
         this.lengthTotal += valObj.lengthSum
-        gcSum += valObj.xSum
-        covSum += valObj.ySum
+        gcSum += ((valObj.xSum/valObj.count)*(valObj.lengthSum/valObj.count))*valObj.count
+        covSum += ((valObj.ySum/valObj.count)*(valObj.lengthSum/valObj.count))*valObj.count
         c += valObj.count
         let size: number = Math.log(valObj.lengthSum)*scalingFactor
         return {gc: valObj.xSum/valObj.count, coverage: valObj.ySum/valObj.count, size, colour: valObj.colour}
       })
       this.props.setTotalLength(this.lengthTotal)
-      if (this.coverageAverage !== covSum/c) {
-        this.props.setCoverageAverage(Math.round(covSum/c))
-        this.coverageAverage = covSum/c
+      if (this.coverageAverage !== covSum/this.lengthTotal) {
+        this.props.setCoverageAverage(Math.round(covSum/this.lengthTotal))
+        this.coverageAverage = covSum/this.lengthTotal
       }
-      if (this.gcAverage !== gcSum/c) {
-        this.props.setGCAverage(Math.round(gcSum/c))
-        this.gcAverage = gcSum/c
+      if (this.gcAverage !== gcSum/this.lengthTotal) {
+        this.props.setGCAverage(Math.round(gcSum/this.lengthTotal))
+        this.gcAverage = gcSum/this.lengthTotal
       }
-      // console.log("Return vals:", returnVals)
+      this.props.setSelectedCount(c)
       return returnVals
     }
     return []

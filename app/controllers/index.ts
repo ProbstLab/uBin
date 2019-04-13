@@ -42,6 +42,9 @@ export const samplesReducer = createReducer(samples.getInitialState(), {
   [samplesActions.setCoverageAverage]: samples.setCoverageAverage,
   [samplesActions.setTotalLength]: samples.setTotalLength,
   [samplesActions.setSavingBins]: samples.setSavingBins,
+  [samplesActions.setNewBinToData]: samples.setNewBinToData,
+  [samplesActions.setReloadSamples]: samples.setReloadSamples,
+  [samplesActions.setSelectedCount]: samples.setSelectedCount,
 })
 
 export const fileTreeReducer = createReducer(files.getInitialState(), {
@@ -53,6 +56,9 @@ export const fileTreeReducer = createReducer(files.getInitialState(), {
   [fileTreeActions.importFilePending]: files.importFilePending,
   [fileTreeActions.importFileFulfilled]: files.importFileFulfilled,
   [fileTreeActions.setImportName]: files.setImportName,
+  [fileTreeActions.saveExportFilePending]: files.saveExportFilePending,
+  [fileTreeActions.saveExportFileRejected]: files.saveExportFileRejected,
+  [fileTreeActions.saveExportFileFulfilled]: files.saveExportFileFulfilled,
 })
 
 export const dbReducer = createReducer(db.getInitialState(), {

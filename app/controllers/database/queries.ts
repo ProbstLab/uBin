@@ -3,6 +3,10 @@ import {ISampleFilter} from 'samples'
 import {Sample} from '../../db/entities/Sample'
 import {compareArrayToString} from '../../utils/compare'
 import {IBin} from '../../utils/interfaces'
+import {ThunkDispatch} from 'redux-thunk'
+import {AnyAction} from 'redux'
+import {SamplesActions} from '../samples'
+import {Bin} from '../../db/entities/Bin'
 
 export const scatterFilter = (query: any, filter?: ISampleFilter): any => {
   if (filter) {
@@ -132,7 +136,8 @@ const compareScaffoldWithFilters = (sample: Sample, filter: ISampleFilter, exclu
 }
 
 export const saveBinQuery = async (connection: Connection, recordId: number, data: any[], filter: ISampleFilter,
-                                   name: {covAvg?: number, gcAvg?: number, consensusName?: string, sampleName?: string}): Promise<any> => {
+                                   name: {covAvg?: number, gcAvg?: number, consensusName?: string, sampleName?: string},
+                                   dispatch?: ThunkDispatch<{}, {}, AnyAction>): Promise<any> => {
   let idList: number[] = []
   let selectedTaxonomy: string|undefined = filter.selectedTaxonomy ? ';'+filter.selectedTaxonomy.id+';' : undefined
   let excludedTaxonomyStrings: string[] = filter.excludedTaxonomies ? filter.excludedTaxonomies.map(excludedTaxonomy => ';'+excludedTaxonomy.id.toString()+';') : []
@@ -158,10 +163,37 @@ export const saveBinQuery = async (connection: Connection, recordId: number, dat
                             .where('bin.name = :binName', {binName})
                             .andWhere('bin.importRecord = :recordId', {recordId})
                             .getCount()
-  if (exists) {
-    binName = [name.sampleName, name.consensusName+'2', name.gcAvg, name.covAvg].join('_')
+  let nameCounter: number = 2
+  while (exists > 0) {
+    binName = [name.sampleName, name.consensusName+nameCounter.toString(), name.gcAvg, name.covAvg].join('_')
+    exists = await connection.getRepository('bin').createQueryBuilder('bin')
+              .select('bin.id')
+              .where('bin.name = :binName', {binName})
+              .andWhere('bin.importRecord = :recordId', {recordId})
+              .getCount()
+    nameCounter++
   }
   let newBin: IBin = await connection.getRepository('bin').save({name: binName, importRecord: recordId})
-  return connection.getRepository('sample').createQueryBuilder('sample')
-                   .update('sample').set({bin: newBin.id}).where('id IN (:...idList)', {idList}).execute()
+  console.log("New Bin:", newBin, "idList:", idList)
+  let promises: Promise<any>[] = []
+  let ceiling: number = idList.length
+  let bottom: number = 0
+  while (bottom < ceiling) {
+    promises.push(connection.getRepository('sample').createQueryBuilder('sample')
+                  .update('sample').set({bin: newBin.id})
+                  .where('id IN (:...idList)', {idList: idList.slice(bottom, bottom+100)}).execute())
+    bottom += 100
+  }
+  if (dispatch) {
+    // Promise.all([
+    //   SamplesActions.setBinFilter(newBin as Bin),
+    //   DBActions.getSamples(connection, recordId),
+    // ])
+    Promise.all([
+    dispatch(SamplesActions.setNewBinToData(newBin as Bin, idList))])
+      .then(() => Promise.all([dispatch(SamplesActions.setReloadSamples(true)), dispatch(SamplesActions.setBinFilter(newBin as Bin))])
+        .then(() => Promise.all([
+                                          dispatch(SamplesActions.setReloadSamples(false))])))
+  }
+  return Promise.all(promises)
 }
