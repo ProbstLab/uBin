@@ -65,8 +65,8 @@ interface IActionsFromState {
   refreshImports(): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   updateDomain(domain: IDomain): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   setDomain(domain: IDomain): void
-  updateDomainX(domain: [number, number]): void
-  updateDomainY(domain: [number, number]): void
+  setDomainX(domain: [number, number]): void
+  setDomainY(domain: [number, number]): void
   updateBinView(isActive: boolean): void
   setSelectedBin(bin: Bin): void
   setSelectedTaxonomy(taxonomy: Taxonomy): void
@@ -108,7 +108,7 @@ class CHome extends React.Component<TProps> {
 
   render(): JSX.Element {
     let { samples, samplesPending, taxonomiesMap, domain, archaealEnzymeTypes, bacterialEnzymeTypes, excludedTaxonomies, reloadSamples,
-          setSelectedTaxonomy, updateDomain, updateDomainX, updateDomainY, connection, importRecords, addExcludedTaxonomy, setConsensus,
+          setSelectedTaxonomy, updateDomain, setDomainX, setDomainY, connection, importRecords, addExcludedTaxonomy, setConsensus,
           importRecordsState, getImportData, resetFilters, bins, binView, selectedBin, selectedTaxonomy, resetBin, resetGC, resetCoverage,
           resetTaxonomies, setGCAverage, setCoverageAverage, setTotalLength} = this.props
 
@@ -139,7 +139,7 @@ class CHome extends React.Component<TProps> {
                                    bacterialEnzymeTypes={bacterialEnzymeTypes} samples={samples}
                                    bins={bins} binView={binView} selectedBin={selectedBin} taxonomies={taxonomiesMap} domain={domain}
                                    selectedTaxonomy={selectedTaxonomy} excludedTaxonomies={excludedTaxonomies} setConsensus={setConsensus}
-                                   updateDomain={updateDomain} updateDomainX={updateDomainX} updateDomainY={updateDomainY}
+                                   updateDomain={updateDomain} updateDomainX={setDomainX} updateDomainY={setDomainY}
                                    setSelectedTaxonomy={setSelectedTaxonomy} addExcludedTaxonomy={addExcludedTaxonomy}
                                    setGCAverage={setGCAverage} setCoverageAverage={setCoverageAverage} setTotalLength={setTotalLength}
                                    setSelectedCount={this.props.setSelectedCount}/>)
@@ -237,8 +237,8 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       getImportData: recordId => DBActions.getImportData(recordId),
       setDomain: domain => SamplesActions.setDomain(domain),
       updateDomain: domain => SamplesActions.updateDomain(domain),
-      updateDomainX: domainX => SamplesActions.updateDomainX(domainX),
-      updateDomainY: domainY => SamplesActions.updateDomainY(domainY),
+      setDomainX: domainX => SamplesActions.setDomainX(domainX),
+      setDomainY: domainY => SamplesActions.setDomainY(domainY),
       updateBinView: isActive => SamplesActions.updateBinView(isActive),
       setSelectedBin: binId => SamplesActions.setSelectedBin(binId),
       setSelectedTaxonomy: taxonomyId => SamplesActions.setSelectedTaxonomy(taxonomyId),

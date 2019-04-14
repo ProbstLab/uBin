@@ -171,6 +171,7 @@ export class SamplesActions {
 
   static updateDomainX(domain: [number, number]): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
+      console.log("Domain X:", domain)
       return new Promise<void>(resolve => {
         Promise.all([dispatch(SamplesActions.setDomainX(domain))]).then(() => resolve())
       })
@@ -180,6 +181,7 @@ export class SamplesActions {
   static updateDomainY(domain: [number, number]): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>(resolve => {
+        console.log("Update domain y", domain)
         Promise.all([dispatch(SamplesActions.setDomainY(domain))]).then(() => resolve())
       })
     }

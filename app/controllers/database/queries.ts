@@ -182,7 +182,6 @@ export const saveBinQuery = async (connection: Connection, recordId: number, dat
     nameCounter++
   }
   let newBin: IBin = await connection.getRepository('bin').save({name: binName, importRecord: recordId})
-  console.log("New Bin:", newBin, "idList:", idList)
   let promises: Promise<any>[] = []
   let ceiling: number = idList.length
   let bottom: number = 0

@@ -67,7 +67,7 @@ export class UBinCoverageBarChart extends React.Component<IProps> {
   }
 
   public handleBrushChangeEnd(): void {
-    this.props.setWorldDomain(this.currentDomain)
+    this.props.setWorldDomain(this.currentDomain.slice())
   }
 
   public reduceInitial(): any {

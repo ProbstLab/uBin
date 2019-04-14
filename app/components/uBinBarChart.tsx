@@ -103,8 +103,6 @@ export class UBinBarChart extends React.Component<IProps> {
   }
 
   public render(): JSX.Element {
-    console.log("xLabels", this.props.xLabels)
-    console.log("Data:", this.getData(), this.props.xName || 'x')
     return (
       <VictoryChart theme={VictoryTheme.material} domainPadding={40}
                     height={600}
