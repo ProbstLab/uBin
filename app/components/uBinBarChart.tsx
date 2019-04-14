@@ -76,7 +76,9 @@ export class UBinBarChart extends React.Component<IProps> {
       if (xLabels) {
         let returnVals: any[] = new Array(xLabels.length).fill(0)
         returnVals.forEach((val: any, index: number) => {
-          returnVals[index] = {[xKey]: index, [yKey]: 0}
+          if (xLabels) {
+          returnVals[index] = {[xKey]: xLabels[index], [yKey]: 0}
+          }
         })
         groupDim.group().reduce(this.reduceAdd, this.reduceRemove, this.reduceInitial).all()
           .filter((val: any) => val.value.enzymes).filter((val: any) => val.value.count).map((val: any) => {
@@ -101,17 +103,22 @@ export class UBinBarChart extends React.Component<IProps> {
   }
 
   public render(): JSX.Element {
+    console.log("xLabels", this.props.xLabels)
+    console.log("Data:", this.getData(), this.props.xName || 'x')
     return (
-      <VictoryChart theme={VictoryTheme.material} domainPadding={20}
-                    height={400}
+      <VictoryChart theme={VictoryTheme.material} domainPadding={40}
+                    height={600}
+                    width={600}
                     // animate={{duration: 300}}
                     padding={{ left: 40, top: 40, right: 10, bottom: 204 }}>
         <VictoryAxis
           tickValues={this.props.xLabels}
-          tickLabelComponent={<VictoryLabel style={{textAnchor:'end', fontSize: '8px'}} angle={-75}/>}
+          tickLabelComponent={<VictoryLabel style={{textAnchor:'end', fontSize: '12px'}} angle={-75}/>}
         />
         <VictoryAxis
+          label={'occurrences'}
           dependentAxis={true}
+          tickLabelComponent={<VictoryLabel style={{fontSize: '12px'}}/>}
           tickFormat={(t: number) => {return  t >= 1000 ? `${Math.round(t)/1000}k` : t}}
         />
         <VictoryBar

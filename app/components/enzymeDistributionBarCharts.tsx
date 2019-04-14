@@ -21,7 +21,7 @@ export class EnzymeDistributionBarCharts extends React.PureComponent<TProps> {
   render(): JSX.Element {
     let {bin, cf, domain, archaealLabels, bacterialLabels, binView} = this.props
     return (
-      <div style={{width: '30%', height: 'inherit'}}>
+      <div style={{width: '100%', height: 'inherit'}}>
         <div style={{height: '400px'}}>
           <UBinBarChart cf={cf} title='Bacterial Single Copy Genes' xName='name' xLabels={bacterialLabels} yName='amount'
                         domain={domain} filterBoolName={'bacterial'} bin={bin} binView={binView}/>

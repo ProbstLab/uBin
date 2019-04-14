@@ -11,9 +11,9 @@ import {ThunkAction} from 'redux-thunk'
 import {getSavingBinState} from '../controllers/database'
 import {UBinToaster} from '../utils/uBinToaster'
 import {FileTreeActions, getExportState} from '../controllers/files'
-import {Sample} from '../db/entities/Sample'
 import {Bin} from '../db/entities/Bin'
 import {IValueMap} from "common"
+import {Connection} from 'typeorm'
 
 interface IPropsFromState {
   consensus?: Taxonomy
@@ -22,13 +22,14 @@ interface IPropsFromState {
   savingBinState?: string
   bins?: IValueMap<Bin>
   exportState?: string
+  connection?: Connection
 }
 
 interface IActionsFromState {
   setConsensusName(consensusName: string): void
   setSampleName(sampleName: string): void
   saveBin(): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
-  saveExportFile(exportDir: string, exportName: string, data: Sample[], taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>): void
+  saveExportFile(exportDir: string, exportName: string, taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>, recordId: number, connection: Connection): void
 }
 
 interface IProps {
@@ -70,10 +71,10 @@ class CBinNaming extends React.PureComponent<TProps> {
     }
   }
   private startExport = (): void => {
-    let {saveExportFile, data, bins, taxonomies} = this.props
+    let {saveExportFile, bins, taxonomies, activeRecord, connection} = this.props
     let {exportFilePath, exportFileName} = this.state
-    if (exportFilePath && exportFileName && data && taxonomies && bins) {
-      saveExportFile(exportFilePath, exportFileName, data, taxonomies, bins)
+    if (exportFilePath && exportFileName && taxonomies && bins && activeRecord && connection) {
+      saveExportFile(exportFilePath, exportFileName, taxonomies, bins, activeRecord.id, connection)
     }
   }
 
@@ -171,6 +172,7 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   savingBinState: getSavingBinState(state),
   bins: getBinsMap(state),
   exportState: getExportState(state),
+  connection: state.database.connection,
 })
 
 const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
@@ -178,8 +180,8 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
     {
       setConsensusName: consensusName => SamplesActions.setConsensusName(consensusName),
       setSampleName: sampleName => SamplesActions.setSampleName(sampleName),
-      saveExportFile: (exportDir: string, exportName: string, data: Sample[], taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>) =>
-                      FileTreeActions.saveExportFile(exportDir, exportName, data, taxonomies, bins),
+      saveExportFile: (exportDir: string, exportName: string, taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>, recordId: number, connection: Connection) =>
+                      FileTreeActions.saveExportFile(exportDir, exportName, taxonomies, bins, recordId, connection),
       saveBin: SamplesActions.saveBin,
     },
     dispatch,

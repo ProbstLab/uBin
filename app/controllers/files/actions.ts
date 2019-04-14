@@ -13,7 +13,6 @@ import {IFile} from 'files'
 import {Connection} from "typeorm"
 import {importFiles} from '../../utils/fileImport'
 import {exportData} from '../../utils/fileExport'
-import {Sample} from '../../db/entities/Sample'
 import {Taxonomy} from '../../db/entities/Taxonomy'
 import {Bin} from '../../db/entities/Bin'
 import {IValueMap} from "common"
@@ -47,8 +46,9 @@ export class FileTreeActions {
     return {type: fileTreeActions.setImportName, importName}
   }
 
-  static saveExportFile(exportDir: string, exportName: string, data: Sample[], taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>): IISaveExportFile {
-    return {type: fileTreeActions.saveExportFile, payload: exportData(exportDir, exportName, data, taxonomies, bins)}
+  static saveExportFile(exportDir: string, exportName: string, taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>,
+                        recordId: number, connection: Connection): IISaveExportFile {
+    return {type: fileTreeActions.saveExportFile, payload: exportData(exportDir, exportName, taxonomies, bins, recordId, connection)}
   }
   static saveExportFilePending(payload: any): IISaveExportFilePending {
     return {type: fileTreeActions.saveExportFilePending, payload}

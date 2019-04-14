@@ -73,14 +73,14 @@ export class UBinPlotsWrappers extends React.Component<IProps> {
 
     return (
       <>
-        <div style={{width: '70%'}}>
-          <div style={{width: '100%', display: 'flex'}}>
-            <div style={{width: '50%'}}>
+        <div style={{width: '60%'}}>
+          <div style={{width: '100%', display: 'flex', justifyContent: 'space-between'}}>
+            <div>
               <UBinScatter cf={cf} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin} excludedTaxonomies={excludedTaxonomies}
                            selectedTaxonomy={selectedTaxonomy} binView={binView} setGCAverage={setGCAverage} setCoverageAverage={setCoverageAverage}
                            setTotalLength={setTotalLength} setSelectedCount={setSelectedCount}/>
             </div>
-            <div style={{width: '60%', marginTop: '30px'}}>
+            <div style={{width: '360px', marginTop: '30px'}}>
               <UBinSunburst data={{ children: []}} taxonomies={taxonomies} cf={cf} setConsensus={setConsensus}
                             selectTaxonomy={setSelectedTaxonomy} excludeTaxonomy={addExcludedTaxonomy}/>
             </div>
@@ -89,8 +89,10 @@ export class UBinPlotsWrappers extends React.Component<IProps> {
                                setDomainX={updateDomainX} setDomainY={updateDomainY} excludedTaxonomies={excludedTaxonomies}
                                domainChangeHandler={updateDomain} bin={selectedBin} binView={binView}/>
         </div>
-        <EnzymeDistributionBarCharts domain={domain} bin={selectedBin} cf={cf}
-                                     archaealLabels={archaealEnzymeTypes} bacterialLabels={bacterialEnzymeTypes} binView={binView}/>
+        <div style={{width: '40%'}}>
+          <EnzymeDistributionBarCharts domain={domain} bin={selectedBin} cf={cf}
+                                       archaealLabels={archaealEnzymeTypes} bacterialLabels={bacterialEnzymeTypes} binView={binView}/>
+        </div>
       </>
     )
   }

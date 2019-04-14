@@ -93,6 +93,14 @@ export const getSamplesQuery = async (connection: Connection, recordId: number, 
   return query.getMany()
 }
 
+export const getSamplesWithScaffoldQuery = async (connection: Connection, recordId: number, filter?: ISampleFilter): Promise<any> => {
+  let query = connection.getRepository('sample').createQueryBuilder('sample')
+    .select(['sample.id', 'sample.scaffold', 'sample.gc', 'sample.coverage', 'sample.length', 'sample.taxonomiesRelationString', 'bin.id'])
+    .leftJoin('sample.bin', 'bin')
+    .where('sample.importRecordId = :recordId', {recordId})
+  return query.getMany()
+}
+
 export const getAllEnzymeTypesQuery = async(connection: Connection): Promise<any> => {
   return connection.getRepository('enzyme').createQueryBuilder('enzyme').getMany()
 }

@@ -6,7 +6,7 @@ import {Sample} from '../db/entities/Sample'
 import {Taxonomy} from '../db/entities/Taxonomy'
 import {IValueMap} from "common"
 import {TreeCreator} from '../utils/treeCreator'
-import {Hotkeys, HotkeysTarget, Hotkey} from '@blueprintjs/core'
+import {Hotkeys, HotkeysTarget, Hotkey, Breadcrumbs, IBreadcrumbProps} from '@blueprintjs/core'
 
 const sunburstLabelStyle = {
   fontSize: '14px',
@@ -66,7 +66,7 @@ interface IProps {
 }
 
 export interface ISunburstState {
-  namePathValue: string,
+  namePathValues: IBreadcrumbProps[],
   finalValue: string,
   clicked: boolean
   pastLength: number
@@ -81,7 +81,7 @@ export class UBinSunburst extends React.Component<IProps> {
   lastUpdateLength?: number
 
   public state: ISunburstState = {
-    namePathValue: '',
+    namePathValues: [],
     finalValue: 'Taxonomy',
     clicked: false,
     pastLength: 0,
@@ -181,7 +181,7 @@ export class UBinSunburst extends React.Component<IProps> {
   }
 
   render(): JSX.Element {
-    const {finalValue, clicked, namePathValue} = this.state
+    const {finalValue, clicked, namePathValues} = this.state
     // console.log("render sunburst")
     return (
       <div>
@@ -201,7 +201,7 @@ export class UBinSunburst extends React.Component<IProps> {
             }, {})
             this.setState({
               finalValue: namePath[namePath.length - 1],
-              namePathValue: namePath.slice(1).join(' > '),
+              namePathValues: namePath.slice(1).map((val: string) => { return {text: val}}),
               data: updateData(this.props.data, pathAsMap),
             })
           }}
@@ -222,8 +222,8 @@ export class UBinSunburst extends React.Component<IProps> {
           }}
           colorType="literal"
           data={this.getData()}
-          height={300}
-          width={350}
+          height={360}
+          width={360}
         >
           {finalValue && (
             <LabelSeries
@@ -231,7 +231,10 @@ export class UBinSunburst extends React.Component<IProps> {
             />
           )}
         </Sunburst>
-        <div className='uBin-sunburst'>{namePathValue}</div>
+        {/*<div className='uBin-sunburst'>{namePathValue}</div>*/}
+        <Breadcrumbs
+          items={namePathValues}
+        />
       </div>
     )
   }

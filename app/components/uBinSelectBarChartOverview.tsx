@@ -131,7 +131,7 @@ export class UBinSelectBarChartOverview extends React.Component<IProps> {
       <VictoryChart theme={VictoryTheme.material} domainPadding={20}
                     height={100}
                     width={400}
-                    padding={{ left: 40, top: 6, right: 10, bottom: 20 }}
+                    padding={{ left: 40, top: 6, right: 10, bottom: 24 }}
                     containerComponent={
                     <VictoryBrushContainer
                       brushDimension='x'
@@ -140,6 +140,7 @@ export class UBinSelectBarChartOverview extends React.Component<IProps> {
                       />
                     }>
         <VictoryAxis
+          label={'coverage'}
           tickFormat={(t: number) => {return  t >= 1000 ? `${Math.round(t)/1000}k` : Math.round(t*100)/100}}
         />
         <VictoryBar

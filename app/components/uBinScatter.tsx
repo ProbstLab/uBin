@@ -291,9 +291,11 @@ export class UBinScatter extends React.PureComponent<IProps> {
                       domainPadding={{x: 20, y: [logScale ? 0 : 20, logScale ? 0 : 20]}}
                       scale={{ x: 'linear', y: logScale ? 'log' : 'linear' }}>
           <VictoryAxis
+            label={'gc'}
             tickFormat={(t: number) => Math.round(t*10)/10}
           />
           <VictoryAxis
+            label={'coverage'}
             dependentAxis={true}
             tickFormat={(t: number) => {return  logScale ? t : t >= 1000 ? `${Math.round(t)/1000}k` : t >= 100 ? Math.round(t) : Math.round(t*10)/10}}
           />
