@@ -58,22 +58,14 @@ export class TreeCreator {
     let child: ISunburstItem
     if (index >= 0) {
       child = children[index]
-      if (!keys.length) {
-        child.size += occurrence.value
-      } else {
-        child.size += 1
-      }
     } else {
       let taxonomy: Taxonomy = taxonomies[key]
-      if (!keys.length) {
-        child = {id: key, title: taxonomy.name, children: [], size: occurrence.value, color: TreeCreator.setColour(taxonomy, color)}
-      } else {
-        child = {id: key, title: taxonomy.name, children: [], size: 1, color: TreeCreator.setColour(taxonomy, color)}
-      }
+      child = {id: key, title: taxonomy.name, children: [], color: TreeCreator.setColour(taxonomy, color)}
       children.push(child)
     }
     color = child.color || color
     children = child.children
+    if (!keys.length) { child.size = occurrence.value }
     return TreeCreator.taxonomyRecursion(keys, children, color, occurrence, taxonomies)
   }
 

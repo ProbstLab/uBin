@@ -42,7 +42,7 @@ export interface ISunburstItem {
   color?: string
   order?: number
   children: ISunburstItem[]
-  size: number
+  size?: number
 }
 
 export interface ITaxonomyForSunburst {

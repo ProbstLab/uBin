@@ -129,6 +129,7 @@ export class UBinSunburst extends React.Component<IProps> {
       let grouped: Grouping<NaturallyOrderedValue, NaturallyOrderedValue>[] = groupDim.group().top(Infinity).filter(d => d.value)
       if (grouped.length !== pastLength) {
         if (grouped.length) {
+          // for (let: i)
           let taxonomyPath: string = grouped[0].key as string
           let taxonomyKey: string|undefined = taxonomyPath.split(';').slice(1, -1).pop()
           if (taxonomyKey && taxonomyKey !== this.consensus) {
@@ -155,6 +156,7 @@ export class UBinSunburst extends React.Component<IProps> {
 
   public getData(): any {
     let {tree} = this.state
+    // console.log("Tree:", tree)
     return tree ? tree : {}
   }
 
