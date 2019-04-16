@@ -158,7 +158,7 @@ export interface ISetBinView extends Action {
 
 export interface ISetConsensus extends Action {
   type: samplesActions.setConsensus
-  consensus: Taxonomy
+  consensus?: Taxonomy
 }
 export interface ISetConsensusName extends Action {
   type: samplesActions.setConsensusName

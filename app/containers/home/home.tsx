@@ -76,7 +76,7 @@ interface IActionsFromState {
   resetCoverage(): void
   resetTaxonomies(): void
   resetBin(): void
-  setConsensus(consensus: Taxonomy): void
+  setConsensus(consensus?: Taxonomy): void
   setGCAverage(avg: number): void
   setCoverageAverage(avg: number): void
   setTotalLength(length: number): void

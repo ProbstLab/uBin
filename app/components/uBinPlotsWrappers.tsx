@@ -34,7 +34,7 @@ interface IProps {
   updateDomain(domain: IDomain): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   updateDomainX(domain: [number, number]): void
   updateDomainY(domain: [number, number]): void
-  setConsensus(consensus: Taxonomy): void
+  setConsensus(consensus?: Taxonomy): void
   setGCAverage(avg: number): void
   setCoverageAverage(avg: number): void
   setTotalLength(length: number): void

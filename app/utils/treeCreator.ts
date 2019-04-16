@@ -58,9 +58,10 @@ export class TreeCreator {
     let child: ISunburstItem
     if (index >= 0) {
       child = children[index]
+      child.count = (child.count || 0) + occurrence.value
     } else {
       let taxonomy: Taxonomy = taxonomies[key]
-      child = {id: key, title: taxonomy.name, children: [], color: TreeCreator.setColour(taxonomy, color)}
+      child = {id: key, title: taxonomy.name, children: [], count: occurrence.value, color: TreeCreator.setColour(taxonomy, color)}
       children.push(child)
     }
     color = child.color || color

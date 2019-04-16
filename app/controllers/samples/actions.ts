@@ -109,7 +109,7 @@ export class SamplesActions {
     return {type: samplesActions.setBinView, binView}
   }
 
-  static setConsensus(consensus: Taxonomy): ISetConsensus {
+  static setConsensus(consensus?: Taxonomy): ISetConsensus {
     return {type: samplesActions.setConsensus, consensus}
   }
   static setConsensusName(consensusName: string): ISetConsensusName {
