@@ -66,6 +66,7 @@ export class UBinGCBarChart extends React.Component<IProps> {
 
   public handleBrushChange(domain: any): void {
     this.currentDomain = domain.x
+    if (this.currentDomain && this.currentDomain[1] > 100) { this.currentDomain[1] = 100 }
   }
 
   public handleBrushChangeEnd(): void {
@@ -152,7 +153,7 @@ export class UBinGCBarChart extends React.Component<IProps> {
     }
     // console.log("render gc bar")
     return (
-      <VictoryChart theme={VictoryTheme.material} domainPadding={20}
+      <VictoryChart theme={VictoryTheme.material} domainPadding={10}
                     height={300}
                     width={400}
                     padding={{ left: 40, top: 20, right: 10, bottom: 40 }}

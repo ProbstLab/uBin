@@ -181,8 +181,12 @@ class CHome extends React.Component<TProps> {
           <div style={{marginTop: '8px'}}>
             {this.props.activeRecord && <Tag style={{maxHeight: '20px', margin: '4px'}} intent={'primary'} key={'activeRecord'}>Active Record: {this.props.activeRecord.name}</Tag>}
             {this.props.activeRecord && <Tag style={{maxHeight: '20px', margin: '4px'}} key={'lengthTotal'}>Length in total: {(this.props.totalLength/1000000).toFixed(2)} Mbps</Tag>}
-            {this.props.selectedBin && <Tag style={{maxHeight: '20px', margin: '4px'}} intent={'success'} key={'selectedBin'}>Active Bin: {this.props.selectedBin.name}</Tag>}
-            {this.props.selectedTaxonomy && <Tag style={{maxHeight: '20px', margin: '4px'}} intent={'warning'} key={'selectedTaxonomy'}>Selected Taxonomy: {this.props.selectedTaxonomy.name}</Tag>}
+            {selectedBin && <Tag style={{maxHeight: '20px', margin: '4px'}} intent={'success'} key={'selectedBin'}>Active Bin: {selectedBin.name}</Tag>}
+            {selectedTaxonomy && <Tag style={{maxHeight: '20px', margin: '4px'}} intent={'warning'} key={'selectedTaxonomy'}>Selected Taxonomy: {selectedTaxonomy.name}</Tag>}
+            {!!excludedTaxonomies.length &&
+            <Tag style={{maxHeight: '20px', margin: '4px'}} intent={'danger'} key={'excludedTaxonomies'}>
+                {excludedTaxonomies.length > 1 ? 'Excluded Taxonomies: '+excludedTaxonomies.length.toString() : 'Excluded Taxonomy: '+excludedTaxonomies[0].name}
+            </Tag>}
           </div>
           <div>
             {!!samples.length && <Tag style={{maxHeight: '20px', margin: '4px'}} intent={'primary'} key={'selectedScaffolds'}>

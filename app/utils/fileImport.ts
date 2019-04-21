@@ -147,8 +147,10 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
     } catch (e) {
       console.log("nope", e)
     }
-    for (let enzymeKey of item.enzymeKeys.map((e: number, i: number) => e === 1 ? i : 0).filter((x: number) => x > 0)) {
-      newEnzymes.push(enzymeMap[enzymeList[enzymeKey]] as IEnzyme)
+    for (let enzymeKey of item.enzymeKeys.map((e: number, i: number) => e === 1 ? i : undefined).filter((x: number) => x !== undefined)) {
+      if (enzymeKey !== undefined) {
+        newEnzymes.push(enzymeMap[enzymeList[enzymeKey]] as IEnzyme)
+      }
     }
 
     if (item.binName && binMap.hasOwnProperty(item.binName) && binMap[item.binName] !== undefined) {

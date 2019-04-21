@@ -312,6 +312,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
             y={'coverage'}
           />
         </VictoryChart>
+        {/*<p style={{textAlign: 'center'}}>Bubble size according to scaffold length</p>*/}
         <div style={{display: 'flex', marginLeft: '50px'}}>
           <Switch checked={this.state.logScale} label={'Log Scaling'} onChange={() => this.handleLogScaleChange()}/>
           {/*<Tag style={{maxHeight: '20px'}} key={'lengthTotal'}>Length in total: {this.lengthTotal}</Tag>*/}

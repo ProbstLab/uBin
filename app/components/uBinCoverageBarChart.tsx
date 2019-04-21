@@ -191,7 +191,7 @@ export class UBinCoverageBarChart extends React.Component<IProps> {
         />
         <VictoryAxis
           label={'length'}
-          tickFormat={(t: number) => {return  t >= 1000000 ? `${Math.round(t)/1000000}M` : t >= 1000 ? `${Math.round(t)/1000}K` : t}}
+          tickFormat={(t: number) => {return  t >= 1000000 ? `${Math.round(t)/1000000}M` : t >= 1000 ? `${Math.round(t)/1000}k` : t}}
           dependentAxis={true}
         />
         <VictoryBar

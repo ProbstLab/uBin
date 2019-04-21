@@ -7,7 +7,6 @@ import {Taxonomy} from '../db/entities/Taxonomy'
 import {IValueMap} from "common"
 import {TreeCreator} from '../utils/treeCreator'
 import {Hotkeys, HotkeysTarget, Hotkey, Breadcrumbs, IBreadcrumbProps} from '@blueprintjs/core'
-import {IGenericAssociativeArray} from '../utils/interfaces'
 
 const sunburstLabelStyle = {
   fontSize: '14px',
@@ -99,7 +98,8 @@ export class UBinSunburst extends React.Component<IProps> {
     let {taxonomies} = this.props
     let {groupDim, pastLength} = this.state
     if (groupDim) {
-      let grouped: Grouping<NaturallyOrderedValue, NaturallyOrderedValue>[] = groupDim.group().all().filter(d => d.value)
+      let grouped: Grouping<NaturallyOrderedValue, NaturallyOrderedValue>[] =
+        groupDim.group().reduceSum((d: any) => Math.round(d.length * d.coverage)).all().filter(d => d.value)
       let tree: any = TreeCreator.createTreeFromCFData(grouped, this.props.taxonomies)
       if (grouped.length !== pastLength) {
         if (grouped.length) {
@@ -113,34 +113,23 @@ export class UBinSunburst extends React.Component<IProps> {
     }
   }
 
-  // public shouldComponentUpdate(nextProps: IProps): boolean {
-  //   let {groupDim} = this.state
-  //   if (!groupDim || this.lastUpdateLength === undefined) { this.lastUpdateLength = 0; return true }
-  //   let nextLength = nextProps.cf.dimension((d: Sample) => d.taxonomiesRelationString).group().all().filter(d => d.value).length
-  //   if (this.lastUpdateLength !== nextLength){
-  //     this.lastUpdateLength = nextLength
-  //     return true
-  //   }
-  //   return false
-  // }
-
-  public findConsensus(items: Grouping<any, any>[], level: number, total: number): string|undefined {
-    if (level <= 1) { return undefined }
-    let realOccurrences: IGenericAssociativeArray = {}
-    for (let i: number = 0; i < items.length; i++) {
-      if (items[i].key.split(';').length === level+2) {
-        realOccurrences[items[i].key] = items[i].value
-      }
-    }
-    let keys: string[] = Object.keys(realOccurrences)
-    for (let i: number = 0; i < keys.length; i++) {
-      for (let j: number = 0; j < items.length; j++) {
-        if (items[j].key === keys[i] && [i].indexOf(items[j].key) >= 0) {
-          realOccurrences[keys[i]] += items[j].value
+  public componentWillUpdate(): void {
+    let {taxonomies} = this.props
+    let {groupDim, pastLength} = this.state
+    if (groupDim) {
+      let grouped: Grouping<NaturallyOrderedValue, NaturallyOrderedValue>[] =
+        groupDim.group().reduceSum((d: any) => Math.round(d.length * d.coverage)).all().filter(d => d.value)
+      if (grouped.length !== pastLength) {
+        let tree: any = TreeCreator.createTreeFromCFData(grouped, taxonomies)
+        if (grouped.length) {
+          let taxonomyPathsTotal: number = 0
+          for (let i: number = 0; i < grouped.length; i++) { taxonomyPathsTotal += grouped[i].value as number }
+          let consensus: string = this.findConsensusInTree(tree, taxonomyPathsTotal)
+          this.props.setConsensus(taxonomies[consensus])
         }
+        this.setState({tree, pastLength: grouped.length})
       }
     }
-    return this.findConsensus(items, level-1, total)
   }
 
   public findConsensusInTree(tree: any, total: number): string {
@@ -169,23 +158,20 @@ export class UBinSunburst extends React.Component<IProps> {
     return ''
   }
 
-  public componentWillUpdate(): void {
-    let {taxonomies} = this.props
-    let {groupDim, pastLength} = this.state
-    if (groupDim) {
+  public reduceInitial(): any {
+    return {lengthXCovSum: 0, count: 0}
+  }
 
-      let grouped: Grouping<NaturallyOrderedValue, NaturallyOrderedValue>[] = groupDim.group().top(Infinity).filter(d => d.value)
-      if (grouped.length !== pastLength) {
-        let tree: any = TreeCreator.createTreeFromCFData(grouped, taxonomies)
-        if (grouped.length) {
-          let taxonomyPathsTotal: number = 0
-          for (let i: number = 0; i < grouped.length; i++) { taxonomyPathsTotal += grouped[i].value as number }
-          let consensus: string = this.findConsensusInTree(tree, taxonomyPathsTotal)
-          this.props.setConsensus(taxonomies[consensus])
-        }
-        this.setState({tree, pastLength: grouped.length})
-      }
-    }
+  public reduceAdd(p: any, v: Sample): any {
+    p.lengthXCovSum += v.length * v.coverage
+    p.count += 1
+    return p
+  }
+
+  public reduceRemove(p: any, v: Sample): any {
+    p.lengthXCovSum -= v.length * v.coverage
+    p.count -= 1
+    return p
   }
 
   public renderHotkeys() {
@@ -202,7 +188,6 @@ export class UBinSunburst extends React.Component<IProps> {
 
   public getData(): any {
     let {tree} = this.state
-    // console.log("Tree:", tree)
     return tree ? tree : {}
   }
 
@@ -230,7 +215,6 @@ export class UBinSunburst extends React.Component<IProps> {
 
   render(): JSX.Element {
     const {finalValue, clicked, namePathValues} = this.state
-    // console.log("render sunburst")
     return (
       <div>
         <Sunburst

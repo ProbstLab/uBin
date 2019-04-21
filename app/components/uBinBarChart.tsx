@@ -22,6 +22,7 @@ interface IProps {
   domain?: IDomain
   bin?: IBin
   binView: boolean
+  maxCount?: number
 }
 
 export interface IBarCharState {
@@ -80,6 +81,8 @@ export class UBinBarChart extends React.Component<IProps> {
           returnVals[index] = {[xKey]: xLabels[index], [yKey]: 0}
           }
         })
+        let count: number = 0
+        let contamination: number = 0
         groupDim.group().reduce(this.reduceAdd, this.reduceRemove, this.reduceInitial).all()
           .filter((val: any) => val.value.enzymes).filter((val: any) => val.value.count).map((val: any) => {
           Object.keys(val.value.enzymes).map((key: string) => {
@@ -89,6 +92,8 @@ export class UBinBarChart extends React.Component<IProps> {
               if (arrKey >= 0) {
                 if (returnVals.hasOwnProperty(arrKey)) {
                   returnVals[arrKey][yKey] += 1
+                  if (returnVals[arrKey][yKey] === 1) { count++ }
+                  else if (returnVals[arrKey][yKey] > 1) { contamination++ }
                 } else {
                   returnVals[arrKey][yKey] = 1
                 }
@@ -96,6 +101,10 @@ export class UBinBarChart extends React.Component<IProps> {
             })
           })
         })
+        if (this.props.maxCount) {
+          console.log("Count:", count, Math.round((count/this.props.maxCount)*1000)/10)
+          console.log("Contamination:", contamination, Math.round((contamination/this.props.maxCount)*1000)/10)
+        }
         return returnVals
       }
     }
@@ -117,7 +126,6 @@ export class UBinBarChart extends React.Component<IProps> {
           label={'occurrences'}
           dependentAxis={true}
           tickLabelComponent={<VictoryLabel style={{fontSize: '12px'}}/>}
-          tickFormat={(t: number) => {return  t >= 1000 ? `${Math.round(t)/1000}k` : t}}
         />
         <VictoryBar
           data={this.getData()}
