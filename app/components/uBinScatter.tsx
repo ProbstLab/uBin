@@ -277,7 +277,6 @@ export class UBinScatter extends React.PureComponent<IProps> {
 }
   public render(): JSX.Element {
     let {logScale} = this.state
-    console.log("render scatter")
     return (
       <div>
         <VictoryChart containerComponent={<VictoryBrushContainer

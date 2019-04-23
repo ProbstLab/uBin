@@ -57,9 +57,9 @@ export class UBinGCBarChart extends React.Component<IProps> {
     }
   }
 
-  public componentDidUpdate(): void {
-    let { xDomain } = this.props
-    if (xDomain && this.currentDomain !== xDomain) {
+  public componentWillUpdate(nextProps: IProps): void {
+    let { xDomain } = nextProps
+    if (this.currentDomain !== xDomain) {
       this.currentDomain = xDomain
     }
   }
@@ -151,7 +151,6 @@ export class UBinGCBarChart extends React.Component<IProps> {
     if (bin && xName) {
       binColour = numToColour(bin.id)
     }
-    // console.log("render gc bar")
     return (
       <VictoryChart theme={VictoryTheme.material} domainPadding={10}
                     height={300}

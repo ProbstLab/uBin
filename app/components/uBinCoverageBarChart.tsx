@@ -55,9 +55,9 @@ export class UBinCoverageBarChart extends React.Component<IProps> {
     }
   }
 
-  public componentDidUpdate(): void {
-    let { coverageRange } = this.props
-    if (coverageRange && this.currentDomain !== coverageRange) {
+  public componentWillUpdate(nextProps: IProps): void {
+    let { coverageRange } = nextProps
+    if (this.currentDomain !== coverageRange) {
       this.currentDomain = coverageRange
     }
   }

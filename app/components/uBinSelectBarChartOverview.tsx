@@ -52,9 +52,9 @@ export class UBinSelectBarChartOverview extends React.Component<IProps> {
     }
   }
 
-  public componentDidUpdate(): void {
-    let { worldDomain } = this.props
-    if (worldDomain && this.currentDomain !== worldDomain) {
+  public componentWillUpdate(nextProps: IProps): void {
+    let { worldDomain } = nextProps
+    if (this.currentDomain !== worldDomain) {
       this.currentDomain = worldDomain
     }
   }
