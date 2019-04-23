@@ -26,22 +26,17 @@ interface IProps {
 }
 
 export interface IBarCharState {
-  gcDim?: Dimension<Sample, number>
-  binDim?: Dimension<Sample, number>
-  coverageDim?: Dimension<Sample, number>
   groupDim?: Dimension<Sample, number>
 }
 
 export class UBinBarChart extends React.Component<IProps> {
+  maxVal?: number = undefined
 
   public state: IBarCharState = {}
 
   public componentWillMount(): void {
     let {cf} = this.props
     this.setState({
-      gcDim: cf.dimension((d: Sample) => Math.round(d.gc)),
-      coverageDim: cf.dimension((d: Sample) => Math.round(d.coverage)),
-      binDim: cf.dimension((d: Sample) => d.bin ? d.bin.id : 0),
       groupDim: cf.dimension((d: Sample) => d.id || 0),
     })
   }
@@ -69,8 +64,8 @@ export class UBinBarChart extends React.Component<IProps> {
   }
 
   public getData(): any[] {
-    let {gcDim, coverageDim, groupDim, binDim} = this.state
-    if (gcDim && coverageDim && groupDim && binDim) {
+    let {groupDim} = this.state
+    if (groupDim) {
       let {xName, yName, xLabels, filterBoolName} = this.props
       let xKey: string = xName || 'x'
       let yKey: string = yName || 'y'
@@ -97,6 +92,9 @@ export class UBinBarChart extends React.Component<IProps> {
                 } else {
                   returnVals[arrKey][yKey] = 1
                 }
+                if (!this.maxVal || returnVals[arrKey][yKey] > this.maxVal) {
+                  this.maxVal = returnVals[arrKey][yKey]
+                }
               }
             })
           })
@@ -111,6 +109,17 @@ export class UBinBarChart extends React.Component<IProps> {
     return []
   }
 
+  public getTickValues(): number[]|undefined {
+    if (this.maxVal && this.maxVal < 10) {
+      let tickVals: number[] = []
+      for (let i: number = 0; i < this.maxVal+1; i++) {
+        tickVals.push(i)
+      }
+      return tickVals
+    }
+    return undefined
+  }
+
   public render(): JSX.Element {
     return (
       <VictoryChart theme={VictoryTheme.material} domainPadding={40}
@@ -123,9 +132,11 @@ export class UBinBarChart extends React.Component<IProps> {
           tickLabelComponent={<VictoryLabel style={{textAnchor:'end', fontSize: '12px'}} angle={-75}/>}
         />
         <VictoryAxis
+          axisLabelComponent={<VictoryLabel x={-4} style={{fontSize: '16px'}} />}
           label={'occurrences'}
           dependentAxis={true}
-          tickLabelComponent={<VictoryLabel style={{fontSize: '12px'}}/>}
+          tickFormat={t => Math.round(t) !== t ? undefined : t}
+          tickLabelComponent={<VictoryLabel style={{fontSize: '16px'}}/>}
         />
         <VictoryBar
           data={this.getData()}

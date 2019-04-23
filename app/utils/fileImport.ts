@@ -169,11 +169,7 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
     console.log("saved", itemList.length, "left")
   }
   await Promise.all(samplePromises)
-  // if (itemList.length){
-  //   await connection.getRepository('sample').save([...itemList]).catch(reason => console.log("!!!!!! BROKE !!11", reason))
-  // }
-    itemList = []
-  // await connection.getRepository('sample').save(itemList).catch(reason => console.log("!!!!!! BROKE !!11", reason))
+  itemList = []
   console.timeEnd("save samples")
   var t1 = performance.now()
   console.log("finished")

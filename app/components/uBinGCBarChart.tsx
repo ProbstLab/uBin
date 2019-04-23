@@ -1,5 +1,5 @@
 import * as React from 'react'
-import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryBrushContainer} from 'victory'
+import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryBrushContainer, VictoryLabel} from 'victory'
 import {Crossfilter, Dimension, Grouping} from 'crossfilter2'
 import {IBin, IDomain} from 'samples'
 import {Sample} from '../db/entities/Sample'
@@ -156,7 +156,7 @@ export class UBinGCBarChart extends React.Component<IProps> {
       <VictoryChart theme={VictoryTheme.material} domainPadding={10}
                     height={300}
                     width={400}
-                    padding={{ left: 40, top: 20, right: 10, bottom: 40 }}
+                    padding={{ left: 50, top: 20, right: 10, bottom: 40 }}
                     containerComponent={
                     <VictoryBrushContainer
                       brushDimension='x'
@@ -166,11 +166,13 @@ export class UBinGCBarChart extends React.Component<IProps> {
                       />
                     }>
         <VictoryAxis
+          axisLabelComponent={<VictoryLabel y={285} />}
           tickValues={[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]}
           label={this.props.xName || 'x'}
           fixLabelOverlap={true}
         />
         <VictoryAxis
+          axisLabelComponent={<VictoryLabel x={10} />}
           label={this.props.yName || 'y'}
           tickFormat={(t: number) => {return  t >= 1000000 ? `${Math.round(t)/1000000}M` : t >= 1000 ? `${Math.round(t)/1000}K` : t}}
           dependentAxis={true}

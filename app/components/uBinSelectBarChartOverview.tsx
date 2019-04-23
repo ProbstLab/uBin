@@ -140,7 +140,6 @@ export class UBinSelectBarChartOverview extends React.Component<IProps> {
                       />
                     }>
         <VictoryAxis
-          label={'coverage'}
           tickFormat={(t: number) => {return  t >= 1000 ? `${Math.round(t)/1000}k` : Math.round(t*100)/100}}
         />
         <VictoryBar
