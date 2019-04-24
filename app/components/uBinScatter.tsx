@@ -61,7 +61,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
   public componentWillMount(): void {
     let {cf} = this.props
     this.setState({
-      combDim: cf.dimension((d: Sample) => Math.round(d.gc/2)*2+':'+Math.round(d.coverage/50)*50+':'+(d.bin ? d.bin.id : '')),
+      // combDim: cf.dimension((d: Sample) => Math.round(d.gc/2)*2+':'+Math.round(d.coverage/50)*50+':'+(d.bin ? d.bin.id : '')),
       binDim: cf.dimension((d: Sample) => d.bin ? d.bin.id : 0),
       covDim: cf.dimension((d: Sample) => d.coverage),
       taxonomyDim: cf.dimension((d: Sample) => d.taxonomiesRelationString),
@@ -108,18 +108,20 @@ export class UBinScatter extends React.PureComponent<IProps> {
         this.currentRanges = {x: currentXRange, y: currentYRange}
         // let xRoundTo = Math.round(currentXRange/25) > 0 ? Math.round(currentXRange/25) : 0.5
         let yRoundTo = Math.round(currentYRange/100) > 1 ? Math.round(currentYRange/100) : 2
-        console.log("Round to:", yRoundTo, "range: ", currentYRange)
         this.setState({combDim: cf.dimension(
             (d: Sample) => (currentYRange > 1000 ? Math.round(d.gc / 2) * 2 : Math.round(d.gc))+':'+this.round(d.coverage, yRoundTo, 0)+':'+(d.bin ? d.bin.id : ''))},
         )
         this.allowUpdate = true
       }
-    } else if (this.allowUpdate && this.currentRanges) {
-      let currentYRange = this.currentRanges.y
-      let yRoundTo = Math.round(currentYRange/100) > 1 ? Math.round(currentYRange/100) : 2
+    } else if (this.allowUpdate) {
       this.setState({combDim: cf.dimension(
-          (d: Sample) => (currentYRange > 1000 ? Math.round(d.gc / 2) * 2 : Math.round(d.gc))+':'+this.round(d.coverage, yRoundTo, 0)+':'+(d.bin ? d.bin.id : ''))},
-      )
+        (d: Sample) => Math.round(d.gc / 2) * 2 + ':' + Math.round(d.coverage / 50) * 50 + ':' + (d.bin ? d.bin.id : '')),
+      })
+      // let currentYRange = this.currentRanges.y
+      // let yRoundTo = Math.round(currentYRange/100) > 1 ? Math.round(currentYRange/100) : 2
+      // this.setState({combDim: cf.dimension(
+      //     (d: Sample) => (currentYRange > 1000 ? Math.round(d.gc / 2) * 2 : Math.round(d.gc))+':'+this.round(d.coverage, yRoundTo, 0)+':'+(d.bin ? d.bin.id : ''))},
+      // )
       this.allowUpdate = false
     }
   }
@@ -289,6 +291,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
                       padding={{ left: 50, top: 40, right: 10, bottom: 40 }}
                       domainPadding={{x: 20, y: [logScale ? 0 : 20, logScale ? 0 : 20]}}
                       scale={{ x: 'linear', y: logScale ? 'log' : 'linear' }}>
+          <VictoryLabel text={this.props.title} x={200} y={30} textAnchor="middle"/>
           <VictoryAxis
             label={'gc'}
             axisLabelComponent={<VictoryLabel y={485} />}

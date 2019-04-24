@@ -31,6 +31,8 @@ export interface IBarCharState {
 
 export class UBinBarChart extends React.Component<IProps> {
   maxVal?: number = undefined
+  completeness?: number = 0
+  contamination?: number = 0
 
   public state: IBarCharState = {}
 
@@ -100,8 +102,8 @@ export class UBinBarChart extends React.Component<IProps> {
           })
         })
         if (this.props.maxCount) {
-          console.log("Count:", count, Math.round((count/this.props.maxCount)*1000)/10)
-          console.log("Contamination:", contamination, Math.round((contamination/this.props.maxCount)*1000)/10)
+          this.completeness = Math.round((count/this.props.maxCount)*1000)/10
+          this.contamination = Math.round((contamination/this.props.maxCount)*1000)/10
         }
         return returnVals
       }
@@ -121,12 +123,14 @@ export class UBinBarChart extends React.Component<IProps> {
   }
 
   public render(): JSX.Element {
+    let data: any = this.getData()
     return (
       <VictoryChart theme={VictoryTheme.material} domainPadding={40}
                     height={600}
                     width={600}
-                    // animate={{duration: 300}}
-                    padding={{ left: 40, top: 40, right: 10, bottom: 204 }}>
+                    padding={{ left: 40, top: 60, right: 10, bottom: 204 }}>
+        <VictoryLabel text={this.props.title} x={300} y={30} style={{fontSize: '16px'}} textAnchor='middle'/>
+        <VictoryLabel text={'Completeness: '+this.completeness+'% | Contamination: '+this.contamination+'%'} x={300} y={50} style={{fontSize: '16px'}} textAnchor='middle'/>
         <VictoryAxis
           tickValues={this.props.xLabels}
           tickLabelComponent={<VictoryLabel style={{textAnchor:'end', fontSize: '12px'}} angle={-75}/>}
@@ -139,7 +143,7 @@ export class UBinBarChart extends React.Component<IProps> {
           tickLabelComponent={<VictoryLabel style={{fontSize: '16px'}}/>}
         />
         <VictoryBar
-          data={this.getData()}
+          data={data}
           x={this.props.xName || 'x'}
           y={this.props.yName || 'y'}
         />

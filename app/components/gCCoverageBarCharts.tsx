@@ -38,7 +38,7 @@ export class GCCoverageBarCharts extends React.PureComponent<TProps> {
     return (
       <div style={{width: '100%', display: 'flex'}}>
         <div style={{width: '50%', height: '360px'}}>
-          <UBinGCBarChart data={samples} title='GC/Length' xName='gc' yName='length' xDomain={domain ? domain.x : undefined}
+          <UBinGCBarChart data={samples} title='GC distribution' xName='gc' yName='length' xDomain={domain ? domain.x : undefined}
                           coverageRange={domain ? domain.y : undefined} setWorldDomain={setDomainX} selectedTaxonomy={selectedTaxonomy}
                           domainChangeHandler={domainChangeHandler} bin={bin} binView={binView} excludedTaxonomies={excludedTaxonomies}/>
         </div>

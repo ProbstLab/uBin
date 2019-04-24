@@ -78,7 +78,7 @@ export class UBinPlotsWrappers extends React.Component<IProps> {
             <div>
               <UBinScatter cf={cf} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin} excludedTaxonomies={excludedTaxonomies}
                            selectedTaxonomy={selectedTaxonomy} binView={binView} setGCAverage={setGCAverage} setCoverageAverage={setCoverageAverage}
-                           setTotalLength={setTotalLength} setSelectedCount={setSelectedCount}/>
+                           setTotalLength={setTotalLength} setSelectedCount={setSelectedCount} title={'GC-Coverage plot'}/>
             </div>
             <div style={{width: '360px', marginTop: '30px'}}>
               <UBinSunburst data={{ children: []}} taxonomies={taxonomies} cf={cf} setConsensus={setConsensus}

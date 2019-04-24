@@ -164,6 +164,7 @@ export class UBinGCBarChart extends React.Component<IProps> {
                       onBrushDomainChangeEnd={() => this.handleBrushChangeEnd()}
                       />
                     }>
+        <VictoryLabel text={this.props.title} x={200} y={10} textAnchor="middle"/>
         <VictoryAxis
           axisLabelComponent={<VictoryLabel y={285} />}
           tickValues={[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]}

@@ -44,10 +44,10 @@ export class CoverageBarChartsWrapper extends React.PureComponent<TProps> {
     let {worldDomain, setDomainY, domainChangeHandler, bin, binView, selectedTaxonomy, excludedTaxonomies} = this.props
     return (
         <div>
-          <UBinCoverageBarChart cf={cf} title='Coverage/Length' xName='coverage' yName='length' coverageRange={worldDomain ? worldDomain.y : undefined}
+          <UBinCoverageBarChart cf={cf} title='Coverage distribution' xName='coverage' yName='length' coverageRange={worldDomain ? worldDomain.y : undefined}
                                 setWorldDomain={setDomainY} domainChangeHandler={domainChangeHandler} bin={bin} range={range} binView={binView}
                                 gcRange={worldDomain ? worldDomain.x : undefined} selectedTaxonomy={selectedTaxonomy} excludedTaxonomies={excludedTaxonomies}/>
-          <UBinSelectBarChartOverview cf={overviewCf} title='Coverage/Length' xName='coverage' yName='length' binView={binView} selectedTaxonomy={selectedTaxonomy}
+          <UBinSelectBarChartOverview cf={overviewCf} title='Coverage range selection' xName='coverage' yName='length' binView={binView} selectedTaxonomy={selectedTaxonomy}
                                       worldDomain={worldDomain ? worldDomain.y : undefined} bin={bin} setRange={this.setRange.bind(this)} excludedTaxonomies={excludedTaxonomies}/>
         </div>
     )}

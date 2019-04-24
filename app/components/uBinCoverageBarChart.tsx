@@ -185,6 +185,7 @@ export class UBinCoverageBarChart extends React.Component<IProps> {
                       onBrushDomainChangeEnd={() => this.handleBrushChangeEnd()}
                       />
                     }>
+        <VictoryLabel text={this.props.title} x={200} y={10} textAnchor="middle"/>
         <VictoryAxis
           label={'coverage'}
           axisLabelComponent={<VictoryLabel y={285} />}
