@@ -93,12 +93,12 @@ export class UBinScatter extends React.PureComponent<IProps> {
     }
   }
 
-  public componentWillUpdate(): void {
-    this.setScatterScaling()
+  public componentWillUpdate(nextProps: IProps): void {
+    this.setScatterScaling(nextProps)
   }
 
-  public setScatterScaling(): void {
-    let {domain, cf} = this.props
+  public setScatterScaling(nextProps?: IProps): void {
+    let {domain, cf} = nextProps || this.props
     if (domain && domain.x && domain.y) {
       let currentXRange: number = Math.sqrt((domain.x[1] - domain.x[0])**2)
       let currentYRange: number = Math.sqrt((domain.y[1] - domain.y[0])**2)
@@ -110,7 +110,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
         let yRoundTo = Math.round(currentYRange/100) > 1 ? Math.round(currentYRange/100) : 2
         console.log("Round to:", yRoundTo, "range: ", currentYRange)
         this.setState({combDim: cf.dimension(
-            (d: Sample) => (currentYRange > 1000 ? Math.round(d.gc / 2) * 2 : Math.round(d.gc))+':'+this.round(d.coverage, yRoundTo, 0).toString()+':'+(d.bin ? d.bin.id : ''))},
+            (d: Sample) => (currentYRange > 1000 ? Math.round(d.gc / 2) * 2 : Math.round(d.gc))+':'+this.round(d.coverage, yRoundTo, 0)+':'+(d.bin ? d.bin.id : ''))},
         )
         this.allowUpdate = true
       }
@@ -118,7 +118,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
       let currentYRange = this.currentRanges.y
       let yRoundTo = Math.round(currentYRange/100) > 1 ? Math.round(currentYRange/100) : 2
       this.setState({combDim: cf.dimension(
-          (d: Sample) => (currentYRange > 1000 ? Math.round(d.gc / 2) * 2 : Math.round(d.gc))+':'+this.round(d.coverage, yRoundTo, 0).toString()+':'+(d.bin ? d.bin.id : ''))},
+          (d: Sample) => (currentYRange > 1000 ? Math.round(d.gc / 2) * 2 : Math.round(d.gc))+':'+this.round(d.coverage, yRoundTo, 0)+':'+(d.bin ? d.bin.id : ''))},
       )
       this.allowUpdate = false
     }

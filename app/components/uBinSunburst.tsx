@@ -98,7 +98,7 @@ export class UBinSunburst extends React.Component<IProps> {
     let {taxonomies} = this.props
     let {groupDim, pastLength} = this.state
     if (groupDim) {
-      let grouped: Grouping<NaturallyOrderedValue, NaturallyOrderedValue>[] =
+      let grouped: Grouping<NaturallyOrderedValue, any>[] =
         groupDim.group().reduceSum((d: any) => Math.round(d.length * d.coverage)).all().filter(d => d.value)
       let tree: any = TreeCreator.createTreeFromCFData(grouped, this.props.taxonomies)
       if (grouped.length !== pastLength) {
@@ -117,7 +117,7 @@ export class UBinSunburst extends React.Component<IProps> {
     let {taxonomies} = this.props
     let {groupDim, pastLength} = this.state
     if (groupDim) {
-      let grouped: Grouping<NaturallyOrderedValue, NaturallyOrderedValue>[] =
+      let grouped: Grouping<NaturallyOrderedValue, any>[] =
         groupDim.group().reduceSum((d: any) => Math.round(d.length * d.coverage)).all().filter(d => d.value)
       if (grouped.length !== pastLength) {
         let tree: any = TreeCreator.createTreeFromCFData(grouped, taxonomies)
@@ -249,8 +249,8 @@ export class UBinSunburst extends React.Component<IProps> {
           onValueClick={(datapoint: any, event: MouseEvent<HTMLElement>) => this.selectTaxonomy(datapoint)}
           style={{
             stroke: '#ddd',
-            strokeOpacity: 0.3,
-            strokeWidth: '0.5',
+            strokeOpacity: 0.5,
+            strokeWidth: '1.0',
           }}
           colorType="literal"
           data={this.getData()}
