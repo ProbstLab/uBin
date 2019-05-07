@@ -126,7 +126,7 @@ const compareScaffoldWithFilters = (sample: Sample, filter: ISampleFilter, exclu
     if (sample.taxonomiesRelationString.indexOf(selectedTaxonomy) < 0) { return false }
   }
   if (excludedTaxonomyStrings.length) {
-    if (!compareArrayToString(sample.taxonomiesRelationString, excludedTaxonomyStrings)) { return false }
+    if (compareArrayToString(sample.taxonomiesRelationString, excludedTaxonomyStrings)) { return false }
   }
   if (filter.domain) {
     if (filter.domain.x) {
@@ -192,10 +192,6 @@ export const saveBinQuery = async (connection: Connection, recordId: number, dat
     bottom += 100
   }
   if (dispatch) {
-    // Promise.all([
-    //   SamplesActions.setBinFilter(newBin as Bin),
-    //   DBActions.getSamples(connection, recordId),
-    // ])
     Promise.all([
     dispatch(SamplesActions.setNewBinToData(newBin as Bin, idList))])
       .then(() => Promise.all([dispatch(SamplesActions.setReloadSamples(true)), dispatch(SamplesActions.setBinFilter(newBin as Bin))])
