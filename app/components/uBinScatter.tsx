@@ -98,32 +98,42 @@ export class UBinScatter extends React.PureComponent<IProps> {
   }
 
   public setScatterScaling(nextProps?: IProps): void {
-    let {domain, cf} = nextProps || this.props
+    let {domain, cf, bin, binView} = nextProps || this.props
+    let {combDim} = this.state
     if (domain && domain.x && domain.y) {
-      let currentXRange: number = Math.sqrt((domain.x[1] - domain.x[0])**2)
-      let currentYRange: number = Math.sqrt((domain.y[1] - domain.y[0])**2)
-      // console.log("currentXRange:", currentXRange, "currentYRange:", currentYRange, "this.currentRanges:", this.currentRanges)
-      // console.log("True?", (!this.currentRanges || this.currentRanges.x !== currentXRange || this.currentRanges.y !== currentYRange))
+      let currentXRange: number = Math.sqrt((domain.x[1] - domain.x[0]) ** 2)
+      let currentYRange: number = Math.sqrt((domain.y[1] - domain.y[0]) ** 2)
       if (!this.currentRanges || this.currentRanges.y !== currentYRange) {
-        this.currentRanges = {x: currentXRange, y: currentYRange}
-        // let xRoundTo = Math.round(currentXRange/25) > 0 ? Math.round(currentXRange/25) : 0.5
-        let yRoundTo = Math.round(currentYRange/100) > 1 ? Math.round(currentYRange/100) : 2
-        this.setState({combDim: cf.dimension(
-            (d: Sample) => (currentYRange > 1000 ? Math.round(d.gc / 2) * 2 : Math.round(d.gc))+':'+this.round(d.coverage, yRoundTo, 0)+':'+(d.bin ? d.bin.id : ''))},
-        )
-        this.allowUpdate = true
+        this.setCombGrouping(currentXRange, currentYRange, nextProps)
+      }
+    } else if (combDim && bin && binView) {
+      let bottom: Sample = combDim.bottom(1)[0]
+      let top: Sample = combDim.top(1)[0]
+      if (bottom && top) {
+        let currentXRange: number = Math.sqrt((top.gc - bottom.gc) ** 2)
+        let currentYRange: number = Math.sqrt((top.coverage - bottom.coverage) ** 2)
+        if (!this.currentRanges || this.currentRanges.y !== currentYRange) {
+          this.setCombGrouping(currentXRange, currentYRange, nextProps)
+        }
       }
     } else if (this.allowUpdate) {
       this.setState({combDim: cf.dimension(
         (d: Sample) => Math.round(d.gc / 2) * 2 + ':' + Math.round(d.coverage / 50) * 50 + ':' + (d.bin ? d.bin.id : '')),
       })
-      // let currentYRange = this.currentRanges.y
-      // let yRoundTo = Math.round(currentYRange/100) > 1 ? Math.round(currentYRange/100) : 2
-      // this.setState({combDim: cf.dimension(
-      //     (d: Sample) => (currentYRange > 1000 ? Math.round(d.gc / 2) * 2 : Math.round(d.gc))+':'+this.round(d.coverage, yRoundTo, 0)+':'+(d.bin ? d.bin.id : ''))},
-      // )
       this.allowUpdate = false
     }
+  }
+
+  private setCombGrouping(currentXRange: number, currentYRange: number, nextProps?: IProps): void {
+    let {cf} = nextProps || this.props
+    this.currentRanges = {x: currentXRange, y: currentYRange}
+    let yRoundTo = Math.round(currentYRange / 100) > 1 ? Math.round(currentYRange / 100) : 2
+    this.setState({
+        combDim: cf.dimension(
+          (d: Sample) => (currentYRange > 1000 ? Math.round(d.gc / 2) * 2 : Math.round(d.gc)) + ':' + this.round(d.coverage, yRoundTo, 0) + ':' + (d.bin ? d.bin.id : ''))
+      },
+    )
+    this.allowUpdate = true
   }
 
   public reduceInitial(): any {

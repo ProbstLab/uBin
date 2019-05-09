@@ -44,12 +44,12 @@ export class TreeCreator {
       let occurrence = occurrences[i] as Grouping<string, number>
       let keys: string[] = occurrence.key.split(';').slice(1, -1)
       let children: ISunburstItem[] = tree.children
-      children = TreeCreator.taxonomyRecursion(keys, children, tree.color || '#12939A', occurrence, taxonomies)
+      children = TreeCreator.taxonomyRecursion(keys, children, 0, tree.color || '#12939A', occurrence, taxonomies)
     }
     return tree
   }
 
-  static taxonomyRecursion(keys: string[], children: ISunburstItem[], color: string,
+  static taxonomyRecursion(keys: string[], children: ISunburstItem[], level: number, color: string,
                            occurrence: Grouping<string, number>, taxonomies: IValueMap<Taxonomy>): ISunburstItem[] {
     let key = keys.shift()
     if (key === undefined) { return children }
@@ -67,7 +67,7 @@ export class TreeCreator {
     color = child.color || color
     children = child.children
     if (!keys.length) { child.size = occurrence.value }
-    return TreeCreator.taxonomyRecursion(keys, children, color, occurrence, taxonomies)
+    return TreeCreator.taxonomyRecursion(keys, children, level+1, color, occurrence, taxonomies)
   }
 
   // Finding "root" of taxonomy recursively. Basically just looking up parents and then adding children to it
