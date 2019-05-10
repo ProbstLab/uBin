@@ -33,6 +33,7 @@ interface IFileManagerState {
   importName: string,
   importNameLength: number
   importNameLengthReached: boolean
+  citationMessageOpen: boolean
 }
 
 const fileManagerStyle = {
@@ -67,10 +68,17 @@ class CFileManager extends React.Component<TProps> {
     importName: '',
     importNameLength: 6,
     importNameLengthReached: false,
+    citationMessageOpen: false,
   }
 
   public componentDidMount(): void {
     if (!this.props.fileTree.length) {this.props.initFileTree('')}
+  }
+
+  componentDidUpdate(prevProps: TProps): void {
+    if (prevProps.isImportingFiles && !this.props.isImportingFiles) {
+      this.toggleCitationMessage()
+    }
   }
 
   private handleImportNameChange = (value: string) => this.setState({importNameLengthReached: value.length >= this.state.importNameLength,
@@ -118,6 +126,12 @@ class CFileManager extends React.Component<TProps> {
               <ProgressBar intent='primary'/>
             </div>
           </Dialog>
+          <Dialog isOpen={this.state.citationMessageOpen} onClose={() => this.toggleCitationMessage()} icon='info-sign'
+                  title='Importing Data'>
+            <div className={Classes.DIALOG_BODY}>
+              <h4>Importing Files...</h4>
+            </div>
+          </Dialog>
         </div>
       </div>
     )
@@ -161,8 +175,13 @@ class CFileManager extends React.Component<TProps> {
     }
   }
 
+  private toggleCitationMessage(): void {
+    let {citationMessageOpen} = this.state
+    this.setState({citationMessageOpen: !citationMessageOpen})
+  }
+
   private toggleDialog(isOpen: boolean): void {
-    if (this.props.connection) {
+    if (this.props.connection && isOpen) {
       this.props.startFileImport(this.props.addedFiles, this.props.connection, this.state.importName)
     }
   }
