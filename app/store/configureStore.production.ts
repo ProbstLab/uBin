@@ -1,15 +1,15 @@
 import { createStore, applyMiddleware, compose, combineReducers } from 'redux'
 import { connectRouter, routerMiddleware } from 'connected-react-router'
 import thunk from 'redux-thunk'
-import createHistory from 'history/createBrowserHistory'
+import { createBrowserHistory } from 'history'
 import promise from 'redux-promise-middleware'
 
 import {samplesReducer, IClientState, fileTreeReducer, dbReducer} from '../controllers'
 import {DBActions} from '../controllers/database'
 
-const history = createHistory()
+const history = createBrowserHistory()
 
-const enhancers = []
+const enhancers: any[] = []
 const middleware = [thunk, routerMiddleware(history), promise()]
 
 const devToolsExtension = (window as any).__REDUX_DEVTOOLS_EXTENSION__

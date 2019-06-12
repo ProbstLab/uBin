@@ -95,6 +95,7 @@ const homeStyle = {
 type TProps = IProps & IPropsFromState & IActionsFromState
 
 class CHome extends React.Component<TProps> {
+  date: Date = new Date()
   wrapperKey: string = new Date().toISOString().toString()
   lastReloadState: boolean|undefined
 
@@ -148,7 +149,6 @@ class CHome extends React.Component<TProps> {
     let dataLoaded: boolean = !samplesPending && samples.length > 0
     if (reloadSamples && this.lastReloadState !== reloadSamples) {
       this.wrapperKey = new Date().toISOString().toString()
-      console.log("new key")
     }
     this.lastReloadState = reloadSamples
     return (

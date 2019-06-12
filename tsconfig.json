@@ -6,7 +6,7 @@
     "jsx": "react",
     "lib": [
       "dom",
-      "es6",
+      "es5",
       "es2016.array.include",
       "dom.iterable",
       "scripthost"
