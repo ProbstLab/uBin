@@ -176,7 +176,7 @@ export class UBinCoverageBarChart extends React.Component<IProps> {
       <VictoryChart theme={VictoryTheme.material} domainPadding={20}
                     height={300}
                     width={400}
-                    padding={{ left: 50, top: 20, right: 10, bottom: 40 }}
+                    padding={{ left: 50, top: 20, right: 10, bottom: 25 }}
                     containerComponent={
                     <VictoryBrushContainer
                       brushDimension='x'
@@ -187,8 +187,6 @@ export class UBinCoverageBarChart extends React.Component<IProps> {
                     }>
         <VictoryLabel text={this.props.title} x={200} y={10} textAnchor="middle"/>
         <VictoryAxis
-          label={'coverage'}
-          axisLabelComponent={<VictoryLabel y={285} />}
           tickFormat={(t: number) => {return  t >= 1000 ? `${Math.round(t)/1000}k` : Math.round(t*100)/100}}
         />
         <VictoryAxis

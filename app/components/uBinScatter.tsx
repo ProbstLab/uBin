@@ -55,10 +55,11 @@ export class UBinScatter extends React.PureComponent<IProps> {
   coverageAverage?: number
 
   public state: IUBinScatterState = {
-    logScale: false,
+    logScale: localStorage.getItem('logScale') ? localStorage.getItem('logScale') === 'true' : false,
   }
 
   public componentWillMount(): void {
+    console.log("log scale:", localStorage.getItem('logScale'), localStorage.getItem('logScale') === 'true')
     let {cf} = this.props
     this.setState({
       // combDim: cf.dimension((d: Sample) => Math.round(d.gc/2)*2+':'+Math.round(d.coverage/50)*50+':'+(d.bin ? d.bin.id : '')),
@@ -285,7 +286,9 @@ export class UBinScatter extends React.PureComponent<IProps> {
   }
 
   private handleLogScaleChange(): void {
+    let negatedLogScale = !this.state.logScale
     this.setState({logScale: !this.state.logScale})
+    localStorage.setItem('logScale', negatedLogScale.toString())
 }
   public render(): JSX.Element {
     let {logScale} = this.state

@@ -106,7 +106,7 @@ class CFileManager extends React.Component<TProps> {
           <Card style={{ margin: '8px'}}>
             <h4>Import</h4>
             <Callout intent={(numFilesRequired - addedFiles.length) > 0 ?  'warning' : 'success'}>
-              Add your taxonomy file first, then .csv or .txt of second dataset ({numFilesRequired - addedFiles.length} files remaining)
+              Add your taxonomy file first, then .tsv, .csv or .txt of second dataset ({numFilesRequired - addedFiles.length} files remaining)
             </Callout>
             <Callout style={{marginTop: '6px'}} intent={!importNameLengthReached ? 'warning': 'success'}>
               Choose a name for your import
@@ -127,9 +127,9 @@ class CFileManager extends React.Component<TProps> {
             </div>
           </Dialog>
           <Dialog isOpen={this.state.citationMessageOpen} onClose={() => this.toggleCitationMessage()} icon='info-sign'
-                  title='Importing Data'>
+                  title='Import Successful!'>
             <div className={Classes.DIALOG_BODY}>
-              <h4>Importing Files...</h4>
+              <h4>Please cite Till Bonnermann, Alexander Probst and Tim Burg.</h4>
             </div>
           </Dialog>
         </div>

@@ -129,9 +129,9 @@ export class UBinSelectBarChartOverview extends React.Component<IProps> {
   public render(): JSX.Element {
     return (
       <VictoryChart theme={VictoryTheme.material} domainPadding={20}
-                    height={100}
+                    height={120}
                     width={400}
-                    padding={{ left: 50, top: 18, right: 10, bottom: 24 }}
+                    padding={{ left: 50, top: 0, right: 10, bottom: 45 }}
                     containerComponent={
                     <VictoryBrushContainer
                       brushDimension='x'
@@ -139,8 +139,10 @@ export class UBinSelectBarChartOverview extends React.Component<IProps> {
                       onBrushDomainChangeEnd={() => this.handleBrushChangeEnd()}
                       />
                     }>
-        <VictoryLabel text={this.props.title} x={200} y={8} textAnchor="middle"/>
+        {/*<VictoryLabel text={this.props.title} x={200} y={8} textAnchor="middle"/>*/}
         <VictoryAxis
+          label={'coverage'}
+          axisLabelComponent={<VictoryLabel y={100} />}
           tickFormat={(t: number) => {return  t >= 1000 ? `${Math.round(t)/1000}k` : Math.round(t*100)/100}}
         />
         <VictoryBar

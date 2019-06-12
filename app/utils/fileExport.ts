@@ -14,7 +14,7 @@ export const exportData = (exportDir: string, exportName: string, taxonomies: IV
   return new Promise((resolve, reject) => {
     let addSlash: string = exportDir.endsWith('/') ? '' : '/'
     getSamplesWithScaffoldQuery(connection, recordId).then((data: Sample[]) => {
-      let wstream = fs.createWriteStream(exportDir + addSlash + exportName + '.csv')
+      let wstream = fs.createWriteStream(exportDir + addSlash + exportName + '.tsv')
       wstream.on('finish', () => {
         resolve(true)
       })
