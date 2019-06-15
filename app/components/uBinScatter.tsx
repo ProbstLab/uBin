@@ -59,7 +59,6 @@ export class UBinScatter extends React.PureComponent<IProps> {
   }
 
   public componentWillMount(): void {
-    console.log("log scale:", localStorage.getItem('logScale'), localStorage.getItem('logScale') === 'true')
     let {cf} = this.props
     this.setState({
       // combDim: cf.dimension((d: Sample) => Math.round(d.gc/2)*2+':'+Math.round(d.coverage/50)*50+':'+(d.bin ? d.bin.id : '')),

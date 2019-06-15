@@ -166,6 +166,7 @@ export class UBinCoverageBarChart extends React.Component<IProps> {
   }
 
   public render(): JSX.Element {
+    // console.log("currentDomain:", this.currentDomain)
     let {xName, bin} = this.props
     let {binRange} = this
     let binColour: string

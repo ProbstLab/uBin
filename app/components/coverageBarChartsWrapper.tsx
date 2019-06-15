@@ -34,6 +34,14 @@ export class CoverageBarChartsWrapper extends React.PureComponent<TProps> {
     overviewCf: crossfilter(this.props.samples),
   }
 
+  // public componentWillUpdate(nextProps: IProps): void {
+  //   let { worldDomain } = nextProps
+  //   let { range } = this.state
+  //   if (worldDomain && range && !worldDomain.y) {
+  //     this.setState({range: undefined})
+  //   }
+  // }
+
   private setRange(range: [number, number]) {
     this.setState({range})
   }

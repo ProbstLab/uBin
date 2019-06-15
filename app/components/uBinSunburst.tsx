@@ -249,13 +249,8 @@ export class UBinSunburst extends React.Component<IProps> {
             })
           }}
           onValueMouseOut={() =>
-            clicked
-              ? () => {}
-              : this.setState({
-                pathValue: false,
-                finalValue: 'Taxonomy',
-                data: updateData(this.props.data, false),
-              })
+            clicked ? () => {} :
+              this.setState({pathValue: false, finalValue: 'Taxonomy', namePathValues: [], data: updateData(this.props.data, false)})
           }
           onValueClick={(datapoint: any, event: MouseEvent<HTMLElement>) => this.selectTaxonomy(datapoint)}
           style={{
