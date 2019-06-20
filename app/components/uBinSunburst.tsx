@@ -105,7 +105,7 @@ export class UBinSunburst extends React.Component<IProps> {
         if (grouped.length) {
           let taxonomyPathsTotal: number = 0
           for (let i: number = 0; i < grouped.length; i++) { taxonomyPathsTotal += grouped[i].value as number }
-          let consensus: string = this.findConsensusInTree(tree, taxonomyPathsTotal)
+          let consensus: string = this.findConsensusInTree(tree, taxonomyPathsTotal, 0)
           this.props.setConsensus(taxonomies[consensus])
         }
       }
@@ -124,7 +124,7 @@ export class UBinSunburst extends React.Component<IProps> {
         if (grouped.length) {
           let taxonomyPathsTotal: number = 0
           for (let i: number = 0; i < grouped.length; i++) { taxonomyPathsTotal += grouped[i].value as number }
-          let consensus: string = this.findConsensusInTree(tree, taxonomyPathsTotal)
+          let consensus: string = this.findConsensusInTree(tree, taxonomyPathsTotal, 0)
           this.props.setConsensus(taxonomies[consensus])
         }
         this.setState({tree, pastLength: grouped.length})
@@ -132,13 +132,13 @@ export class UBinSunburst extends React.Component<IProps> {
     }
   }
 
-  public findConsensusInTree(tree: any, total: number): string {
+  public findConsensusInTree(tree: any, total: number, level: number): string {
     if (!tree.children.length) { return '' }
     let candidate: string = ''
     let candidateKey: number|undefined
     for (let i: number = 0; i < tree.children.length; i++) {
       if (tree.children[i].hasOwnProperty('count') && tree.children[i].count/total > 0.5) {
-        if (tree.children.length > 1 && tree.children[i].title === 'unclassified') {
+        if (tree.children.length > 1 && level !== 0 && tree.children[i].title === 'unclassified') {
           let maxCount: number = 0
           for (let j: number = 0; j < tree.children.length; j++) {
             if (j !== i && tree.children[j].hasOwnProperty('count') && tree.children[j].count > maxCount) {
@@ -155,7 +155,7 @@ export class UBinSunburst extends React.Component<IProps> {
     }
     if (candidate.length && candidateKey !== undefined) {
       let nextCandidate: string = ''
-      let potentialCandidate: string = this.findConsensusInTree(tree.children[candidateKey], total)
+      let potentialCandidate: string = this.findConsensusInTree(tree.children[candidateKey], total, ++level)
       if (potentialCandidate.length) {
         nextCandidate = potentialCandidate
       }

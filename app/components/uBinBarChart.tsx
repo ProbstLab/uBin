@@ -23,6 +23,8 @@ interface IProps {
   bin?: IBin
   binView: boolean
   maxCount?: number
+  chartHeight?: number
+  bottomHeight?: number
 }
 
 export interface IBarCharState {
@@ -126,9 +128,9 @@ export class UBinBarChart extends React.Component<IProps> {
     let data: any = this.getData()
     return (
       <VictoryChart theme={VictoryTheme.material} domainPadding={40}
-                    height={600}
-                    width={600}
-                    padding={{ left: 40, top: 60, right: 10, bottom: 204 }}>
+                    height={this.props.chartHeight ? this.props.chartHeight : 420}
+                    width={500}
+                    padding={{ left: 40, top: 60, right: 10, bottom: this.props.bottomHeight ? this.props.bottomHeight : 245 }}>
         <VictoryLabel text={this.props.title} x={300} y={30} style={{fontSize: '16px'}} textAnchor='middle'/>
         <VictoryLabel text={'Completeness: '+this.completeness+'% | Contamination: '+this.contamination+'%'} x={300} y={50} style={{fontSize: '16px'}} textAnchor='middle'/>
         <VictoryAxis

@@ -126,12 +126,12 @@ class CFileManager extends React.Component<TProps> {
               <ProgressBar intent='primary'/>
             </div>
           </Dialog>
-          <Dialog isOpen={this.state.citationMessageOpen} onClose={() => this.toggleCitationMessage()} icon='info-sign'
-                  title='Import Successful!'>
-            <div className={Classes.DIALOG_BODY}>
-              <h4>When using this software please cite:<br/>Till L. V. Bornemann, Tim Burg, and Alexander J. Probst: uBin - an interactive metagenome viewer and binner for educational purposes. <i>unpublished.</i></h4>
-            </div>
-          </Dialog>
+          {/*<Dialog isOpen={this.state.citationMessageOpen} onClose={() => this.toggleCitationMessage()} icon='info-sign'*/}
+                  {/*title='Import Successful!'>*/}
+            {/*<div className={Classes.DIALOG_BODY}>*/}
+              {/*<h4>When using this software please cite:<br/>Till L. V. Bornemann, Tim Burg, and Alexander J. Probst: uBin - an interactive metagenome viewer and binner for educational purposes. <i>unpublished.</i></h4>*/}
+            {/*</div>*/}
+          {/*</Dialog>*/}
         </div>
       </div>
     )
