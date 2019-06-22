@@ -42,7 +42,7 @@ export class DBActions {
     return {
       type: dbActions.connectDatabase, payload: orm.createConnection().then(async (connection: Connection) => {
         return connection
-      }).catch((error: any) => console.log('wtf?', error)),
+      }).catch((error: any) => console.log('DB Connection failed:', error)),
     }
   }
   static connectDatabaseFulfilled(connection: Connection): IConnectDatabaseFulfilled {
