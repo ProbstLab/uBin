@@ -30,6 +30,7 @@ export interface IBarCharState {
 export class UBinSelectBarChartOverview extends React.Component<IProps> {
 
   yMax: number = 0
+  totalCount?: number
   currentDomain?: any
 
   public state: IBarCharState = {}
@@ -115,13 +116,14 @@ export class UBinSelectBarChartOverview extends React.Component<IProps> {
           grouped = groupDim.group().reduce(this.reduceAddLength, this.reduceRemoveLength, this.reduceInitial).all()
           break
       }
-      let arr: any[] = grouped.filter((value: any) => value.value.count).map((value: any) => {
+      this.totalCount = 0
+      return grouped.filter((value: any) => value.value.count).map((value: any) => {
         let obj: any = {}
         obj[xName || 'x'] = value.key
         obj[yName || 'x'] = value.value.xSum
+        this.totalCount += value.value.xSum
         return obj
       })
-      return arr
     }
     return []
   }
@@ -144,6 +146,10 @@ export class UBinSelectBarChartOverview extends React.Component<IProps> {
           label={'coverage'}
           axisLabelComponent={<VictoryLabel y={100} />}
           tickFormat={(t: number) => {return  t >= 1000 ? `${Math.round(t)/1000}k` : Math.round(t*100)/100}}
+        />
+        <VictoryAxis
+          tickFormat={(t: number) => {return this.totalCount ? `${Math.round((t/this.totalCount)*100)}%` : ''}}
+          dependentAxis={true}
         />
         <VictoryBar
           barRatio={0.4}
