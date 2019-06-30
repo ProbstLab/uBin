@@ -32,6 +32,8 @@ export class UBinSelectBarChartOverview extends React.Component<IProps> {
   yMax: number = 0
   totalCount?: number
   currentDomain?: any
+  changedBin: boolean = true
+  groupDimRange?: number
 
   public state: IBarCharState = {}
 
@@ -54,9 +56,29 @@ export class UBinSelectBarChartOverview extends React.Component<IProps> {
   }
 
   public componentWillUpdate(nextProps: IProps): void {
-    let { worldDomain } = nextProps
+    let { worldDomain, bin } = nextProps
     if (this.currentDomain !== worldDomain) {
       this.currentDomain = worldDomain
+    }
+    if (bin !== this.props.bin) {
+      this.changedBin = true
+    }
+  }
+
+  public componentDidUpdate(): void {
+    if (this.changedBin) {
+      let {cf} = this.props
+      let tmpDimension = cf.dimension((d: Sample) => d.coverage)
+      let groupDimTop = tmpDimension.top(1)[0].coverage
+      let groupDimBottom = tmpDimension.bottom(1)[0].coverage
+      let covRange = Math.sqrt(groupDimTop**2 - groupDimBottom**2)
+      if (covRange <= 20) {
+        this.setState({groupDim: cf.dimension((d: Sample) => d.coverage)})
+      } else {
+        this.setState({groupDim: cf.dimension((d: Sample) => Math.round(d.coverage/10)*10)})
+      }
+      this.groupDimRange = covRange
+      this.changedBin = false
     }
   }
 
@@ -133,7 +155,7 @@ export class UBinSelectBarChartOverview extends React.Component<IProps> {
       <VictoryChart theme={VictoryTheme.material} domainPadding={20}
                     height={120}
                     width={400}
-                    padding={{ left: 50, top: 0, right: 10, bottom: 45 }}
+                    padding={{ left: 50, top: 4, right: 10, bottom: 45 }}
                     containerComponent={
                     <VictoryBrushContainer
                       brushDimension='x'
