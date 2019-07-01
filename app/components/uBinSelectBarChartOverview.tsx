@@ -72,8 +72,12 @@ export class UBinSelectBarChartOverview extends React.Component<IProps> {
       let groupDimTop = tmpDimension.top(1)[0].coverage
       let groupDimBottom = tmpDimension.bottom(1)[0].coverage
       let covRange = Math.sqrt(groupDimTop**2 - groupDimBottom**2)
-      if (covRange <= 20) {
+      if (covRange <= 50) {
         this.setState({groupDim: cf.dimension((d: Sample) => d.coverage)})
+      } else if (covRange <= 100) {
+        this.setState({groupDim: cf.dimension((d: Sample) => Math.round(d.coverage/2)*2)})
+      } else if (covRange <= 250) {
+        this.setState({groupDim: cf.dimension((d: Sample) => Math.round(d.coverage/5)*5)})
       } else {
         this.setState({groupDim: cf.dimension((d: Sample) => Math.round(d.coverage/10)*10)})
       }
