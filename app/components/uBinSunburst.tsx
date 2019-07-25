@@ -147,7 +147,7 @@ export class UBinSunburst extends React.Component<IProps> {
               candidateKey = j
             }
           }
-        } else if (tree.children[i].title !== 'unclassified') {
+        } else if (tree.children[i].title !== 'unclassified' || level === 0) {
           candidate = tree.children[i].id
           candidateKey = i
         }
