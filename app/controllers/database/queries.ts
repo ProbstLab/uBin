@@ -200,3 +200,14 @@ export const saveBinQuery = async (connection: Connection, recordId: number, dat
   }
   return Promise.all(promises)
 }
+
+export const deleteBinQuery = async (connection: Connection, bin: Bin): Promise<any> => {
+  // console.log("bin id:", bin.id)
+  // console.log("before", await connection.getRepository('sample').createQueryBuilder('sample').select('id').where('binId = :binId', {binId: bin.id}).getCount())
+  let query = connection.getRepository('sample').createQueryBuilder('sample').update()
+              .set({bin: null})
+              .where('binId = :binId', {binId: bin.id})
+  await query.execute()
+  // console.log("after", await connection.getRepository('sample').createQueryBuilder('sample').select('id').where('binId = :binId', {binId: bin.id}).getCount())
+  return connection.getRepository('bin').createQueryBuilder('bin').delete().where('id = :id', {id: bin.id}).execute()
+}

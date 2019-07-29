@@ -28,6 +28,10 @@ export enum dbActions {
   saveBinPending = 'database.saveBin_PENDING',
   saveBinRejected = 'database.saveBin_REJECTED',
   saveBinFulfilled = 'database.saveBin_FULFILLED',
+  deleteBin = 'database.deleteBin',
+  deleteBinPending = 'database.deleteBin_PENDING',
+  deleteBinRejected = 'database.deleteBin_REJECTED',
+  deleteBinFulfilled = 'database.deleteBin_FULFILLED',
 }
 
 export interface IConnectDatabase extends Action {
@@ -119,5 +123,22 @@ export interface ISetSaveBinRejected extends Action {
 }
 export interface ISetSaveBinFulfilled extends Action {
   type: dbActions.saveBinFulfilled
+  payload: any
+}
+
+export interface IDeleteBin extends Action {
+  type: dbActions.deleteBin
+  payload: Promise<any>
+}
+export interface ISetDeleteBinPending extends Action {
+  type: dbActions.deleteBinPending
+  payload: any
+}
+export interface ISetDeleteBinRejected extends Action {
+  type: dbActions.deleteBinRejected
+  payload: any
+}
+export interface ISetDeleteBinFulfilled extends Action {
+  type: dbActions.deleteBinFulfilled
   payload: any
 }

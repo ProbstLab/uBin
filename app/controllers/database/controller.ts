@@ -2,7 +2,7 @@ import {
   IConnectDatabaseFulfilled,
   IDBState,
   IGetSamplesPending,
-  IGetTaxonomiesForImportPending,
+  IGetTaxonomiesForImportPending, ISetDeleteBinFulfilled, ISetDeleteBinPending, ISetDeleteBinRejected,
   ISetSaveBinFulfilled, ISetSaveBinPending, ISetSaveBinRejected
 } from './interfaces'
 
@@ -57,5 +57,24 @@ export const setSaveBinFulfilled = (state: IDBState, action: ISetSaveBinFulfille
   return {
     ...state,
     savingBinState: 'fulfilled',
+  }
+}
+
+export const setDeleteBinPending = (state: IDBState, action: ISetDeleteBinPending): IDBState => {
+  return {
+    ...state,
+    deletingBinState: 'pending',
+  }
+}
+export const setDeleteBinRejected = (state: IDBState, action: ISetDeleteBinRejected): IDBState => {
+  return {
+    ...state,
+    deletingBinState: 'rejected',
+  }
+}
+export const setDeleteBinFulfilled = (state: IDBState, action: ISetDeleteBinFulfilled): IDBState => {
+  return {
+    ...state,
+    deletingBinState: 'fulfilled',
   }
 }

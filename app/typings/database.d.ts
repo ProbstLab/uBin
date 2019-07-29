@@ -7,5 +7,6 @@ declare module 'database' {
     samplesPending: boolean
     taxonomiesPending: boolean
     savingBinState?: string
+    deletingBinState?: string
   }
 }

@@ -15,7 +15,14 @@ import {
   IGetTaxonomiesForImportPendingDone,
   IGetSamplesForBin,
   IGetTaxonomies,
-  IGetTaxonomiesPending, IGetTaxonomiesPendingDone, ISaveBin, ISetSaveBinPending, ISetSaveBinRejected, ISetSaveBinFulfilled,
+  IGetTaxonomiesPending,
+  IGetTaxonomiesPendingDone,
+  ISaveBin,
+  ISetSaveBinPending,
+  ISetSaveBinRejected,
+  ISetSaveBinFulfilled,
+  ISetDeleteBinPending,
+  ISetDeleteBinRejected, ISetDeleteBinFulfilled, IDeleteBin,
 } from './interfaces'
 import {Connection} from 'typeorm'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
@@ -29,10 +36,11 @@ import {
   getSamplesForBinQuery,
   getSamplesQuery,
   getTaxonomiesAndCountQuery,
-  getAllTaxonomiesQuery, saveBinQuery
+  getAllTaxonomiesQuery, saveBinQuery, deleteBinQuery
 } from './queries'
 import {SamplesActions} from '../samples'
 import {ISampleFilter} from 'samples'
+import {Bin} from '../../db/entities/Bin'
 
 console.log('window: ', window)
 const orm = (window as any).typeorm
@@ -114,6 +122,19 @@ export class DBActions {
   }
   static saveBinFulfilled(payload: any): ISetSaveBinFulfilled{
     return {type: dbActions.saveBinFulfilled, payload}
+  }
+  
+  static deleteBin(connection: Connection, bin: Bin, dispatch?: ThunkDispatch<{}, {}, AnyAction>): IDeleteBin {
+    return {type: dbActions.deleteBin, payload: deleteBinQuery(connection, bin)}
+  }
+  static deleteBinPending(payload: any): ISetDeleteBinPending{
+    return {type: dbActions.deleteBinPending, payload}
+  }
+  static deleteBinRejected(payload: any): ISetDeleteBinRejected{
+    return {type: dbActions.deleteBinRejected, payload}
+  }
+  static deleteBinFulfilled(payload: any): ISetDeleteBinFulfilled{
+    return {type: dbActions.deleteBinFulfilled, payload}
   }
 
   static startDatabase(): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {

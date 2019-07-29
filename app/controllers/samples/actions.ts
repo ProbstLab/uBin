@@ -206,8 +206,10 @@ export class SamplesActions {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>(resolve => {
         Promise.all([dispatch(SamplesActions.resetDomain()),
+                     dispatch(SamplesActions.resetTaxonomies())])
+                    .then(() => Promise.all([
                             dispatch(SamplesActions.setBinFilter(bin)),
-                            dispatch(SamplesActions.setBinView(true))]).then(() => resolve())
+                            dispatch(SamplesActions.setBinView(true))]).then(() => resolve()))
       })
     }
   }
@@ -222,15 +224,30 @@ export class SamplesActions {
         let recordId = getImportRecordId(getState())
         if (connection && recordId) {
           Promise.all([dispatch(DBActions.saveBin(connection, recordId, data, filters, binName, dispatch))])
-            // .then(() => {
-            //   if (connection && recordId) {
-            //     Promise.all([dispatch(DBActions.getBins(connection, recordId)),
-            //                 dispatch(DBActions.getSamples(connection, recordId))])
-            //       .then(() => Promise.all([dispatch(DBActions.getSamplesPendingDone())]).then(() => resolve()))
-            //   } else {
-            //     resolve()
-            //   }
-            // })
+            .then(() => {
+              if (connection && recordId) {
+                Promise.all([dispatch(DBActions.getBins(connection, recordId))])
+                  .then(() => resolve())
+              } else {
+                resolve()
+              }
+            })
+        } else {
+          resolve()
+        }
+      })
+    }
+  }
+
+  static deleteBin(bin: Bin): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
+    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
+      return new Promise<void>(resolve => {
+        let connection = getDBConnection(getState())
+        let recordId = getImportRecordId(getState())
+        if (connection && recordId) {
+          Promise.all([
+            dispatch(SamplesActions.removeFilters()),
+            dispatch(DBActions.deleteBin(connection, bin, dispatch))])
             .then(() => {
               if (connection && recordId) {
                 Promise.all([dispatch(DBActions.getBins(connection, recordId))])

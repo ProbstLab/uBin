@@ -23,3 +23,8 @@ export const getSavingBinState = createSelector(
   getDBState,
   (state: IDBState) => state.savingBinState,
 )
+
+export const getDeletingBinState = createSelector(
+  getDBState,
+  (state: IDBState) => state.deletingBinState,
+)
