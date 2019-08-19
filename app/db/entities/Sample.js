@@ -13,6 +13,7 @@ var typeorm_1 = require("typeorm");
 var Taxonomy_1 = require("./Taxonomy");
 var Enzyme_1 = require("./Enzyme");
 var ImportRecord_1 = require("./ImportRecord");
+var Bin_1 = require("./Bin");
 var Sample = /** @class */ (function () {
     function Sample() {
     }
@@ -28,17 +29,25 @@ var Sample = /** @class */ (function () {
         __metadata("design:type", String)
     ], Sample.prototype, "scaffold", void 0);
     __decorate([
-        typeorm_1.Column("double"),
+        typeorm_1.Column('double'),
         __metadata("design:type", Number)
     ], Sample.prototype, "gc", void 0);
     __decorate([
-        typeorm_1.Column("integer"),
+        typeorm_1.Column('integer'),
         __metadata("design:type", Number)
     ], Sample.prototype, "coverage", void 0);
     __decorate([
-        typeorm_1.Column("integer"),
+        typeorm_1.Column('integer'),
         __metadata("design:type", Number)
     ], Sample.prototype, "length", void 0);
+    __decorate([
+        typeorm_1.Column({
+            type: 'varchar',
+            length: 100,
+            default: '',
+        }),
+        __metadata("design:type", String)
+    ], Sample.prototype, "taxonomiesRelationString", void 0);
     __decorate([
         typeorm_1.ManyToOne(function (type) { return Taxonomy_1.Taxonomy; }, function (taxonomy) { return taxonomy.samples; }),
         typeorm_1.JoinTable(),
@@ -49,6 +58,11 @@ var Sample = /** @class */ (function () {
         typeorm_1.JoinTable(),
         __metadata("design:type", Array)
     ], Sample.prototype, "enzymes", void 0);
+    __decorate([
+        typeorm_1.ManyToOne(function (type) { return Bin_1.Bin; }, function (bin) { return bin.samples; }),
+        typeorm_1.JoinTable(),
+        __metadata("design:type", Bin_1.Bin)
+    ], Sample.prototype, "bin", void 0);
     __decorate([
         typeorm_1.ManyToOne(function (type) { return ImportRecord_1.ImportRecord; }, function (importRecord) { return importRecord.samples; }),
         typeorm_1.JoinTable(),

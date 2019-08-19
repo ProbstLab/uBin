@@ -50,6 +50,16 @@ export const getExportState = createSelector(
   (state: IFileTreeState) => state.exportState,
 )
 
+export const getFastaImportState = createSelector(
+  getFileTreeState,
+  (state: IFileTreeState) => state.isImportingFastaFile,
+)
+
+export const getFastaDict = createSelector(
+  getFileTreeState,
+  (state: IFileTreeState) => state.fastaDict,
+)
+
 // export const getFilteredFileTree = createSelector(
 //   getFileTreeMap,
 //   (nodes: IFile[]) => Object.keys(nodes).map(id => nodes[id]),

@@ -59,6 +59,10 @@ export const fileTreeReducer = createReducer(files.getInitialState(), {
   [fileTreeActions.saveExportFilePending]: files.saveExportFilePending,
   [fileTreeActions.saveExportFileRejected]: files.saveExportFileRejected,
   [fileTreeActions.saveExportFileFulfilled]: files.saveExportFileFulfilled,
+  [fileTreeActions.importFastaFilePending]: files.importFastaFilePending,
+  [fileTreeActions.importFastaFileFulfilled]: files.importFastaFileFulfilled,
+  [fileTreeActions.importFastaFilePending]: files.importFastaFilePending,
+  [fileTreeActions.importFastaFileRejected]: files.importFastaFileRejected,
 })
 
 export const dbReducer = createReducer(db.getInitialState(), {

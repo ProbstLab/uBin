@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import {remote} from 'electron'
-import {Button, Dialog, InputGroup, Classes, ProgressBar, ButtonGroup, Tooltip} from '@blueprintjs/core'
+import {Button, Dialog, InputGroup, Classes, ProgressBar, ButtonGroup, Tooltip, Label} from '@blueprintjs/core'
 import {Taxonomy} from '../db/entities/Taxonomy'
 import {IClientState} from '../controllers'
 import {getBinsMap, getConsensus, getCoverageAverage, getGCAverage, getSelectedBin, IImportRecord, SamplesActions} from '../controllers/samples'
@@ -10,11 +10,12 @@ import {connect} from 'react-redux'
 import {ThunkAction} from 'redux-thunk'
 import {getDeletingBinState, getSavingBinState} from '../controllers/database'
 import {UBinToaster} from '../utils/uBinToaster'
-import {FileTreeActions, getExportState} from '../controllers/files'
+import {FileTreeActions, getExportState, getFastaDict, getFastaImportState} from '../controllers/files'
 import {Bin} from '../db/entities/Bin'
 import {IValueMap} from 'common'
 import {Connection} from 'typeorm'
 import {IBin} from 'samples'
+import {IGenericAssociativeArray} from '../utils/interfaces'
 
 interface IPropsFromState {
   consensus?: Taxonomy
@@ -24,6 +25,8 @@ interface IPropsFromState {
   deletingBinState?: string
   bins?: IValueMap<Bin>
   exportState?: string
+  fastaDict?: IGenericAssociativeArray
+  isImportingFastaFile: boolean
   connection?: Connection
   selectedBin?: IBin
 }
@@ -33,7 +36,9 @@ interface IActionsFromState {
   setSampleName(sampleName: string): void
   saveBin(): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   deleteSelectedBin(bin: Bin): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
-  saveExportFile(exportDir: string, exportName: string, taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>, recordId: number, connection: Connection): void
+  saveExportFile(exportDir: string, exportName: string, taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>, recordId: number,
+                 connection: Connection, fastaDict?: IGenericAssociativeArray): void
+  importFastaFile(file: string): void
 }
 
 interface IProps {
@@ -50,6 +55,7 @@ interface IState {
   isDeleteDialogOpen: boolean
   exportFilePath?: string
   exportFileName?: string
+  fastaInputFilePath?: string
 }
 
 type TProps = IPropsFromState & IActionsFromState & IProps
@@ -79,11 +85,20 @@ class CBinNaming extends React.PureComponent<TProps> {
       this.setState({exportFilePath: dirPath[0]})
     }
   }
+  private openFastaBrowser = (): void => {
+    let {importFastaFile} = this.props
+    const fastaPath: string[]|undefined = remote.dialog.showOpenDialog({properties: ['openFile']})
+    if (fastaPath && fastaPath.length) {
+      this.setState({fastaInputFilePath: fastaPath[0]})
+      importFastaFile(fastaPath[0])
+      // console.log(fastaPath[0])
+    }
+  }
   private startExport = (): void => {
-    let {saveExportFile, bins, taxonomies, activeRecord, connection} = this.props
+    let {saveExportFile, bins, taxonomies, activeRecord, connection, fastaDict} = this.props
     let {exportFilePath, exportFileName} = this.state
     if (exportFilePath && exportFileName && taxonomies && bins && activeRecord && connection) {
-      saveExportFile(exportFilePath, exportFileName, taxonomies, bins, activeRecord.id, connection)
+      saveExportFile(exportFilePath, exportFileName, taxonomies, bins, activeRecord.id, connection, fastaDict)
     }
   }
 
@@ -162,8 +177,8 @@ class CBinNaming extends React.PureComponent<TProps> {
     this.props.setSampleName(e.target.value)
   }
   render(): JSX.Element {
-    let {dataLoaded, gcAverage, coverageAverage, savingBinState, exportState, selectedBin} = this.props
-    let {consensusName, sampleName, exportFilePath, exportFileName, isOpen, isDeleteDialogOpen} = this.state
+    let {dataLoaded, gcAverage, coverageAverage, savingBinState, exportState, selectedBin, isImportingFastaFile} = this.props
+    let {consensusName, sampleName, exportFilePath, fastaInputFilePath, exportFileName, isOpen, isDeleteDialogOpen} = this.state
     return (
       <>
         <InputGroup disabled={!dataLoaded} onChange={(e: any) => this.handleSampleName(e)} value={sampleName} name={'sample_name'} placeholder={'Name'}/><span style={{padding: '2px'}}></span>
@@ -184,14 +199,20 @@ class CBinNaming extends React.PureComponent<TProps> {
           title='Export'
           isOpen={isOpen}>
           <div className={Classes.DIALOG_BODY}>
-            <InputGroup style={{margin: '4px 0'}} value={exportFileName ? exportFileName : ''} placeholder={'Type in your file name...'} onChange={(e: any) => this.handleExportFileNameChange(e.target.value)}/>
+            <InputGroup style={{margin: '4px 0'}} value={exportFileName ? exportFileName : ''} placeholder={' Type in your file name...'} onChange={(e: any) => this.handleExportFileNameChange(e.target.value)}/>
             <InputGroup readOnly={true} placeholder={exportFilePath ? exportFilePath : 'Choose directory...'} rightElement={
               <Button text={'Browse'} onClick={this.openDirBrowser}/>
             }/>
+            <Label style={{marginTop: '10px'}}>
+              .fasta input file (optional)
+              <InputGroup readOnly={true} placeholder={fastaInputFilePath ? fastaInputFilePath : 'Choose .fasta file...'} rightElement={
+                <Button text={'Browse'} onClick={this.openFastaBrowser}/>
+              }/>
+            </Label>
             <Button style={{marginTop: '10px'}} disabled={!exportFilePath || !exportFileName} intent={'primary'} text={'Save'}
                     onClick={() => this.startExport()}/>
           </div>
-          {!!exportState && exportState === 'pending' &&
+          {((!!exportState && exportState === 'pending') || isImportingFastaFile) &&
           <div className={Classes.DIALOG_FOOTER}>
               <ProgressBar intent={'primary'}/>
           </div>
@@ -224,6 +245,8 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   bins: getBinsMap(state),
   selectedBin: getSelectedBin(state),
   exportState: getExportState(state),
+  fastaDict: getFastaDict(state),
+  isImportingFastaFile: getFastaImportState(state),
   connection: state.database.connection,
 })
 
@@ -232,8 +255,9 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
     {
       setConsensusName: consensusName => SamplesActions.setConsensusName(consensusName),
       setSampleName: sampleName => SamplesActions.setSampleName(sampleName),
-      saveExportFile: (exportDir: string, exportName: string, taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>, recordId: number, connection: Connection) =>
-                      FileTreeActions.saveExportFile(exportDir, exportName, taxonomies, bins, recordId, connection),
+      saveExportFile: (exportDir: string, exportName: string, taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>, recordId: number, connection: Connection, fastaDict?: IGenericAssociativeArray) =>
+                      FileTreeActions.saveExportFile(exportDir, exportName, taxonomies, bins, recordId, connection, fastaDict),
+      importFastaFile: (file: string) => FileTreeActions.importFastaFile(file),
       deleteSelectedBin: SamplesActions.deleteBin,
       saveBin: SamplesActions.saveBin,
     },

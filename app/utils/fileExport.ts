@@ -1,37 +1,77 @@
 
-import * as fs from "fs"
+import * as fs from 'fs'
 import {Sample} from '../db/entities/Sample'
 import {Taxonomy} from '../db/entities/Taxonomy'
 import {Bin} from '../db/entities/Bin'
-import {IValueMap} from "common"
+import {IValueMap} from 'common'
 import {Connection} from 'typeorm'
-import {getSamplesWithScaffoldQuery} from '../controllers/database/queries'
+import {getSamplesWithScaffoldQuery, getSamplesWithScaffoldForBinQuery} from '../controllers/database/queries'
+import {IFastaDict} from '../typings/fasta'
 
 export const exportData = (exportDir: string, exportName: string, taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>,
-                           recordId: number, connection: Connection): Promise<any> => {
+                           recordId: number, connection: Connection, fastaDict?: IFastaDict): Promise<any> => {
   let headers: string = ['scaffold', 'GC', 'coverage', 'length', 'taxonomy', 'Bin'].join('\t')
 
   return new Promise((resolve, reject) => {
     let addSlash: string = exportDir.endsWith('/') ? '' : '/'
     getSamplesWithScaffoldQuery(connection, recordId).then((data: Sample[]) => {
-      let wstream = fs.createWriteStream(exportDir + addSlash + exportName + '.tsv')
-      wstream.on('finish', () => {
-        resolve(true)
-      })
-      wstream.on('error', err => {
-        reject(err)
-      })
-      wstream.write(headers + '\n')
-      for (let i: number = 0; i < data.length; i++) {
-        let taxonomyNames: string[] = []
-        let sample: Sample = data[i]
-        sample.taxonomiesRelationString.split(';').slice(1, -1).forEach((key: string) => {
-          taxonomyNames.push(taxonomies[key].name)
-        })
-        wstream.write([sample.scaffold, sample.gc.toString(), sample.coverage.toString(), sample.length.toString(), taxonomyNames.join(';'),
-          sample.bin && sample.bin.id ? bins[sample.bin.id].name : ''].join('\t') + '\n')
-      }
-      wstream.end()
+      let promises = [writeExportFile(data, taxonomies, bins, exportDir + addSlash + exportName, headers)]
+      fastaDict ? promises.push(writeFastaFiles(bins, fastaDict, exportDir + addSlash, recordId, connection)) : undefined
+      Promise.all(promises).then(resolve).catch(reject)
     })
   })
+}
+
+const writeExportFile = (samples: Sample[], taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>,
+                         filePath: string, headers: string): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    let wstream = fs.createWriteStream(filePath + '.tsv')
+    wstream.on('finish', () => {
+      resolve(true)
+    })
+    wstream.on('error', err => {
+      reject(err)
+    })
+    wstream.write(headers + '\n')
+    for (let i: number = 0; i < samples.length; i++) {
+      let taxonomyNames: string[] = []
+      let sample: Sample = samples[i]
+      sample.taxonomiesRelationString.split(';').slice(1, -1).forEach((key: string) => {
+        taxonomyNames.push(taxonomies[key].name)
+      })
+      wstream.write([sample.scaffold, sample.gc.toString(), sample.coverage.toString(), sample.length.toString(), taxonomyNames.join(';'),
+        sample.bin && sample.bin.id ? bins[sample.bin.id].name : ''].join('\t') + '\n')
+    }
+    wstream.end()
+  })
+}
+
+const writeFastaFiles = (bins: IValueMap<Bin>, fastaDict: IFastaDict, filePath: string,
+                         recordId: number, connection: Connection): Promise<any> => {
+  let promises = []
+  let binKeys = Object.keys(bins)
+  for (let i=0; i < binKeys.length; i++) {
+    let bin = bins[binKeys[i]]
+    promises.push(new Promise((resolve, reject) => {
+      getSamplesWithScaffoldForBinQuery(connection, recordId, bin.id).then((samples: Sample[]) => {
+        return new Promise((resolve, reject) => {
+          let wstream = fs.createWriteStream(filePath + bin.name + '.fasta')
+          wstream.on('finish', () => {
+            resolve()
+          })
+          wstream.on('error', err => {
+            reject(err)
+          })
+          for (let j = 0; j < samples.length; j++) {
+            let fastaItem = fastaDict[samples[i].scaffold]
+            if (fastaItem) {
+              wstream.write('>' + fastaItem.originalKey + '\n' + fastaItem.content)
+            }
+          }
+          wstream.end()
+        })
+      }).then(resolve).catch(reject)
+    }))
+  }
+  return Promise.all(promises)
 }

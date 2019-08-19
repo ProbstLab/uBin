@@ -29,14 +29,14 @@ var Enzyme = /** @class */ (function () {
     __decorate([
         typeorm_1.Column({
             type: 'boolean',
-            default: false
+            default: false,
         }),
         __metadata("design:type", Boolean)
     ], Enzyme.prototype, "bacterial", void 0);
     __decorate([
         typeorm_1.Column({
             type: 'boolean',
-            default: false
+            default: false,
         }),
         __metadata("design:type", Boolean)
     ], Enzyme.prototype, "archaeal", void 0);

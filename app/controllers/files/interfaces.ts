@@ -1,13 +1,16 @@
 import { Action } from 'redux'
 import { IFile } from 'files';
 import {IValueMap} from "common";
+import {IFastaDict} from '../../typings/fasta'
 
 export interface IFileTreeState {
   fileTree?: IFile[]
   addedFiles: IValueMap<IFile>
   isImportingFiles: boolean
+  isImportingFastaFile: boolean
   importName?: string
   exportState?: string
+  fastaDict?: IFastaDict
 }
 
 export enum fileTreeActions {
@@ -20,6 +23,10 @@ export enum fileTreeActions {
   importFile = 'files.import',
   importFilePending = 'files.import_PENDING',
   importFileFulfilled = 'files.import_FULFILLED',
+  importFastaFile = 'files.importFasta',
+  importFastaFilePending = 'files.importFasta_PENDING',
+  importFastaFileFulfilled = 'files.importFasta_FULFILLED',
+  importFastaFileRejected = 'files.importFasta_REJECTED',
   setImportName = 'files.setImportName',
   saveExportFile = 'files.saveExportFile',
   saveExportFilePending = 'files.saveExportFile_PENDING',
@@ -64,6 +71,24 @@ export interface IImportFileFulfilled extends Action {
   type: fileTreeActions.importFileFulfilled
   payload: any
 }
+
+export interface IImportFastaFile extends Action {
+  type: fileTreeActions.importFastaFile
+  payload: Promise<any>
+}
+export interface IImportFastaFilePending extends Action {
+  type: fileTreeActions.importFastaFilePending
+  payload: any
+}
+export interface IImportFastaFileFulfilled extends Action {
+  type: fileTreeActions.importFastaFileFulfilled
+  payload: any
+}
+export interface IImportFastaFileRejected extends Action {
+  type: fileTreeActions.importFastaFileRejected
+  payload: any
+}
+
 export interface IISetImportName extends Action {
   type: fileTreeActions.setImportName
   importName: string

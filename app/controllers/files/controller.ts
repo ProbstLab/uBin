@@ -1,7 +1,7 @@
 import {
   IAddFile,
-  IFileTreeState,
-  IImportFileFulfilled,
+  IFileTreeState, IImportFastaFileFulfilled, IImportFastaFilePending, IImportFastaFileRejected,
+  IImportFileFulfilled, IImportFilePending,
   IInitFileTree, IISaveExportFileFulfilled, IISaveExportFilePending, IISaveExportFileRejected, IISetImportName,
   IOpenFile,
   IPopulateFileTree,
@@ -21,16 +21,13 @@ const generateKey = (pre: string): string => {
 
 export const getInitialState = (): IFileTreeState => ({
   addedFiles: {},
-  isImportingFiles: false
+  isImportingFiles: false,
+  isImportingFastaFile: false,
 })
 
 export const populateFileTree = (state: IFileTreeState, action: IPopulateFileTree): IFileTreeState => {
   return {
     ...state,
-    // fileTree: {
-    //   ...state.fileTree,
-    //   [action.file.id]: action.file
-    // }
   }
 }
 
@@ -97,7 +94,7 @@ export const removeAddedFiles = (state: IFileTreeState, action: IRemoveAddedFile
   }
 }
 
-export const importFilePending = (state: IFileTreeState, action: IImportFileFulfilled): IFileTreeState => {
+export const importFilePending = (state: IFileTreeState, action: IImportFilePending): IFileTreeState => {
   return {
     ...state,
     isImportingFiles: true,
@@ -107,6 +104,26 @@ export const importFileFulfilled = (state: IFileTreeState, action: IImportFileFu
   return {
     ...state,
     isImportingFiles: false,
+  }
+}
+
+export const importFastaFilePending = (state: IFileTreeState, action: IImportFastaFilePending): IFileTreeState => {
+  return {
+    ...state,
+    isImportingFastaFile: true,
+  }
+}
+export const importFastaFileFulfilled = (state: IFileTreeState, action: IImportFastaFileFulfilled): IFileTreeState => {
+  return {
+    ...state,
+    isImportingFastaFile: false,
+    fastaDict: action.payload,
+  }
+}
+export const importFastaFileRejected = (state: IFileTreeState, action: IImportFastaFileRejected): IFileTreeState => {
+  return {
+    ...state,
+    isImportingFastaFile: false,
   }
 }
 

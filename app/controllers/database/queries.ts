@@ -101,6 +101,15 @@ export const getSamplesWithScaffoldQuery = async (connection: Connection, record
   return query.getMany()
 }
 
+export const getSamplesWithScaffoldForBinQuery = async (connection: Connection, recordId: number, binId: number): Promise<any> => {
+  let query = connection.getRepository('sample').createQueryBuilder('sample')
+    .select(['sample.id', 'sample.scaffold', 'sample.gc', 'sample.coverage', 'sample.length', 'sample.taxonomiesRelationString', 'bin.id'])
+    .leftJoin('sample.bin', 'bin')
+    .where('sample.importRecordId = :recordId', {recordId})
+    .andWhere('sample.binId = :binId', {binId})
+  return query.getMany()
+}
+
 export const getAllEnzymeTypesQuery = async(connection: Connection): Promise<any> => {
   return connection.getRepository('enzyme').createQueryBuilder('enzyme').getMany()
 }
@@ -202,12 +211,9 @@ export const saveBinQuery = async (connection: Connection, recordId: number, dat
 }
 
 export const deleteBinQuery = async (connection: Connection, bin: Bin): Promise<any> => {
-  // console.log("bin id:", bin.id)
-  // console.log("before", await connection.getRepository('sample').createQueryBuilder('sample').select('id').where('binId = :binId', {binId: bin.id}).getCount())
   let query = connection.getRepository('sample').createQueryBuilder('sample').update()
               .set({bin: null})
               .where('binId = :binId', {binId: bin.id})
   await query.execute()
-  // console.log("after", await connection.getRepository('sample').createQueryBuilder('sample').select('id').where('binId = :binId', {binId: bin.id}).getCount())
   return connection.getRepository('bin').createQueryBuilder('bin').delete().where('id = :id', {id: bin.id}).execute()
 }
