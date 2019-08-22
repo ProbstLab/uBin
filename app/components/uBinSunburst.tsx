@@ -138,16 +138,7 @@ export class UBinSunburst extends React.Component<IProps> {
     let candidateKey: number|undefined
     for (let i: number = 0; i < tree.children.length; i++) {
       if (tree.children[i].hasOwnProperty('count') && tree.children[i].count/total > 0.5) {
-        if (tree.children.length > 1 && level !== 0 && tree.children[i].title === 'unclassified') {
-          let maxCount: number = 0
-          for (let j: number = 0; j < tree.children.length; j++) {
-            if (j !== i && tree.children[j].hasOwnProperty('count') && tree.children[j].count > maxCount) {
-              maxCount = tree.children[j].count
-              candidate = tree.children[j].id
-              candidateKey = j
-            }
-          }
-        } else if (tree.children[i].title !== 'unclassified' || level === 0) {
+        if (tree.children[i].title !== 'unclassified' || level === 0) {
           candidate = tree.children[i].id
           candidateKey = i
         }

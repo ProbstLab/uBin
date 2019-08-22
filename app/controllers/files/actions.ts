@@ -27,6 +27,7 @@ import {Taxonomy} from '../../db/entities/Taxonomy'
 import {Bin} from '../../db/entities/Bin'
 import {IValueMap} from 'common'
 import {IGenericAssociativeArray} from '../../utils/interfaces'
+import {IImportRecord} from '../samples'
 
 export class FileTreeActions {
   static populateFileTree(file: IFile): IPopulateFileTree {
@@ -73,8 +74,8 @@ export class FileTreeActions {
   }
 
   static saveExportFile(exportDir: string, exportName: string, taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>,
-                        recordId: number, connection: Connection, fastaDict?: IGenericAssociativeArray): IISaveExportFile {
-    return {type: fileTreeActions.saveExportFile, payload: exportData(exportDir, exportName, taxonomies, bins, recordId, connection, fastaDict)}
+                        activeRecord: IImportRecord, connection: Connection, fastaDict?: IGenericAssociativeArray): IISaveExportFile {
+    return {type: fileTreeActions.saveExportFile, payload: exportData(exportDir, exportName, taxonomies, bins, activeRecord, connection, fastaDict)}
   }
   static saveExportFilePending(payload: any): IISaveExportFilePending {
     return {type: fileTreeActions.saveExportFilePending, payload}

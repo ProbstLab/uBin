@@ -36,7 +36,7 @@ interface IActionsFromState {
   setSampleName(sampleName: string): void
   saveBin(): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   deleteSelectedBin(bin: Bin): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
-  saveExportFile(exportDir: string, exportName: string, taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>, recordId: number,
+  saveExportFile(exportDir: string, exportName: string, taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>, activeRecord: IImportRecord,
                  connection: Connection, fastaDict?: IGenericAssociativeArray): void
   importFastaFile(file: string): void
 }
@@ -87,7 +87,8 @@ class CBinNaming extends React.PureComponent<TProps> {
   }
   private openFastaBrowser = (): void => {
     let {importFastaFile} = this.props
-    const fastaPath: string[]|undefined = remote.dialog.showOpenDialog({properties: ['openFile']})
+    const fastaPath: string[]|undefined = remote.dialog.showOpenDialog({properties: ['openFile'],
+                                                                                filters: [{name: 'Fasta', extensions: ['fasta']}] })
     if (fastaPath && fastaPath.length) {
       this.setState({fastaInputFilePath: fastaPath[0]})
       importFastaFile(fastaPath[0])
@@ -98,7 +99,7 @@ class CBinNaming extends React.PureComponent<TProps> {
     let {saveExportFile, bins, taxonomies, activeRecord, connection, fastaDict} = this.props
     let {exportFilePath, exportFileName} = this.state
     if (exportFilePath && exportFileName && taxonomies && bins && activeRecord && connection) {
-      saveExportFile(exportFilePath, exportFileName, taxonomies, bins, activeRecord.id, connection, fastaDict)
+      saveExportFile(exportFilePath, exportFileName, taxonomies, bins, activeRecord, connection, fastaDict)
     }
   }
 
@@ -110,9 +111,10 @@ class CBinNaming extends React.PureComponent<TProps> {
   }
 
   public componentWillMount(): void {
-    let {consensus} = this.props
+    let {consensus, activeRecord} = this.props
     if (consensus) {
       this.setState({consensusName: consensus.name})
+      this.setState({exportFileName: activeRecord ? activeRecord.name : ''})
     }
   }
 
@@ -127,6 +129,7 @@ class CBinNaming extends React.PureComponent<TProps> {
       this.currSampleName = activeRecord.name
       this.setState({sampleName: activeRecord.name})
       this.props.setSampleName(activeRecord.name)
+      this.setState({exportFileName: activeRecord ? activeRecord.name : ''})
     }
   }
   public componentDidUpdate(): void {
@@ -177,7 +180,7 @@ class CBinNaming extends React.PureComponent<TProps> {
     this.props.setSampleName(e.target.value)
   }
   render(): JSX.Element {
-    let {dataLoaded, gcAverage, coverageAverage, savingBinState, exportState, selectedBin, isImportingFastaFile} = this.props
+    let {dataLoaded, gcAverage, coverageAverage, savingBinState, exportState, selectedBin, isImportingFastaFile, activeRecord} = this.props
     let {consensusName, sampleName, exportFilePath, fastaInputFilePath, exportFileName, isOpen, isDeleteDialogOpen} = this.state
     return (
       <>
@@ -199,7 +202,8 @@ class CBinNaming extends React.PureComponent<TProps> {
           title='Export'
           isOpen={isOpen}>
           <div className={Classes.DIALOG_BODY}>
-            <InputGroup style={{margin: '4px 0'}} value={exportFileName ? exportFileName : ''} placeholder={' Type in your file name...'} onChange={(e: any) => this.handleExportFileNameChange(e.target.value)}/>
+            <InputGroup style={{margin: '4px 0'}} value={exportFileName ? exportFileName : activeRecord ? activeRecord.name : ''}
+                        placeholder={' Type in your file name...'} onChange={(e: any) => this.handleExportFileNameChange(e.target.value)}/>
             <InputGroup readOnly={true} placeholder={exportFilePath ? exportFilePath : 'Choose directory...'} rightElement={
               <Button text={'Browse'} onClick={this.openDirBrowser}/>
             }/>
@@ -255,8 +259,8 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
     {
       setConsensusName: consensusName => SamplesActions.setConsensusName(consensusName),
       setSampleName: sampleName => SamplesActions.setSampleName(sampleName),
-      saveExportFile: (exportDir: string, exportName: string, taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>, recordId: number, connection: Connection, fastaDict?: IGenericAssociativeArray) =>
-                      FileTreeActions.saveExportFile(exportDir, exportName, taxonomies, bins, recordId, connection, fastaDict),
+      saveExportFile: (exportDir: string, exportName: string, taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>, activeRecord: IImportRecord, connection: Connection, fastaDict?: IGenericAssociativeArray) =>
+                      FileTreeActions.saveExportFile(exportDir, exportName, taxonomies, bins, activeRecord, connection, fastaDict),
       importFastaFile: (file: string) => FileTreeActions.importFastaFile(file),
       deleteSelectedBin: SamplesActions.deleteBin,
       saveBin: SamplesActions.saveBin,
