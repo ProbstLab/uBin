@@ -88,7 +88,7 @@ class CBinNaming extends React.PureComponent<TProps> {
   private openFastaBrowser = (): void => {
     let {importFastaFile} = this.props
     const fastaPath: string[]|undefined = remote.dialog.showOpenDialog({properties: ['openFile'],
-                                                                                filters: [{name: 'Fasta', extensions: ['fasta']}] })
+                                                                                filters: [{name: 'Fasta', extensions: ['fasta', 'fna']}] })
     if (fastaPath && fastaPath.length) {
       this.setState({fastaInputFilePath: fastaPath[0]})
       importFastaFile(fastaPath[0])
