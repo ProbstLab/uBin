@@ -69,7 +69,7 @@ const writeFastaFiles = (bins: IValueMap<Bin>, fastaDict: IFastaDict, filePath: 
             reject(err)
           })
           for (let j = 0; j < samples.length; j++) {
-            let fastaItem = fastaDict[samples[i].scaffold]
+            let fastaItem = fastaDict[samples[j].scaffold]
             if (fastaItem) {
               wstream.write('>' + fastaItem.originalKey + '\n' + fastaItem.content)
             }
