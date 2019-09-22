@@ -181,6 +181,8 @@ class CFileManager extends React.Component<TProps> {
   }
 
   private toggleDialog(isOpen: boolean): void {
+    console.log("hi!")
+    console.log("this.props", this.props)
     if (this.props.connection && isOpen) {
       this.props.startFileImport(this.props.addedFiles, this.props.connection, this.state.importName)
     }

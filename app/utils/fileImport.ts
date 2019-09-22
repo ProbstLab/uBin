@@ -134,6 +134,9 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
 
   // Create new Taxonomy tree/Add new taxonomies to existing parents
   try {
+    console.log("taxonomy Map")
+    console.log(taxonomyMap)
+    console.log("______________")
     await saveTaxonomy(taxonomyMap, connection)
   } catch (e) {
     if (enzymeFileSaved.id && taxonomyFileSaved.id && importRecord.id) {
@@ -220,6 +223,7 @@ const saveTaxonomy = async (taxonomyMap: ITaxonomyAssociativeArray, connection: 
         taxonomyMap[key].id = taxonomyId.id
       } else {
         taxonomyMap[key].parent = parent.id
+        console.log(taxonomyMap[key])
         taxonomyMap[key] = await connection.getRepository('taxonomy').save(taxonomyMap[key]) as ITaxonomy
       }
     } else {
@@ -236,6 +240,7 @@ const saveTaxonomy = async (taxonomyMap: ITaxonomyAssociativeArray, connection: 
                                             .getOne() as Taxonomy
         taxonomyMap[key].id = taxonomyId.id
       } else {
+        console.log(taxonomyMap[key])
         taxonomyMap[key] = await connection.getRepository('taxonomy').save(taxonomyMap[key]) as ITaxonomy
       }
     }
