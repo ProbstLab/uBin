@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import { withRouter, RouteComponentProps } from 'react-router'
 import { IClientState } from '../../controllers'
 import {FileTreeActions, getAddedFiles, getFileTreeAsArray} from '../../controllers/files'
-import {Callout, Classes, ITreeNode, Card, Button, Dialog, ProgressBar, InputGroup, Tag} from '@blueprintjs/core'
+import {Callout, Classes, ITreeNode, Card, Button, Dialog, ProgressBar, InputGroup, Tag, RadioGroup, Radio} from '@blueprintjs/core'
 import {IFile} from 'files'
 import {UBinTree} from '../../components/uBinTree'
 import {FileList} from '../../components/fileList/FileList'
@@ -25,7 +25,7 @@ interface IActionsFromState {
   openFile(file: IFile): void
   addFile(file: IFile): void
   removeAddedFile(file: IFile): void
-  startFileImport(addedFiles: IFile[], connection: Connection, importName: string): void
+  startFileImport(addedFiles: IFile[], connection: Connection, importName: string, importSetting?: number): void
 }
 
 interface IFileManagerState {
@@ -34,6 +34,7 @@ interface IFileManagerState {
   importNameLength: number
   importNameLengthReached: boolean
   citationMessageOpen: boolean
+  importSetting: number
 }
 
 const fileManagerStyle = {
@@ -69,6 +70,7 @@ class CFileManager extends React.Component<TProps> {
     importNameLength: 6,
     importNameLengthReached: false,
     citationMessageOpen: false,
+    importSetting: 0,
   }
 
   public componentDidMount(): void {
@@ -84,9 +86,11 @@ class CFileManager extends React.Component<TProps> {
   private handleImportNameChange = (value: string) => this.setState({importNameLengthReached: value.length >= this.state.importNameLength,
                                                                     importName: value})
 
+  private handleImportSettingChange = (value: string) => this.setState({importSetting: parseInt(value, 10)})
+
   render(): JSX.Element {
     const { fileTree, addedFiles } = this.props
-    const { numFilesRequired, importNameLength, importNameLengthReached, importName } = this.state
+    const { numFilesRequired, importNameLength, importNameLengthReached, importName, importSetting } = this.state
     const charactersLeft = <Tag intent={importNameLengthReached ? 'success' : undefined} rightIcon={ importNameLengthReached ? 'tick' : undefined}
                                 minimal={true}>{importNameLengthReached ? 'Valid name' : <span>{importNameLength - importName.length} Characters left</span>}</Tag>
     const enableImport = (): boolean => numFilesRequired === addedFiles.length && importNameLengthReached
@@ -115,6 +119,14 @@ class CFileManager extends React.Component<TProps> {
               <InputGroup type={'text'} placeholder={'Name your import'} rightElement={charactersLeft}
                           onChange={(event: any) => this.handleImportNameChange(event.target.value)}/>
             </div>
+            <div>
+              <h4>Import settings</h4>
+              <RadioGroup onChange={(event: any) => this.handleImportSettingChange(event.target.value)} selectedValue={importSetting}>
+                <Radio label={'Everything'} value={0}/>
+                <Radio label={'Binned scaffolds'} value={1}/>
+                <Radio label={'Unbinned scaffolds'} value={2}/>
+              </RadioGroup>
+            </div>
             <FileList files={addedFiles} removeAddedFile={this.props.removeAddedFile}/>
             <Button icon='import' disabled={!enableImport()} intent='primary'
                     onClick={() => this.toggleDialog(true)}>Import</Button>
@@ -126,12 +138,6 @@ class CFileManager extends React.Component<TProps> {
               <ProgressBar intent='primary'/>
             </div>
           </Dialog>
-          {/*<Dialog isOpen={this.state.citationMessageOpen} onClose={() => this.toggleCitationMessage()} icon='info-sign'*/}
-                  {/*title='Import Successful!'>*/}
-            {/*<div className={Classes.DIALOG_BODY}>*/}
-              {/*<h4>When using this software please cite:<br/>Till L. V. Bornemann, Tim Burg, and Alexander J. Probst: uBin - an interactive metagenome viewer and binner for educational purposes. <i>unpublished.</i></h4>*/}
-            {/*</div>*/}
-          {/*</Dialog>*/}
         </div>
       </div>
     )
@@ -182,7 +188,7 @@ class CFileManager extends React.Component<TProps> {
 
   private toggleDialog(isOpen: boolean): void {
     if (this.props.connection && isOpen) {
-      this.props.startFileImport(this.props.addedFiles, this.props.connection, this.state.importName)
+      this.props.startFileImport(this.props.addedFiles, this.props.connection, this.state.importName, this.state.importSetting)
     }
   }
 }
@@ -201,7 +207,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       openFile: file => FileTreeActions.openFile(file),
       addFile: file => FileTreeActions.addFile(file),
       removeAddedFile: file => FileTreeActions.removeAddedFile(file),
-      startFileImport: (addedFiles, connection, importName) => FileTreeActions.importFile(addedFiles, connection, importName),
+      startFileImport: (addedFiles, connection, importName, importSetting) => FileTreeActions.importFile(addedFiles, connection, importName, importSetting),
     },
     dispatch,
   )
