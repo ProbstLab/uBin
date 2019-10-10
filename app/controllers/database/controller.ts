@@ -14,10 +14,6 @@ export const getInitialState = (): IDBState => ({
 })
 
 export const connectDatabaseFulfilled = (state: IDBState, action: IConnectDatabaseFulfilled): IDBState => {
-  console.log("hallo?")
-
-  console.log("fulfilled!", action.payload)
-  console.log("Taxonomy", action.payload.getRepository('taxonomy').createQueryBuilder('taxonomy').getMany())
   return {
     ...state,
     connection: action.payload,

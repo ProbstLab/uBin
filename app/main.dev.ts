@@ -28,7 +28,8 @@ if (process.env.NODE_ENV === 'production') {
   sourceMapSupport.install();
 }
 
-require('electron-debug')({isEnabled: true});
+require('electron-debug')();
+// require('electron-debug')({isEnabled: true});
 
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
@@ -57,13 +58,14 @@ app.on('ready', async () => {
     process.env.NODE_ENV === 'development' ||
     process.env.DEBUG_PROD === 'true'
   ) {
+    console.log("install extensions?", process.env)
     await installExtensions();
   }
 
   mainWindow = new BrowserWindow({
     show: false,
-    width: 1024,
-    height: 728
+    width: 1150,
+    height: 800
   });
 
   mainWindow.loadURL(`file://${__dirname}/app.html`);

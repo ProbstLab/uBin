@@ -2,11 +2,13 @@ import {Connection} from 'typeorm'
 import {ISampleFilter} from 'samples'
 import {Sample} from '../../db/entities/Sample'
 import {compareArrayToString} from '../../utils/compare'
-import {IBin} from '../../utils/interfaces'
 import {ThunkDispatch} from 'redux-thunk'
 import {AnyAction} from 'redux'
 import {SamplesActions} from '../samples'
 import {Bin} from '../../db/entities/Bin'
+import {Taxonomy} from "../../db/entities/Taxonomy";
+import {Enzyme} from "../../db/entities/Enzyme";
+import {ImportRecord} from "../../db/entities/ImportRecord";
 
 export const scatterFilter = (query: any, filter?: ISampleFilter): any => {
   if (filter) {
@@ -29,7 +31,7 @@ export const scatterFilter = (query: any, filter?: ISampleFilter): any => {
 }
 
 export const getTaxonomyCountQuery = async (connection: Connection, recordId: number, filter?: ISampleFilter): Promise<any> => {
-  let query = connection.getRepository('taxonomy')
+  let query = connection.getRepository(Taxonomy)
     .createQueryBuilder('taxonomy')
     .select('taxonomy.id')
     .addSelect('count(samples.id)', 'sampleCount')
@@ -40,7 +42,7 @@ export const getTaxonomyCountQuery = async (connection: Connection, recordId: nu
 }
 
 export const getTaxonomiesForImportQuery = async (connection: Connection, recordId: number, filter?: ISampleFilter): Promise<any> => {
-  let query = connection.getRepository('taxonomy')
+  let query = connection.getRepository(Taxonomy)
     .createQueryBuilder('taxonomy').select('taxonomy')
     .leftJoinAndSelect('taxonomy.parent', 'taxonomyParent')
     .leftJoinAndSelect('taxonomyParent.parent', 'taxonomyParent2')
@@ -58,12 +60,12 @@ export const getTaxonomiesAndCountQuery = async (connection: Connection, recordI
 }
 
 export const getAllTaxonomiesQuery = async (connection: Connection): Promise<any> => {
-  return connection.getRepository('taxonomy').createQueryBuilder('taxonomy').select('taxonomy').getMany()
+  return connection.getRepository(Taxonomy).createQueryBuilder('taxonomy').select('taxonomy').getMany()
 }
 
 export const getEnzymeDistributionQuery =
   async (connection: Connection, recordId: number, selectedTaxonomys?: number[], filter?: ISampleFilter): Promise<any> => {
-  let query = connection.getRepository('enzyme').createQueryBuilder('enzyme')
+  let query = connection.getRepository(Enzyme).createQueryBuilder('enzyme')
     .leftJoin('enzyme.samples', 'samples')
     .loadRelationCountAndMap('enzyme.sampleCount', 'enzyme.samples')
     .where('samples.importRecordId = :recordId', {recordId})
@@ -79,7 +81,7 @@ export const getEnzymeDistributionQuery =
 }
 
 export const getSamplesQuery = async (connection: Connection, recordId: number, filter?: ISampleFilter): Promise<any> => {
-  let query = connection.getRepository('sample').createQueryBuilder('sample')
+  let query = connection.getRepository(Sample).createQueryBuilder('sample')
     .select(['sample.id', 'sample.gc', 'sample.coverage', 'sample.length', 'sample.taxonomiesRelationString',
                       'enzymes.archaeal', 'enzymes.bacterial', 'enzymes.name', 'bin.id'])
     .leftJoin('sample.enzymes', 'enzymes')
@@ -94,7 +96,7 @@ export const getSamplesQuery = async (connection: Connection, recordId: number, 
 }
 
 export const getSamplesWithScaffoldQuery = async (connection: Connection, recordId: number, filter?: ISampleFilter): Promise<any> => {
-  let query = connection.getRepository('sample').createQueryBuilder('sample')
+  let query = connection.getRepository(Sample).createQueryBuilder('sample')
     .select(['sample.id', 'sample.scaffold', 'sample.gc', 'sample.coverage', 'sample.length', 'sample.taxonomiesRelationString', 'bin.id'])
     .leftJoin('sample.bin', 'bin')
     .where('sample.importRecordId = :recordId', {recordId})
@@ -102,7 +104,7 @@ export const getSamplesWithScaffoldQuery = async (connection: Connection, record
 }
 
 export const getSamplesWithScaffoldForBinQuery = async (connection: Connection, recordId: number, binId: number): Promise<any> => {
-  let query = connection.getRepository('sample').createQueryBuilder('sample')
+  let query = connection.getRepository(Sample).createQueryBuilder('sample')
     .select(['sample.id', 'sample.scaffold', 'sample.gc', 'sample.coverage', 'sample.length', 'sample.taxonomiesRelationString', 'bin.id'])
     .leftJoin('sample.bin', 'bin')
     .where('sample.importRecordId = :recordId', {recordId})
@@ -111,17 +113,17 @@ export const getSamplesWithScaffoldForBinQuery = async (connection: Connection, 
 }
 
 export const getAllEnzymeTypesQuery = async(connection: Connection): Promise<any> => {
-  return connection.getRepository('enzyme').createQueryBuilder('enzyme').getMany()
+  return connection.getRepository(Enzyme).createQueryBuilder('enzyme').getMany()
 }
 
 export const getBinsQuery = async(connection: Connection, recordId: number): Promise<any> => {
-  return connection.getRepository('bin').createQueryBuilder('bin').select(['bin.id', 'bin.name'])
+  return connection.getRepository(Bin).createQueryBuilder('bin').select(['bin.id', 'bin.name'])
     .leftJoin('bin.samples', 'samples').where('samples.importRecordId = :recordId', {recordId})
     .getMany()
 }
 
 export const getSamplesForBinQuery = async (connection: Connection, recordId: number, binId: number): Promise<any> => {
-  let query = connection.getRepository('sample').createQueryBuilder('sample')
+  let query = connection.getRepository(Sample).createQueryBuilder('sample')
     .select(['sample.id', 'sample.gc', 'sample.coverage', 'sample.length', 'enzymes.archaeal', 'enzymes.bacterial', 'enzymes.name', 'bin.id'])
     .leftJoin('sample.enzymes', 'enzymes')
     .leftJoin('sample.bin', 'bin')
@@ -175,7 +177,7 @@ export const saveBinQuery = async (connection: Connection, recordId: number, dat
     }
   }
   let binName: string = [name.sampleName, name.consensusName, name.gcAvg, name.covAvg].join('_')
-  let exists: number = await connection.getRepository('bin').createQueryBuilder('bin')
+  let exists: number = await connection.getRepository(Bin).createQueryBuilder('bin')
                             .select('bin.id')
                             .where('bin.name = :binName', {binName})
                             .andWhere('bin.importRecord = :recordId', {recordId})
@@ -183,20 +185,21 @@ export const saveBinQuery = async (connection: Connection, recordId: number, dat
   let nameCounter: number = 2
   while (exists > 0) {
     binName = [name.sampleName, name.consensusName+nameCounter.toString(), name.gcAvg, name.covAvg].join('_')
-    exists = await connection.getRepository('bin').createQueryBuilder('bin')
+    exists = await connection.getRepository(Bin).createQueryBuilder('bin')
               .select('bin.id')
               .where('bin.name = :binName', {binName})
               .andWhere('bin.importRecord = :recordId', {recordId})
               .getCount()
     nameCounter++
   }
-  let newBin: IBin = await connection.getRepository('bin').save({name: binName, importRecord: recordId})
+  let importRecord: ImportRecord = await connection.getRepository(ImportRecord).findOneOrFail(recordId)
+  let newBin: Bin = await connection.getRepository(Bin).save({name: binName, importRecord: importRecord})
   let promises: Promise<any>[] = []
   let ceiling: number = idList.length
   let bottom: number = 0
   while (bottom < ceiling) {
-    promises.push(connection.getRepository('sample').createQueryBuilder('sample')
-                  .update('sample').set({bin: newBin.id})
+    promises.push(connection.getRepository(Sample).createQueryBuilder('sample')
+                  .update('sample').set({bin: newBin})
                   .where('id IN (:...idList)', {idList: idList.slice(bottom, bottom+100)}).execute())
     bottom += 100
   }
@@ -211,9 +214,9 @@ export const saveBinQuery = async (connection: Connection, recordId: number, dat
 }
 
 export const deleteBinQuery = async (connection: Connection, bin: Bin): Promise<any> => {
-  let query = connection.getRepository('sample').createQueryBuilder('sample').update()
+  let query = connection.getRepository(Sample).createQueryBuilder('sample').update()
               .set({bin: null})
               .where('binId = :binId', {binId: bin.id})
   await query.execute()
-  return connection.getRepository('bin').createQueryBuilder('bin').delete().where('id = :id', {id: bin.id}).execute()
+  return connection.getRepository(Bin).createQueryBuilder('bin').delete().where('id = :id', {id: bin.id}).execute()
 }
