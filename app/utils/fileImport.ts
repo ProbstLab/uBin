@@ -17,7 +17,7 @@ import {ImportRecord} from "../db/entities/ImportRecord";
 import {Enzyme} from "../db/entities/Enzyme";
 import {Bin} from "../db/entities/Bin";
 
-export const importFiles = async (addedFiles: IFile[], connection: Connection, importName: string) => {
+export const importFiles = async (addedFiles: IFile[], connection: Connection, importName: string, importSetting: number = 0) => {
   const taxonomyFile: IFile = addedFiles[0]
   const enzymeFile: IFile = addedFiles[1]
   let taxonomyMap: ITaxonomyAssociativeArray = {}
@@ -60,7 +60,9 @@ export const importFiles = async (addedFiles: IFile[], connection: Connection, i
             }
           }
         })
-        sampleMap[data.scaffold] = sample
+        if (importSetting === 0 || (importSetting === 1 && data.bin) || (importSetting === 2 && !data.bin)) {
+          sampleMap[data.scaffold] = sample
+        }
       }).on('end', () => {
       let enzymeList: string[]
       fs.createReadStream(enzymeFile.filePath)

@@ -46,8 +46,8 @@ export class FileTreeActions {
     return {file, type: fileTreeActions.removeAddedFile }
   }
 
-  static importFile(addedFiles: IFile[], connection: Connection, importName: string): IImportFile {
-    return {type: fileTreeActions.importFile, payload: importFiles(addedFiles, connection, importName)}
+  static importFile(addedFiles: IFile[], connection: Connection, importName: string, importSetting?: number): IImportFile {
+    return {type: fileTreeActions.importFile, payload: importFiles(addedFiles, connection, importName, importSetting)}
   }
   static importFilePending(payload: any): IImportFilePending {
     return {type: fileTreeActions.importFilePending, payload}

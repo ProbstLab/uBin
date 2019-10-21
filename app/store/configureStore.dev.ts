@@ -3,7 +3,6 @@ import thunk from 'redux-thunk';
 import { createHashHistory } from 'history';
 import { routerMiddleware, routerActions, connectRouter } from 'connected-react-router';
 import { createLogger } from 'redux-logger';
-import * as counterActions from '../actions/counter';
 import { DBActions } from '../controllers/database';
 import {samplesReducer, IClientState, fileTreeReducer, dbReducer} from '../controllers'
 import promise from 'redux-promise-middleware'
@@ -43,7 +42,6 @@ const configureStore = (initialState?: any) => {
 
   // Redux DevTools Configuration
   const actionCreators = {
-    ...counterActions,
     ...routerActions
   };
   // If Redux DevTools Extension is installed use it, otherwise use Redux compose
@@ -65,8 +63,8 @@ const configureStore = (initialState?: any) => {
 
   if ((module as any).hot) {
     (module as any).hot.accept(
-      '../reducers', // eslint-disable-next-line global-require
-      () => store.replaceReducer(require('../reducers').default)
+      '../controllers/index', // eslint-disable-next-line global-require
+      () => store.replaceReducer(require('../controllers/index').default)
     );
   }
   store.dispatch<any>(DBActions.startDatabase());

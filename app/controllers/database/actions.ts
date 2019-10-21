@@ -47,6 +47,7 @@ import {Taxonomy} from "../../db/entities/Taxonomy";
 import {Enzyme} from "../../db/entities/Enzyme";
 import {ImportRecord} from "../../db/entities/ImportRecord";
 import {ImportFile} from "../../db/entities/ImportFile";
+import {remote} from 'electron'
 
 
 export class DBActions {
@@ -54,7 +55,7 @@ export class DBActions {
     return {
       type: dbActions.connectDatabase, payload: createConnection({
         type: 'sqlite',
-        database: 'database.sqlite',
+        database: `${remote.app.getPath('appData')}/database.sqlite`,
         synchronize: true,
         logging: false,
         entities: [Sample, Bin, Taxonomy, Enzyme, ImportRecord, ImportFile],
