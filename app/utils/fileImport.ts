@@ -91,23 +91,23 @@ export const importFiles = async (addedFiles: IFile[], connection: Connection, i
 const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: Connection, importName: string, enzymeList: string[],
                            enzymeMap: IDynamicAssociativeArray, taxonomyMap: ITaxonomyAssociativeArray, sampleMap: IDynamicAssociativeArray,
                            binList: string[], binMap: IDynamicAssociativeArray) => {
-  console.log(1)
+  // console.log(1)
   let enzymeFileSaved = await connection.getRepository(ImportFile).save({ name: enzymeFile.filePath })
-  console.log(1.1)
+  // console.log(1.1)
   let taxonomyFileSaved = await connection.getRepository(ImportFile).save({ name: taxonomyFile.filePath })
-  console.log(1.2)
+  // console.log(1.2)
   let importRecord: ImportRecord = undefined
   try {
-    console.log(1.3)
+    // console.log(1.3)
     importRecord = await connection.getRepository(ImportRecord).save({name: importName, files: [enzymeFileSaved, taxonomyFileSaved],})
-    console.log(1.4)
+    // console.log(1.4)
   } catch (e) {
     if (enzymeFileSaved.id && taxonomyFileSaved.id) {
       await deleteImportFiles([enzymeFileSaved.id, taxonomyFileSaved.id], connection)
     }
     return e
   }
-  console.log(2)
+  // console.log(2)
   // Save new Enzymes and load already saves ones from database
   try {
     await Promise.all(enzymeList.map(async (value: string, index: number) => {
@@ -124,7 +124,7 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
     }
     return e
   }
-  console.log(3)
+  // console.log(3)
 
   // Save bins and link them to new record
   try {
@@ -137,7 +137,7 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
     }
     return e
   }
-  console.log(4)
+  // console.log(4)
 
   // Create new Taxonomy tree/Add new taxonomies to existing parents
   try {
