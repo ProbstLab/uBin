@@ -1,8 +1,8 @@
 
 declare module 'victory' {
-  import {DomainPropType, VictoryBrushContainerProps, VictoryContainerProps} from "victory"
+  import {DomainPropType} from "victory"
 
-  export interface VictoryBrushContainerProps extends VictoryContainerProps {
+  export interface VictoryBrushContainerProps {
     onBrushDomainChangeEnd?: (domain: DomainPropType, props: VictoryBrushContainerProps) => void;
   }
 }

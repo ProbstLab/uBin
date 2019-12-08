@@ -1,6 +1,6 @@
 import * as React from 'react'
 import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryBrushContainer, VictoryLabel} from 'victory'
-import {Crossfilter, Dimension} from 'crossfilter2'
+import {Crossfilter, Dimension, Grouping} from 'crossfilter2'
 import {IBin} from 'samples'
 import {Sample} from '../db/entities/Sample'
 import {compareArrayToString} from '../utils/compare'
@@ -133,7 +133,7 @@ export class UBinSelectBarChartOverview extends React.Component<IProps> {
       } else {
         taxonomyDim.filterAll()
       }
-      let grouped: any[] = []
+      let grouped: readonly Grouping<any, any>[]
       switch (xName) {
         case 'gc':
           grouped = groupDim.group().reduce(this.reduceAddLength, this.reduceRemoveLength, this.reduceInitial).all()

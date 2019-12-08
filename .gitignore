@@ -42,6 +42,14 @@ dist
 main.js
 main.js.map
 
+app/components/**/*.js*
+app/constants/**/*.js*
+app/contrainers/**/*.js*
+app/controllers/**/*.js*
+app/db/**/*.js*
+app/utils/**/*.js*
+app/typings/*.js*
+
 .idea
 *.sqlite
 

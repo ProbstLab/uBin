@@ -1,6 +1,6 @@
 import * as React from 'react'
 import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryBrushContainer, VictoryLabel} from 'victory'
-import {Crossfilter, Dimension} from 'crossfilter2'
+import {Crossfilter, Dimension, Grouping} from 'crossfilter2'
 import {IBin, IDomain} from 'samples'
 import {Sample} from '../db/entities/Sample'
 import {numToColour} from '../utils/convert'
@@ -132,7 +132,7 @@ export class UBinCoverageBarChart extends React.Component<IProps> {
       }
       if (xName) {
         this.yMax = 0
-        let grouped: any[] = groupDim.group().reduce(this.reduceAddLength, this.reduceRemoveLength, this.reduceInitial).all()
+        let grouped: readonly Grouping<any, any>[] = groupDim.group().reduce(this.reduceAddLength, this.reduceRemoveLength, this.reduceInitial).all()
         let bottom: Sample = groupDim.bottom(1)[0]
         let top: Sample = groupDim.top(1)[0]
         if (bottom && top) {

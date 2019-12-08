@@ -1,6 +1,6 @@
 import * as React from 'react'
 import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryBrushContainer} from 'victory'
-import {Crossfilter, Dimension} from 'crossfilter2'
+import {Crossfilter, Dimension, Grouping} from 'crossfilter2'
 import {IBin, IDomain} from 'samples'
 import {Sample} from '../db/entities/Sample'
 
@@ -140,7 +140,7 @@ export class UBinSelectBarChart extends React.Component<IProps> {
       }
       if (xName) {
         this.yMax = 0
-        let grouped: any[] = []
+        let grouped: readonly Grouping<any, any>[]
         switch (xName) {
           case 'gc':
             grouped = groupDim.group().reduce(this.reduceAddLength, this.reduceRemoveLength, this.reduceInitial).all()
