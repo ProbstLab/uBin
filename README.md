@@ -1,6 +1,6 @@
 ## uBin
 
-⚠️ dev version
+⚠️ alpha version
 
 ### Installation
 

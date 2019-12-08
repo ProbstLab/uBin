@@ -29,7 +29,13 @@ interface IActionsFromState {
 }
 
 interface IFileManagerState {
-  numFilesRequired: number
+  numFilesRequired: numberNOISIA - Halcyon (with The Upbeats) soundcloud.com
+
+submitted 10 hours ago by NarwhalNelly
+
+    2 commentssharesavehidegive awardreportcrosspost
+
+
   importName: string,
   importNameLength: number
   importNameLengthReached: boolean
@@ -70,7 +76,7 @@ class CFileManager extends React.Component<TProps> {
     importNameLength: 6,
     importNameLengthReached: false,
     citationMessageOpen: false,
-    importSetting: 0,
+    importSetting: 0
   }
 
   public componentDidMount(): void {

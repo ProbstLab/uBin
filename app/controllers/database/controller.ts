@@ -6,6 +6,7 @@ import {
   ISetSaveBinFulfilled, ISetSaveBinPending, ISetSaveBinRejected
 } from './interfaces'
 
+
 export const getInitialState = (): IDBState => ({
   id: 'default-db',
   samplesPending: false,

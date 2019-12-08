@@ -2,11 +2,8 @@ import * as fs from "fs"
 import {
   ISample,
   IDynamicAssociativeArray,
-  IImportFile,
-  IImportRecord,
   IEnzyme,
   ITaxonomy,
-  // IdValuePair,
   ITaxonomyAssociativeArray,
   IBin,
 } from "./interfaces"
@@ -15,6 +12,10 @@ import {Connection} from "typeorm"
 import {IFile} from "files"
 import * as _ from 'lodash'
 import {Taxonomy} from '../db/entities/Taxonomy'
+import {ImportFile} from "../db/entities/ImportFile";
+import {ImportRecord} from "../db/entities/ImportRecord";
+import {Enzyme} from "../db/entities/Enzyme";
+import {Bin} from "../db/entities/Bin";
 
 export const importFiles = async (addedFiles: IFile[], connection: Connection, importName: string, importSetting: number = 0) => {
   const taxonomyFile: IFile = addedFiles[0]
@@ -90,29 +91,31 @@ export const importFiles = async (addedFiles: IFile[], connection: Connection, i
 const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: Connection, importName: string, enzymeList: string[],
                            enzymeMap: IDynamicAssociativeArray, taxonomyMap: ITaxonomyAssociativeArray, sampleMap: IDynamicAssociativeArray,
                            binList: string[], binMap: IDynamicAssociativeArray) => {
-
-  let enzymeFileSaved = await connection.getRepository('import_file').save({ name: enzymeFile.filePath }) as IImportFile
-  let taxonomyFileSaved = await connection.getRepository('import_file').save({ name: taxonomyFile.filePath }) as IImportFile
-  let importRecord: IImportRecord = {
-    name: importName,
-    files: [enzymeFileSaved, taxonomyFileSaved],
-  }
+  // console.log(1)
+  let enzymeFileSaved = await connection.getRepository(ImportFile).save({ name: enzymeFile.filePath })
+  // console.log(1.1)
+  let taxonomyFileSaved = await connection.getRepository(ImportFile).save({ name: taxonomyFile.filePath })
+  // console.log(1.2)
+  let importRecord: ImportRecord = undefined
   try {
-    await connection.getRepository('import_record').save(importRecord)
+    // console.log(1.3)
+    importRecord = await connection.getRepository(ImportRecord).save({name: importName, files: [enzymeFileSaved, taxonomyFileSaved],})
+    // console.log(1.4)
   } catch (e) {
     if (enzymeFileSaved.id && taxonomyFileSaved.id) {
       await deleteImportFiles([enzymeFileSaved.id, taxonomyFileSaved.id], connection)
     }
     return e
   }
+  // console.log(2)
   // Save new Enzymes and load already saves ones from database
   try {
     await Promise.all(enzymeList.map(async (value: string, index: number) => {
-      let exists = await connection.getRepository('enzyme').count({where: {name: value}})
+      let exists = await connection.getRepository(Enzyme).count({where: {name: value}})
       if (exists) {
-        enzymeMap[value] = await connection.getRepository('enzyme').findOne({where: {name: value}}) as IEnzyme
+        enzymeMap[value] = await connection.getRepository(Enzyme).findOne({where: {name: value}})
       } else {
-        enzymeMap[value] = await connection.getRepository('enzyme').save({name: value, bacterial: index <= 50, archaeal: index > 50}) as IEnzyme
+        enzymeMap[value] = await connection.getRepository(Enzyme).save({name: value, bacterial: index <= 50, archaeal: index > 50})
       }
     }))
   } catch (e) {
@@ -121,11 +124,12 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
     }
     return e
   }
+  // console.log(3)
 
   // Save bins and link them to new record
   try {
     await Promise.all(binList.map(async (value: string) => {
-      binMap[value] = await connection.getRepository('bin').save({name: value, importRecord: importRecord.id}) as IBin
+      binMap[value] = await connection.getRepository(Bin).save({name: value, importRecord: importRecord})
     }))
   } catch (e) {
     if (enzymeFileSaved.id && taxonomyFileSaved.id && importRecord.id) {
@@ -133,9 +137,13 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
     }
     return e
   }
+  // console.log(4)
 
   // Create new Taxonomy tree/Add new taxonomies to existing parents
   try {
+    // console.log("taxonomy Map")
+    // console.log(taxonomyMap)
+    // console.log("______________")
     await saveTaxonomy(taxonomyMap, connection)
   } catch (e) {
     if (enzymeFileSaved.id && taxonomyFileSaved.id && importRecord.id) {
@@ -222,6 +230,7 @@ const saveTaxonomy = async (taxonomyMap: ITaxonomyAssociativeArray, connection: 
         taxonomyMap[key].id = taxonomyId.id
       } else {
         taxonomyMap[key].parent = parent.id
+        console.log(taxonomyMap[key])
         taxonomyMap[key] = await connection.getRepository('taxonomy').save(taxonomyMap[key]) as ITaxonomy
       }
     } else {
@@ -238,6 +247,7 @@ const saveTaxonomy = async (taxonomyMap: ITaxonomyAssociativeArray, connection: 
                                             .getOne() as Taxonomy
         taxonomyMap[key].id = taxonomyId.id
       } else {
+        console.log(taxonomyMap[key])
         taxonomyMap[key] = await connection.getRepository('taxonomy').save(taxonomyMap[key]) as ITaxonomy
       }
     }

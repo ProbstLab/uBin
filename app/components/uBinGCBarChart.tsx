@@ -3,7 +3,7 @@ import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryBrushContain
 import {Crossfilter, Dimension, Grouping} from 'crossfilter2'
 import {IBin, IDomain} from 'samples'
 import {Sample} from '../db/entities/Sample'
-import crossfilter = require('crossfilter2')
+import * as crossfilter from 'crossfilter2'
 import {numToColour} from '../utils/convert'
 import {compareArrayToString} from '../utils/compare'
 import {Taxonomy} from '../db/entities/Taxonomy'

@@ -41,18 +41,28 @@ import {
 import {SamplesActions} from '../samples'
 import {ISampleFilter} from 'samples'
 import {Bin} from '../../db/entities/Bin'
+import {createConnection} from 'typeorm'
+import {Sample} from "../../db/entities/Sample";
+import {Taxonomy} from "../../db/entities/Taxonomy";
+import {Enzyme} from "../../db/entities/Enzyme";
+import {ImportRecord} from "../../db/entities/ImportRecord";
+import {ImportFile} from "../../db/entities/ImportFile";
+import {remote} from 'electron'
 
-console.log('window: ', window)
-const orm = (window as any).typeorm
 
 export class DBActions {
   static connectDatabase(): IConnectDatabase {
     return {
-      type: dbActions.connectDatabase, payload: orm.createConnection().then(async (connection: Connection) => {
-        return connection
-      }).catch((error: any) => console.log('DB Connection failed:', error)),
+      type: dbActions.connectDatabase, payload: createConnection({
+        type: 'sqlite',
+        database: `${remote.app.getPath('appData')}/database.sqlite`,
+        synchronize: true,
+        logging: false,
+        entities: [Sample, Bin, Taxonomy, Enzyme, ImportRecord, ImportFile],
+      })
     }
   }
+
   static connectDatabaseFulfilled(connection: Connection): IConnectDatabaseFulfilled {
     return {type: dbActions.connectDatabaseFulfilled, payload: connection}
   }
@@ -106,7 +116,7 @@ export class DBActions {
   }
 
   static getImports(connection: Connection): IGetImports {
-    return {type: dbActions.getImports, payload: connection.getRepository('import_record').find()}
+    return {type: dbActions.getImports, payload: connection.getRepository(ImportRecord).find()}
   }
 
   static saveBin(connection: Connection, recordId: number, data: any[], filters: ISampleFilter,
@@ -138,6 +148,7 @@ export class DBActions {
   }
 
   static startDatabase(): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
+    console.log("start database")
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>((resolve) => {
         let connection: (Connection | undefined) = getDBConnection(getState())
