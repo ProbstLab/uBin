@@ -79,16 +79,16 @@ class CBinNaming extends React.PureComponent<TProps> {
   private handleDeleteDialogOpen = () => this.setState({ isDeleteDialogOpen: true })
   private handleDeleteDialogClose = () => this.setState({ isDeleteDialogOpen: false })
   private handleExportFileNameChange = (name: string) => this.setState({ exportFileName: name })
-  private openDirBrowser = (): void => {
-    const dirPath: string[]|undefined = remote.dialog.showOpenDialog({properties: ['openDirectory']})
+  private openDirBrowser = async () => {
+    const dirPath: string[] = await remote.dialog.showOpenDialog({properties: ['openDirectory']}).then(result => result.filePaths)
     if (dirPath && dirPath.length) {
       this.setState({exportFilePath: dirPath[0]})
     }
   }
-  private openFastaBrowser = (): void => {
+  private openFastaBrowser = async () => {
     let {importFastaFile} = this.props
-    const fastaPath: string[]|undefined = remote.dialog.showOpenDialog({properties: ['openFile'],
-                                                                                filters: [{name: 'Fasta', extensions: ['fasta', 'fna']}] })
+    const fastaPath: string[] = await remote.dialog.showOpenDialog({properties: ['openFile'],
+                                                        filters: [{name: 'Fasta', extensions: ['fasta', 'fna']}] }).then(result => result.filePaths)
     if (fastaPath && fastaPath.length) {
       this.setState({fastaInputFilePath: fastaPath[0]})
       importFastaFile(fastaPath[0])
