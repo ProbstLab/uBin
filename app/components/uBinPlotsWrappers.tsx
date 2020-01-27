@@ -9,12 +9,14 @@ import {Bin} from '../db/entities/Bin'
 import {ThunkAction} from 'redux-thunk'
 import {IClientState} from '../controllers'
 import {AnyAction} from 'redux'
-import {UBinScatter} from './uBinScatter'
+import {UBinScatterVX} from './uBinScatterVX'
 import {Crossfilter} from 'crossfilter2'
 import {Sample} from '../db/entities/Sample'
 import * as crossfilter from 'crossfilter2'
 import {Taxonomy} from '../db/entities/Taxonomy'
 import {IValueMap} from "common"
+// import BarStack from './BarStack'
+import { ParentSize } from '@vx/responsive';
 
 
 interface IProps {
@@ -76,9 +78,14 @@ export class UBinPlotsWrappers extends React.Component<IProps> {
         <div style={{width: '60%'}}>
           <div style={{width: '100%', display: 'flex', justifyContent: 'space-between'}}>
             <div style={{display: 'flex', alignItems: 'center'}}>
-              <UBinScatter cf={cf} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin} excludedTaxonomies={excludedTaxonomies}
-                           selectedTaxonomy={selectedTaxonomy} binView={binView} setGCAverage={setGCAverage} setCoverageAverage={setCoverageAverage}
-                           setTotalLength={setTotalLength} setSelectedCount={setSelectedCount} title={'GC-Coverage plot'}/>
+              <ParentSize>
+                {parent =>
+                <UBinScatterVX cf={cf} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin} excludedTaxonomies={excludedTaxonomies}
+                            selectedTaxonomy={selectedTaxonomy} binView={binView} setGCAverage={setGCAverage} setCoverageAverage={setCoverageAverage}
+                            setTotalLength={setTotalLength} setSelectedCount={setSelectedCount} title={'GC-Coverage plot'} />
+                }
+              </ParentSize>
+              {/* <BarStack width={400} height={400}/> */}
             </div>
             <div style={{width: '360px', marginTop: '30px', minWidth: '280px'}}>
               <UBinSunburst data={{ children: []}} taxonomies={taxonomies} cf={cf} setConsensus={setConsensus}
