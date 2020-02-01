@@ -58,3 +58,4 @@ app/db/entities/*.js
 app/db/entities/*.js.map
 app/db/**/*.js*
 app/db/**/**/*.js*
+dll/

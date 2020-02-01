@@ -107,6 +107,7 @@ export class UBinBarChart extends React.Component<IProps> {
           this.completeness = Math.round((count/this.props.maxCount)*1000)/10
           this.contamination = Math.round((contamination/this.props.maxCount)*1000)/10
         }
+        console.log("returnVals", returnVals)
         return returnVals
       }
     }

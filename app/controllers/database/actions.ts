@@ -52,6 +52,7 @@ import {remote} from 'electron'
 
 export class DBActions {
   static connectDatabase(): IConnectDatabase {
+    console.log(`${remote.app.getPath('appData')}/database.sqlite`)
     return {
       type: dbActions.connectDatabase, payload: createConnection({
         type: 'sqlite',

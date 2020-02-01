@@ -70,9 +70,10 @@ export const importFiles = async (addedFiles: IFile[], connection: Connection, i
         .on('headers', (headers: string[]) => {
           headers.shift()
           enzymeList = headers
+          console.log(enzymeList)
         })
         .on('data', async (data: any) => {
-
+          console.log(data.scaffolds)
           if (sampleMap.hasOwnProperty(data.scaffolds)) {
             let item: ISample = sampleMap[data.scaffolds] as ISample
             for (let key of enzymeList) {
@@ -190,7 +191,6 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
     if (item.binName && binMap.hasOwnProperty(item.binName) && binMap[item.binName] !== undefined) {
         item.bin = binMap[item.binName] as IBin
     }
-
     item.enzymes = newEnzymes
     item.importRecord = importRecord
     itemList.push(item)
