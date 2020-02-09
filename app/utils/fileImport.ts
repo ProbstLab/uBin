@@ -68,7 +68,6 @@ export const importFiles = async (addedFiles: IFile[], connection: Connection, i
       fs.createReadStream(enzymeFile.filePath)
         .pipe(csv({separator: ','}))
         .on('headers', (headers: string[]) => {
-          headers.shift()
           enzymeList = headers
           console.log(enzymeList)
         })

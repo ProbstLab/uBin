@@ -2,20 +2,19 @@ import * as React from "react"
 import {IBin, IDomain} from 'samples'
 import {Crossfilter} from 'crossfilter2'
 import {Dimension} from 'crossfilter2'
-// import {Switch} from '@blueprintjs/core'
 import {Sample} from '../db/entities/Sample'
 import {numToColour} from '../utils/convert'
-import {compareArrayToString} from '../utils/compare'
+// import {compareArrayToString} from '../utils/compare'
 import {Taxonomy} from '../db/entities/Taxonomy'
 import {Group} from '@vx/group'
-import {Brush} from '@vx/brush'
+import Brush from './FutureBrush'
 import {Bounds} from '@vx/brush/lib/types'
 import {Circle} from '@vx/shape'
-import { PatternLines } from '@vx/pattern';
-import { scaleLinear } from '@vx/scale';
+import { scaleLinear, scaleLog } from '@vx/scale';
 import { Grid } from '@vx/grid';
-// import { GradientOrangeRed } from '@vx/gradient';
 import { AxisLeft, AxisBottom } from '@vx/axis'
+import { Switch } from "@blueprintjs/core"
+import { filterBin, filterRange, filterTaxonomy } from "../utils/cfFilters"
 
 
 interface IProps {
@@ -70,9 +69,8 @@ export class UBinScatterVX extends React.PureComponent<IProps> {
     range: [0, this.xMax],
     nice: true,
   });
-  yScale = scaleLinear<number>({
-    range: [this.yMax, 0],
-  });
+  yScale = scaleLinear<number>({ range: [this.yMax, 0] });
+  yScaleLog = scaleLog<number>({ range: [this.yMax, 0] });
   zoom?: number
   currentRanges?: {x: number, y: number}
   allowUpdate: boolean = true
@@ -120,20 +118,40 @@ export class UBinScatterVX extends React.PureComponent<IProps> {
     this.setScatterScaling(nextProps)
   }
 
+  getRange (dim: Dimension<Sample, number>, key: string): [number, number] {
+    let xRange: [number, number] = [0, 100]
+    let dimTop = dim.top(1)[0]
+    let dimBot = dim.bottom(1)[0]
+    if (dimTop && dimBot) {
+      xRange = [dimBot[key], dimTop[key]]
+    }
+    return xRange
+  }
+
   setScatterDomain () {
     let {gcDim, covDim} = this.state
-    if (gcDim && covDim) {
-      let gcBot = gcDim.bottom(1)[0]
-      let gcTop = gcDim.top(1)[0]
-      let covBot = covDim.bottom(1)[0]
-      let covTop = covDim.top(1)[0]
-      if (gcBot && gcTop && covBot && covTop) {
-        let gcMargin =  Math.round(Math.sqrt((gcTop.gc - gcBot.gc) ** 2) / 100) | 1
-        let covMargin = Math.round(Math.sqrt((covTop.coverage - covBot.coverage) ** 2) / 100) | 1
-        let gcRange = [gcBot.gc - gcMargin , gcTop.gc + gcMargin]
-        let covRange = [covBot.coverage - covMargin, covTop.coverage + covMargin]
+    let {domain} = this.props
+    if (gcDim && covDim || domain) {
+      let xRange: [number, number] = undefined
+      let yRange: [number, number] = undefined
+      if (domain && domain.x) {
+        xRange = domain.x
+      } else {
+        xRange = this.getRange(gcDim, 'gc')
+      }
+      if (domain && domain.y) {
+        yRange = domain.y
+      } else {
+        yRange = this.getRange(covDim, 'coverage')
+      }
+      if (xRange && yRange) {
+        let gcMargin =  Math.round(Math.sqrt((xRange[1] - xRange[0]) ** 2) / 100) | 1
+        let covMargin = Math.round(Math.sqrt((yRange[1] - yRange[0]) ** 2) / 100) | 1
+        let gcRange = [xRange[0] - gcMargin, xRange[1] + gcMargin]
+        let covRange = [yRange[0] - covMargin, yRange[1] + covMargin]
         this.xScale.domain(gcRange)
         this.yScale.domain(covRange)
+        this.yScaleLog.domain([yRange[0], yRange[1] + covMargin])
       }
     }
   }
@@ -145,7 +163,6 @@ export class UBinScatterVX extends React.PureComponent<IProps> {
       let currentXRange: number = Math.sqrt((domain.x[1] - domain.x[0]) ** 2)
       let currentYRange: number = Math.sqrt((domain.y[1] - domain.y[0]) ** 2)
       if (!this.currentRanges || this.currentRanges.y !== currentYRange) {
-        console.log("xscale 1", this.xScale)
         this.setCombGrouping(currentXRange, currentYRange, nextProps)
       }
     } else if (combDim && bin && binView) {
@@ -214,41 +231,17 @@ export class UBinScatterVX extends React.PureComponent<IProps> {
     let { domain, bin, binView, selectedTaxonomy, excludedTaxonomies } = this.props
 
     if (gcDim && covDim && combDim && binDim && taxonomyDim) {
+
       if (domain) {
-        if (domain.x) {
-          gcDim.filterRange(domain.x)
-        } else {
-          gcDim.filterAll()
-        }
-        if (domain.y) {
-          covDim.filterRange(domain.y)
-        } else {
-          covDim.filterAll()
-        }
+        filterRange(gcDim, domain.x)
+        filterRange(covDim, domain.y)
       } else {
         gcDim.filterAll()
         covDim.filterAll()
         this.zoom = undefined
       }
-      if (bin && binView) {
-        binDim.filterExact(bin.id)
-      } else {
-        binDim.filterAll()
-      }
-      if (selectedTaxonomy) {
-        let taxonomyString: string = ';'+selectedTaxonomy.id.toString()+';'
-        let excludedTaxonomyStrings: string[] = excludedTaxonomies ? excludedTaxonomies.map(excludedTaxonomy => ';'+excludedTaxonomy.id.toString()+';') : []
-        if (excludedTaxonomyStrings.length) {
-          taxonomyDim.filterFunction((d: string) => d.indexOf(taxonomyString) >= 0 && !compareArrayToString(d, excludedTaxonomyStrings))
-        } else {
-          taxonomyDim.filterFunction((d: string) => d.indexOf(taxonomyString) >= 0)
-        }
-      } else if (excludedTaxonomies && excludedTaxonomies.length) {
-        let excludedTaxonomyStrings: string[] = excludedTaxonomies ? excludedTaxonomies.map(excludedTaxonomy => ';'+excludedTaxonomy.id.toString()+';') : []
-        taxonomyDim.filterFunction((d: string) => !compareArrayToString(d, excludedTaxonomyStrings))
-      } else {
-        taxonomyDim.filterAll()
-      }
+      filterBin(binDim, bin, binView)
+      filterTaxonomy(taxonomyDim, selectedTaxonomy, excludedTaxonomies)
 
       let bottom: Sample = combDim.bottom(1)[0]
       let top: Sample = combDim.top(1)[0]
@@ -289,8 +282,6 @@ export class UBinScatterVX extends React.PureComponent<IProps> {
   public handleDomainChangeEnd(): void {
     if (this.props.domainChangeHandler) {
       let { xAxis, yAxis } = this
-      console.log("Hello!", this)
-      console.log(xAxis, yAxis)
       this.props.domainChangeHandler({x: xAxis, y: yAxis})
     }
   }
@@ -302,20 +293,20 @@ export class UBinScatterVX extends React.PureComponent<IProps> {
     }
   }
 
-//   private handleLogScaleChange(): void {
-//     let negatedLogScale = !this.state.logScale
-//     this.setState({logScale: !this.state.logScale})
-//     localStorage.setItem('logScale', negatedLogScale.toString())
-// }
+  private handleLogScaleChange(): void {
+    let negatedLogScale = !this.state.logScale
+    this.setState({logScale: !this.state.logScale})
+    localStorage.setItem('logScale', negatedLogScale.toString())
+}
+
   public render(): JSX.Element {
-    // let {logScale} = this.state
-    let {height, width, xMax, yMax, xScale, yScale, margin} = this
+    let {height, width, xMax, yMax, xScale, margin} = this
     this.setScatterDomain()
+    let yScale = this.state.logScale ? this.yScaleLog : this.yScale
     
     return (
       <div>
         <svg width={width} height={height}>
-          {/* <GradientOrangeRed id="axis_gradient" vertical={false} fromOpacity={0.8} toOpacity={0.3} /> */}
           <rect x={0} y={0} width={width} height={height} fill="white" rx={14} />
           <Grid<Number, number>
             top={margin.top}
@@ -329,7 +320,6 @@ export class UBinScatterVX extends React.PureComponent<IProps> {
           />
           <Group left={margin.left} top={margin.top}>
             {this.getData().map((point, i) => {
-              // const r = i % 3 === 0 ? 2 : 2.765;
               return (
                 <Circle
                   key={`point-${i}`}
@@ -356,25 +346,18 @@ export class UBinScatterVX extends React.PureComponent<IProps> {
               numTicks={10}
               label="gc"
             />
-            <PatternLines
-              id="brush_pattern"
-              height={8}
-              width={8}
-              stroke={'white'}
-              strokeWidth={1}
-              orientation={['diagonal']}
-            />
             <Brush
               xScale={xScale}
               yScale={yScale}
               width={xMax}
               height={yMax}
+              margin={margin}
               handleSize={8}
               resizeTriggerAreas={['left', 'right', 'bottomRight']}
               brushDirection="both"
               onChange={(domain) => this.handleDomainChange(domain)}
-              // onClick={() => setFilteredStock(stock)}
               onBrushEnd={() => this.handleDomainChangeEnd()}
+              resetOnEnd={true}
               selectedBoxStyle={{
                 fill: 'rgba(0, 0, 0, 0.1)',
                 stroke: 'black',
@@ -382,6 +365,9 @@ export class UBinScatterVX extends React.PureComponent<IProps> {
             />
           </Group>
         </svg>
+        <div style={{display: 'flex', marginLeft: '50px', marginTop: '-30px'}}>
+          <Switch checked={this.state.logScale} label={'Log scaling'} onChange={() => this.handleLogScaleChange()}/>
+        </div>
       </div>
     )
   }

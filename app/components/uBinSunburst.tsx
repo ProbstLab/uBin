@@ -260,10 +260,11 @@ export class UBinSunburst extends React.Component<IProps> {
             />
           )}
         </Sunburst>
-        {/*<div className='uBin-sunburst'>{namePathValue}</div>*/}
-        <Breadcrumbs
-          items={namePathValues}
-        />
+        <div style={{minHeight: '30px', minWidth: '30px', maxWidth: '360px'}}>
+          <Breadcrumbs
+            items={namePathValues}
+          />
+        </div>
       </div>
     )
   }
