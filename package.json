@@ -1,7 +1,7 @@
 {
   "name": "ubin",
   "productName": "uBin",
-  "version": "0.9.8",
+  "version": "0.9.9",
   "description": "uBin alpha",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
@@ -246,6 +246,7 @@
     "@vx/vx": "0.0.193",
     "color-convert": "^1.9.3",
     "connected-react-router": "^6.2.1",
+    "core-js": "^2.6.11",
     "crossfilter2": "1.4.6",
     "csv-parser": "^2.1.0",
     "electron-log": "^2.2.17",
