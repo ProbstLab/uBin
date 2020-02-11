@@ -61,7 +61,7 @@ export class UBinCoverageBarChartVX extends React.Component<IProps> {
     top: 10,
     left: 60,
     bottom: 60,
-    right: 10,
+    right: 0,
   }
   xScaleTop: any
   xScaleBot: any
@@ -70,6 +70,7 @@ export class UBinCoverageBarChartVX extends React.Component<IProps> {
   coverageRangeTmp: [number, number]
   changedBin = false
   hasChanged = false
+  overviewRounding = 10
 
   public state: IBarCharState = {
     cf: crossfilter(this.props.data),
@@ -92,7 +93,7 @@ export class UBinCoverageBarChartVX extends React.Component<IProps> {
         overviewBinDim: overviewCf.dimension((d: Sample) => d.bin ? d.bin.id : 0),
         overviewTaxonomyDim: overviewCf.dimension((d: Sample) => d.taxonomiesRelationString)
       })
-      this.xScaleTop = scaleLinear({ range: [0, this.state.xMax] })
+      this.xScaleTop = scaleLinear({ range: [0, this.state.xMax], nice: true })
       this.yScaleTop = scaleLinear({ range: [this.state.yMaxTop, 0] })
       this.xScaleBot = scaleLinear({ range: [0, this.state.xMax] })
       this.yScaleBot = scaleLinear({ range: [this.state.yMaxBot, 0] })
@@ -118,14 +119,15 @@ export class UBinCoverageBarChartVX extends React.Component<IProps> {
       let groupDimBottom = tmpDimension.bottom(1)[0].coverage
       let covRange = Math.sqrt(groupDimTop**2 - groupDimBottom**2)
       if (covRange <= 50) {
-        this.setState({overviewDim: overviewCf.dimension((d: Sample) => d.coverage)})
+        this.overviewRounding = 1
       } else if (covRange <= 100) {
-        this.setState({overviewDim: overviewCf.dimension((d: Sample) => Math.round(d[this.props.xName]/2)*2)})
+        this.overviewRounding = 2
       } else if (covRange <= 250) {
-        this.setState({overviewDim: overviewCf.dimension((d: Sample) => Math.round(d[this.props.xName]/5)*5)})
+        this.overviewRounding = 5
       } else {
-        this.setState({overviewDim: overviewCf.dimension((d: Sample) => Math.round(d[this.props.xName]/10)*10)})
+        this.overviewRounding = 10
       }
+      this.setState({overviewDim: overviewCf.dimension((d: Sample) => Math.round(d[this.props.xName]/this.overviewRounding)*this.overviewRounding)})
     }
   }
 
@@ -237,14 +239,16 @@ export class UBinCoverageBarChartVX extends React.Component<IProps> {
     }
     let bot = this.state.coverageDim.bottom(1)
     let top = this.state.coverageDim.top(1)
-    return [bot && bot[0] ? bot[0].coverage: 0, top && top[0] ? top[0].coverage : 100]
+    return [bot && bot[0] ? Math.max(bot[0].coverage - 5, 0): 0,
+            top && top[0] ? top[0].coverage + 5 : 100]
   }
 
   getBotXRange (): [number, number] {
     let tmpDim = this.state.overviewCf.dimension((d: Sample) => d.coverage)
     let bot = tmpDim.bottom(1)
     let top = tmpDim.top(1)
-    return [bot ? bot[0].coverage : 0, top ? top[0].coverage : 100]
+    return [bot && bot[0] ? Math.max(bot[0].coverage - 5, 0): 0,
+            top && top[0] ? top[0].coverage + 5 : 100]
   }
 
   getActiveArea (): {x: number, width: number} | undefined {
@@ -261,6 +265,7 @@ export class UBinCoverageBarChartVX extends React.Component<IProps> {
   public render(): JSX.Element {
     let {xName, yName, bin} = this.props
     let {binRange} = this
+    let binRangeRounded = binRange ? [Math.floor(binRange[0]), Math.ceil(binRange[1])] : undefined
     let binColour: string
     if (bin && xName) {
       binColour = numToColour(bin.id)
@@ -272,11 +277,15 @@ export class UBinCoverageBarChartVX extends React.Component<IProps> {
     let {width, topChartHeight, bottomChartHeight} = this.props
     const xKey = xName || 'x'
     const yKey = yName || 'y'
-    const topBarWidth = Math.floor(xMax / ((data.length * 2) || 1)) || 1
-    const botBarWidth = Math.floor(xMax / ((overviewData.length * 2) || 1)) || 1
-    xScaleTop.domain(this.getTopXRange())
+    let topXRange = this.getTopXRange()
+    let botXRange = this.getBotXRange()
+    let topXDistance = Math.sqrt((topXRange[1] - topXRange[0]) ** 2 )
+    let botXDistance = Math.sqrt((botXRange[1] - botXRange[0]) ** 2 )
+    const topBarWidth = Math.min(Math.max(Math.floor(xMax / topXDistance) - 1, 1), 30)
+    const botBarWidth = Math.min(Math.max(Math.floor(xMax / (botXDistance / this.overviewRounding)) - 1, 1), 30)
+    xScaleTop.domain(topXRange)
     yScaleTop.domain([0, Math.max(...data.map(y => y[yKey])) || 100])
-    xScaleBot.domain(this.getBotXRange())
+    xScaleBot.domain(botXRange)
     yScaleBot.domain([0, Math.max(...overviewData.map(y => y[yKey])) || 100])
     const activeArea = this.getActiveArea()
     return (
@@ -295,11 +304,13 @@ export class UBinCoverageBarChartVX extends React.Component<IProps> {
               return (
                 <Bar
                   key={`bar-${i}`}
-                  x={barX}
+                  x={barX - Math.max(topBarWidth/2, 0)}
                   y={barY}
                   width={topBarWidth}
                   height={barHeight}
-                  fill={binRange && binRange[0] <= val[xName || 'x'] && binRange[1] >= val[xName || 'x'] ? '#'+binColour : "#455a64"}
+                  fill={binRangeRounded && binRangeRounded[0] <= val[xName || 'x'] && binRangeRounded[1] >= val[xName || 'x']
+                        ? '#'+binColour
+                        : "#455a64"}
                 />
               );
             })}
@@ -346,7 +357,7 @@ export class UBinCoverageBarChartVX extends React.Component<IProps> {
               return (
                 <Bar
                   key={`bar-${i}`}
-                  x={barX}
+                  x={barX - Math.max(botBarWidth/2, 0)}
                   y={barY}
                   width={botBarWidth}
                   height={barHeight}

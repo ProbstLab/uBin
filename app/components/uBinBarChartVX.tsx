@@ -172,7 +172,7 @@ export class UBinBarChartVX extends React.Component<IProps> {
               return (
                 <Bar
                   key={`bar-${i}`}
-                  x={barX}
+                  x={barX + 1}
                   y={barY}
                   width={barWidth - 2}
                   height={barHeight}
