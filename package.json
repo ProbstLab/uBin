@@ -1,8 +1,8 @@
 {
   "name": "ubin",
   "productName": "uBin",
-  "version": "0.9.10",
-  "description": "uBin alpha",
+  "version": "0.9.11",
+  "description": "uBin beta",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
     "build-dll": "cross-env NODE_ENV=development webpack --config ./configs/webpack.config.renderer.dev.dll.babel.js --colors",
@@ -19,7 +19,7 @@
     "package-ci": "yarn postinstall && yarn build && electron-builder --publish always",
     "package-linux": "yarn build && electron-builder build --linux",
     "package-win": "yarn build && electron-builder build --win --x64",
-    "postinstall": "electron-builder install-app-deps package.json && yarn build-dll && opencollective-postinstall",
+    "postinstall": "electron-builder install-app-deps && yarn build-dll && opencollective-postinstall",
     "postlint-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{*{js,jsx,json},babelrc,eslintrc,prettierrc,stylelintrc}'",
     "postlint-styles-fix": "prettier --ignore-path .eslintignore --single-quote --write '**/*.{css,scss}'",
     "precommit": "lint-staged",
@@ -79,10 +79,10 @@
       ]
     },
     "win": {
-      "target": ["nsis", "msi"]
+      "target": ["nsis"]
     },
     "linux": {
-      "target": ["deb", "rpm", "snap", "AppImage"],
+      "target": ["deb", "snap"],
       "category": "Development"
     },
     "directories": {

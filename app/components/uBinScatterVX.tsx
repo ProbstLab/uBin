@@ -70,7 +70,7 @@ export class UBinScatterVX extends React.PureComponent<IProps> {
     nice: true,
   });
   yScale = scaleLinear<number>({ range: [this.yMax, 0] });
-  yScaleLog = scaleLog<number>({ range: [this.yMax, 0] });
+  yScaleLog = scaleLog<number>({ range: [this.yMax, 0], clamp: true });
   zoom?: number
   currentRanges?: {x: number, y: number}
   allowUpdate: boolean = true
@@ -147,11 +147,9 @@ export class UBinScatterVX extends React.PureComponent<IProps> {
       if (xRange && yRange) {
         let gcMargin =  Math.round(Math.sqrt((xRange[1] - xRange[0]) ** 2) / 100) | 1
         let covMargin = Math.round(Math.sqrt((yRange[1] - yRange[0]) ** 2) / 100) | 1
-        let gcRange = [xRange[0] - gcMargin, xRange[1] + gcMargin]
-        let covRange = [yRange[0] - covMargin, yRange[1] + covMargin]
-        this.xScale.domain(gcRange)
-        this.yScale.domain(covRange)
-        this.yScaleLog.domain([yRange[0], yRange[1] + covMargin])
+        this.xScale.domain([xRange[0] - gcMargin, xRange[1] + gcMargin])
+        this.yScale.domain([Math.max(yRange[0] - covMargin, 0), yRange[1] + covMargin])
+        this.yScaleLog.domain([Math.max(yRange[0], 0.1), yRange[1] + covMargin])
       }
     }
   }
@@ -243,8 +241,8 @@ export class UBinScatterVX extends React.PureComponent<IProps> {
       filterBin(binDim, bin, binView)
       filterTaxonomy(taxonomyDim, selectedTaxonomy, excludedTaxonomies)
 
-      let bottom: Sample = combDim.bottom(1)[0]
-      let top: Sample = combDim.top(1)[0]
+      let bottom: Sample = gcDim.bottom(1)[0]
+      let top: Sample = gcDim.top(1)[0]
       let scalingFactor: number
       if (bottom && top) {
         scalingFactor = 20 / Math.sqrt((top.gc ** 2 - bottom.gc ** 2))
@@ -303,7 +301,6 @@ export class UBinScatterVX extends React.PureComponent<IProps> {
     let {height, width, xMax, yMax, xScale, margin} = this
     this.setScatterDomain()
     let yScale = this.state.logScale ? this.yScaleLog : this.yScale
-    
     return (
       <div>
         <svg width={width} height={height}>

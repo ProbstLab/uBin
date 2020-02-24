@@ -153,6 +153,7 @@ export class UBinCoverageBarChartVX extends React.Component<IProps> {
 
   handleOverviewBrushChangeEnd ():  void {
     if (this.coverageRangeTmp) {
+      this.coverageRangeTmp[0] = Math.max(this.coverageRangeTmp[0], 0)
       this.setState({ coverageRange: this.coverageRangeTmp })
     }
   }
