@@ -34,6 +34,7 @@ export type BaseBrushProps = {
   clickSensitivity: number;
   disableDraggingSelection: boolean;
   resetOnEnd?: boolean;
+  forceReset?: boolean;
 };
 
 export type BaseBrushState = BrushShape & {
@@ -88,6 +89,7 @@ export default class BaseBrush extends React.Component<BaseBrushProps, BaseBrush
     disableDraggingSelection: false,
     clickSensitivity: 200,
     resetOnEnd: false,
+    forceReset: false,
   };
 
   componentDidUpdate(prevProps: BaseBrushProps) {
@@ -101,6 +103,9 @@ export default class BaseBrush extends React.Component<BaseBrushProps, BaseBrush
           y1: this.props.height,
         },
       }));
+    }
+    if (this.props.forceReset) {
+      this.reset()
     }
   }
 

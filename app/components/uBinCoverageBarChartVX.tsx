@@ -70,6 +70,8 @@ export class UBinCoverageBarChartVX extends React.Component<IProps> {
   coverageRangeTmp: [number, number]
   changedBin = false
   hasChanged = false
+  resetSelection = false
+  resetOverviewBrush = false
   overviewRounding = 10
 
   public state: IBarCharState = {
@@ -101,12 +103,16 @@ export class UBinCoverageBarChartVX extends React.Component<IProps> {
   }
 
   public componentWillUpdate(nextProps: IProps): void {
-    let { xDomain, bin } = nextProps
-    if (this.currentDomain !== xDomain) {
-      this.currentDomain = xDomain
+    let { yDomain, bin } = nextProps
+    if (this.currentDomain !== yDomain) {
+      this.currentDomain = yDomain
+      if (!yDomain) {
+        this.resetSelection = true
+      }
     }
     if (bin !== this.props.bin) {
       this.changedBin = true
+      this.resetSelection = true
     }
   }
 
@@ -128,6 +134,11 @@ export class UBinCoverageBarChartVX extends React.Component<IProps> {
         this.overviewRounding = 10
       }
       this.setState({overviewDim: overviewCf.dimension((d: Sample) => Math.round(d[this.props.xName]/this.overviewRounding)*this.overviewRounding)})
+    }
+    if (this.resetSelection) {
+      this.resetSelection = false
+      this.resetOverviewBrush = true
+      this.setState({ coverageRange: undefined })
     }
   }
 
@@ -265,7 +276,7 @@ export class UBinCoverageBarChartVX extends React.Component<IProps> {
 
   public render(): JSX.Element {
     let {xName, yName, bin} = this.props
-    let {binRange} = this
+    let {binRange, resetOverviewBrush} = this
     let binRangeRounded = binRange ? [Math.floor(binRange[0]), Math.ceil(binRange[1])] : undefined
     let binColour: string
     if (bin && xName) {
@@ -289,6 +300,10 @@ export class UBinCoverageBarChartVX extends React.Component<IProps> {
     xScaleBot.domain(botXRange)
     yScaleBot.domain([0, Math.max(...overviewData.map(y => y[yKey])) || 100])
     const activeArea = this.getActiveArea()
+    let _resetOverviewBrush = resetOverviewBrush
+    if (resetOverviewBrush) {
+      resetOverviewBrush = false
+    }
     return (
       <div>
         <svg width={width} height={topChartHeight + bottomChartHeight}>
@@ -392,6 +407,7 @@ export class UBinCoverageBarChartVX extends React.Component<IProps> {
               brushDirection="horizontal"
               onChange={(domain) => this.handleOverviewBrushChange(domain)}
               onBrushEnd={() => this.handleOverviewBrushChangeEnd()}
+              forceReset={_resetOverviewBrush}
               selectedBoxStyle={{
                 fill: 'rgba(0, 0, 0, 0.1)',
                 stroke: 'rgba(0, 0, 0, 0.7)',

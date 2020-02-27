@@ -15,3 +15,12 @@ body {
   min-height: 100px;
   overflow-y: scroll;
 }
+
+.record-select div.bp3-transition-container {
+  transform: translate3d(175px, 0, 0);
+}
+
+.record-select div.bp3-popover-content {
+  max-height: calc(100vh - 150px);
+  overflow-y: scroll;
+}

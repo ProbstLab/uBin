@@ -299,6 +299,7 @@ export class UBinScatterVX extends React.PureComponent<IProps> {
 
   public render(): JSX.Element {
     let {height, width, xMax, yMax, xScale, margin} = this
+    let data = this.getData()
     this.setScatterDomain()
     let yScale = this.state.logScale ? this.yScaleLog : this.yScale
     return (
@@ -316,7 +317,7 @@ export class UBinScatterVX extends React.PureComponent<IProps> {
             strokeOpacity={0.1}
           />
           <Group left={margin.left} top={margin.top}>
-            {this.getData().map((point, i) => {
+            {data.map((point, i) => {
               return (
                 <Circle
                   key={`point-${i}`}
