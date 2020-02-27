@@ -104,7 +104,7 @@ export default class BaseBrush extends React.Component<BaseBrushProps, BaseBrush
         },
       }));
     }
-    if (this.props.forceReset) {
+    if (this.props.forceReset && !prevProps.forceReset) {
       this.reset()
     }
   }

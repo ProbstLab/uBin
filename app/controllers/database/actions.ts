@@ -52,7 +52,6 @@ import {remote} from 'electron'
 
 export class DBActions {
   static connectDatabase(): IConnectDatabase {
-    console.log(`${remote.app.getPath('appData')}/database.sqlite`)
     return {
       type: dbActions.connectDatabase, payload: createConnection({
         type: 'sqlite',
@@ -149,7 +148,6 @@ export class DBActions {
   }
 
   static startDatabase(): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
-    console.log("start database")
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>((resolve) => {
         let connection: (Connection | undefined) = getDBConnection(getState())

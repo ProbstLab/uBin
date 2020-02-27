@@ -69,10 +69,8 @@ export const importFiles = async (addedFiles: IFile[], connection: Connection, i
         .pipe(csv({separator: ','}))
         .on('headers', (headers: string[]) => {
           enzymeList = headers
-          console.log(enzymeList)
         })
         .on('data', async (data: any) => {
-          console.log(data.scaffolds)
           if (sampleMap.hasOwnProperty(data.scaffolds)) {
             let item: ISample = sampleMap[data.scaffolds] as ISample
             for (let key of enzymeList) {
@@ -229,7 +227,6 @@ const saveTaxonomy = async (taxonomyMap: ITaxonomyAssociativeArray, connection: 
         taxonomyMap[key].id = taxonomyId.id
       } else {
         taxonomyMap[key].parent = parent.id
-        console.log(taxonomyMap[key])
         taxonomyMap[key] = await connection.getRepository('taxonomy').save(taxonomyMap[key]) as ITaxonomy
       }
     } else {
@@ -246,7 +243,6 @@ const saveTaxonomy = async (taxonomyMap: ITaxonomyAssociativeArray, connection: 
                                             .getOne() as Taxonomy
         taxonomyMap[key].id = taxonomyId.id
       } else {
-        console.log(taxonomyMap[key])
         taxonomyMap[key] = await connection.getRepository('taxonomy').save(taxonomyMap[key]) as ITaxonomy
       }
     }

@@ -27,7 +27,6 @@ export const scatterFilter = (query: any, filter?: ISampleFilter): any => {
       query.andWhere('samples.taxonomiesRelationString like :selectedTaxonomy', {selectedTaxonomy: '%;' + filter.selectedTaxonomy + ';%'})
     }
   }
-  console.log(query)
   return query
 }
 
@@ -77,8 +76,6 @@ export const getEnzymeDistributionQuery =
     }
     query = scatterFilter(query, filter)
   }
-  let enzymes = await query.getMany()
-  if (enzymes.length > 0){ console.log(enzymes)}
   return query.getMany()
 }
 

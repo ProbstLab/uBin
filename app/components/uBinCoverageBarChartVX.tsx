@@ -276,7 +276,7 @@ export class UBinCoverageBarChartVX extends React.Component<IProps> {
 
   public render(): JSX.Element {
     let {xName, yName, bin} = this.props
-    let {binRange, resetOverviewBrush} = this
+    let {binRange} = this
     let binRangeRounded = binRange ? [Math.floor(binRange[0]), Math.ceil(binRange[1])] : undefined
     let binColour: string
     if (bin && xName) {
@@ -300,9 +300,9 @@ export class UBinCoverageBarChartVX extends React.Component<IProps> {
     xScaleBot.domain(botXRange)
     yScaleBot.domain([0, Math.max(...overviewData.map(y => y[yKey])) || 100])
     const activeArea = this.getActiveArea()
-    let _resetOverviewBrush = resetOverviewBrush
-    if (resetOverviewBrush) {
-      resetOverviewBrush = false
+    let _resetOverviewBrush = this.resetOverviewBrush
+    if (this.resetOverviewBrush) {
+      this.resetOverviewBrush = false
     }
     return (
       <div>

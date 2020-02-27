@@ -29,10 +29,7 @@ export class SampleMenu extends React.PureComponent<TProps> {
     if (!importRecordsState.pending && importRecordsState.loaded && !importRecords.length) {
       return <MenuItem text='No data has been imported yet'/>
     } else if (importRecords.length && !importRecordsState.pending){
-      let multipliedRecords = this.props.importRecords
-      multipliedRecords = [...multipliedRecords, ...multipliedRecords, ...multipliedRecords, ...multipliedRecords, ...multipliedRecords, ...multipliedRecords,
-        ...multipliedRecords, ...multipliedRecords, ...multipliedRecords, ...multipliedRecords, ...multipliedRecords, ...multipliedRecords]
-      return (multipliedRecords.map((record: IImportRecord, index: number) =>
+      return (this.props.importRecords.map((record: IImportRecord, index: number) =>
         <MenuItem key={index} icon='pulse' text={record.name} onClick={() => this.loadSampleData(record.id)} />))
     }
     return <MenuItem text={<Spinner size={20}/>}/>
