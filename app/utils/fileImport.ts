@@ -68,7 +68,7 @@ export const importFiles = async (addedFiles: IFile[], connection: Connection, i
       fs.createReadStream(enzymeFile.filePath)
         .pipe(csv({separator: ','}))
         .on('headers', (headers: string[]) => {
-          enzymeList = headers
+          enzymeList = headers.filter(header => header !== 'scaffolds')
         })
         .on('data', async (data: any) => {
           if (sampleMap.hasOwnProperty(data.scaffolds)) {
