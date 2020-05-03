@@ -28,3 +28,8 @@ export const getDeletingBinState = createSelector(
   getDBState,
   (state: IDBState) => state.deletingBinState,
 )
+
+export const getDeletingRecordState = createSelector(
+  getDBState,
+  (state: IDBState) => state.deletingRecordState,
+)

@@ -1,13 +1,20 @@
 import * as React from "react"
-import {VictoryAxis, VictoryScatter, VictoryChart, VictoryTheme, VictoryBrushContainer, VictoryLabel} from 'victory'
 import {IBin, IDomain} from 'samples'
 import {Crossfilter} from 'crossfilter2'
 import {Dimension} from 'crossfilter2'
-import {Switch} from '@blueprintjs/core'
 import {Sample} from '../db/entities/Sample'
 import {numToColour} from '../utils/convert'
-import {compareArrayToString} from '../utils/compare'
+// import {compareArrayToString} from '../utils/compare'
 import {Taxonomy} from '../db/entities/Taxonomy'
+import {Group} from '@vx/group'
+import Brush from './FutureBrush'
+import {Bounds} from '@vx/brush/lib/types'
+import {Circle} from '@vx/shape'
+import { scaleLinear, scaleLog } from '@vx/scale';
+import { Grid } from '@vx/grid';
+import { AxisLeft, AxisBottom } from '@vx/axis'
+import { Switch } from "@blueprintjs/core"
+import { filterBin, filterRange, filterTaxonomy } from "../utils/cfFilters"
 
 
 interface IProps {
@@ -43,10 +50,27 @@ export interface IUBinScatterState {
   logScale: boolean
 }
 
-export class UBinScatter extends React.PureComponent<IProps> {
+export class UBinScatterVX extends React.PureComponent<IProps> {
 
   xAxis?: [number, number]
-  yAxis?: [number, number]
+  yAxis?: [number, number]        
+  _originalDomain: IDomain = { x: [0, 100], y: [0, 8000]}
+  width = 400
+  height = 500
+  margin = {
+    top: 10,
+    left: 60,
+    bottom: 50,
+    right: 10,
+  }
+  xMax = Math.max(this.width - this.margin.left - this.margin.right, 0);
+  yMax = Math.max(this.height - this.margin.top - this.margin.bottom, 0);
+  xScale = scaleLinear<number>({
+    range: [0, this.xMax],
+    nice: true,
+  });
+  yScale = scaleLinear<number>({ range: [this.yMax, 0] });
+  yScaleLog = scaleLog<number>({ range: [this.yMax, 0], clamp: true });
   zoom?: number
   currentRanges?: {x: number, y: number}
   allowUpdate: boolean = true
@@ -84,20 +108,53 @@ export class UBinScatter extends React.PureComponent<IProps> {
         })
       } else {
         this.setState({
-          originalDomain: {
-            x: [0, 100],
-            y: [0, 8000],
-          },
+          originalDomain: this._originalDomain,
         })
       }
     }
   }
 
-  public componentWillUpdate(nextProps: IProps): void {
+  componentWillUpdate(nextProps: IProps): void {
     this.setScatterScaling(nextProps)
   }
 
-  public setScatterScaling(nextProps?: IProps): void {
+  getRange (dim: Dimension<Sample, number>, key: string): [number, number] {
+    let xRange: [number, number] = [0, 100]
+    let dimTop = dim.top(1)[0]
+    let dimBot = dim.bottom(1)[0]
+    if (dimTop && dimBot) {
+      xRange = [dimBot[key], dimTop[key]]
+    }
+    return xRange
+  }
+
+  setScatterDomain () {
+    let {gcDim, covDim} = this.state
+    let {domain} = this.props
+    if (gcDim && covDim || domain) {
+      let xRange: [number, number] = undefined
+      let yRange: [number, number] = undefined
+      if (domain && domain.x) {
+        xRange = domain.x
+      } else {
+        xRange = this.getRange(gcDim, 'gc')
+      }
+      if (domain && domain.y) {
+        yRange = domain.y
+      } else {
+        yRange = this.getRange(covDim, 'coverage')
+      }
+      if (xRange && yRange) {
+        let gcMargin =  Math.round(Math.sqrt((xRange[1] - xRange[0]) ** 2) / 100) | 1
+        let covMargin = Math.round(Math.sqrt((yRange[1] - yRange[0]) ** 2) / 100) | 1
+        this.xScale.domain([xRange[0] - gcMargin, xRange[1] + gcMargin])
+        this.yScale.domain([Math.max(yRange[0] - covMargin, 0), yRange[1] + covMargin])
+        this.yScaleLog.domain([Math.max(yRange[0], 0.1), yRange[1] + covMargin])
+      }
+    }
+  }
+
+  setScatterScaling(nextProps?: IProps): void {
     let {domain, cf, bin, binView} = nextProps || this.props
     let {combDim} = this.state
     if (domain && domain.x && domain.y) {
@@ -147,7 +204,7 @@ export class UBinScatter extends React.PureComponent<IProps> {
     p.count += 1
     if (!p.colour) {
       if (v.bin) {
-        p.colour = numToColour(v.bin.id)
+        p.colour = '#' + numToColour(v.bin.id)
       } else {
         p.colour = '#455a64'
       }
@@ -164,7 +221,6 @@ export class UBinScatter extends React.PureComponent<IProps> {
   }
 
   public round(num: number, x: number, o: number): number {
-    // console.log("Num:", num, "x:", x, "o:", o, "return:", Math.round((o + Math.ceil((num - o)/ x ) * x)*10)/10)
     return Math.round((o + Math.ceil((num - o)/ x ) * x)*10)/10
   }
 
@@ -173,76 +229,25 @@ export class UBinScatter extends React.PureComponent<IProps> {
     let { domain, bin, binView, selectedTaxonomy, excludedTaxonomies } = this.props
 
     if (gcDim && covDim && combDim && binDim && taxonomyDim) {
+
       if (domain) {
-        if (domain.x) {
-          gcDim.filterRange(domain.x)
-        } else {
-          gcDim.filterAll()
-        }
-        if (domain.y) {
-          covDim.filterRange(domain.y)
-        } else {
-          covDim.filterAll()
-        }
+        filterRange(gcDim, domain.x)
+        filterRange(covDim, domain.y)
       } else {
         gcDim.filterAll()
         covDim.filterAll()
         this.zoom = undefined
       }
-      if (bin && binView) {
-        binDim.filterExact(bin.id)
-      } else {
-        binDim.filterAll()
-      }
-      if (selectedTaxonomy) {
-        let taxonomyString: string = ';'+selectedTaxonomy.id.toString()+';'
-        let excludedTaxonomyStrings: string[] = excludedTaxonomies ? excludedTaxonomies.map(excludedTaxonomy => ';'+excludedTaxonomy.id.toString()+';') : []
-        if (excludedTaxonomyStrings.length) {
-          taxonomyDim.filterFunction((d: string) => d.indexOf(taxonomyString) >= 0 && !compareArrayToString(d, excludedTaxonomyStrings))
-        } else {
-          taxonomyDim.filterFunction((d: string) => d.indexOf(taxonomyString) >= 0)
-        }
-      } else if (excludedTaxonomies && excludedTaxonomies.length) {
-        let excludedTaxonomyStrings: string[] = excludedTaxonomies ? excludedTaxonomies.map(excludedTaxonomy => ';'+excludedTaxonomy.id.toString()+';') : []
-        taxonomyDim.filterFunction((d: string) => !compareArrayToString(d, excludedTaxonomyStrings))
-      } else {
-        taxonomyDim.filterAll()
-      }
-      // let logFactor: number = 10/Math.log(100)
-      // let basePointSize: number = 10-Math.log((this.zoom !== undefined ? this.zoom || 0.01 : 1)*200)*logFactor
-      // let basePointSize: number = 1
-      let bottom: Sample = combDim.bottom(1)[0]
-      let top: Sample = combDim.top(1)[0]
+      filterBin(binDim, bin, binView)
+      filterTaxonomy(taxonomyDim, selectedTaxonomy, excludedTaxonomies)
+
+      let bottom: Sample = gcDim.bottom(1)[0]
+      let top: Sample = gcDim.top(1)[0]
       let scalingFactor: number
       if (bottom && top) {
         scalingFactor = 20 / Math.sqrt((top.gc ** 2 - bottom.gc ** 2))
       }
-      // let groupedGc = gcDim.group().all().filter(d => d.value)
-      // let gcCount: number = 0
-      // let gcSum: number = 0
-      // for (let i: number = 0; i < groupedGc.length; i++){
-      //   let c = groupedGc[i].value as number
-      //   let s = groupedGc[i].key as number
-      //   gcCount += c; gcSum += s*c
-      // }
-      // console.log(gcCount, gcSum)
-      // if (gcSum/gcCount !== this.gcAverage) {
-      //   this.props.setGCAverage(Math.round(gcSum/gcCount))
-      // }
-      // let groupedCoverage = covDim.group().all()
-      // let covCount: number = 0
-      // let covSum: number = 0
-      // console.log(groupedCoverage)
-      // for (let i: number = 0; i < groupedCoverage.length; i++){
-      //   let c = groupedCoverage[i].value as number
-      //   let s = groupedCoverage[i].key as number
-      //   // console.log("g", groupedCoverage[i])
-      //   covCount += c; covSum += s*c
-      // }
-      // console.log(covCount, covSum)
-      // if (covSum/covCount !== this.coverageAverage) {
-      //   this.props.setCoverageAverage(Math.round(covSum/covCount))
-      // }
+
       this.lengthTotal = 0
       let gcSum: number = 0
       let covSum: number = 0
@@ -279,9 +284,11 @@ export class UBinScatter extends React.PureComponent<IProps> {
     }
   }
 
-  public handleDomainChange(domain: IDomain): void {
-    this.xAxis = domain.x
-    this.yAxis = domain.y
+  public handleDomainChange(domain: Bounds): void {
+    if (domain) {
+      this.xAxis = [domain.x0, domain.x1]
+      this.yAxis = [domain.y0, domain.y1]
+    }
   }
 
   private handleLogScaleChange(): void {
@@ -289,49 +296,75 @@ export class UBinScatter extends React.PureComponent<IProps> {
     this.setState({logScale: !this.state.logScale})
     localStorage.setItem('logScale', negatedLogScale.toString())
 }
+
   public render(): JSX.Element {
-    let {logScale} = this.state
+    let {height, width, xMax, yMax, xScale, margin} = this
+    let data = this.getData()
+    this.setScatterDomain()
+    let yScale = this.state.logScale ? this.yScaleLog : this.yScale
     return (
       <div>
-        <VictoryChart containerComponent={<VictoryBrushContainer
-                                          defaultBrushArea="disable"
-                                          onBrushDomainChange={(domain: any, props: any) => this.handleDomainChange(domain)}
-                                          onBrushDomainChangeEnd={() => this.handleDomainChangeEnd()}/>}
-                      theme={VictoryTheme.material}
-                      height={500}
-                      width={400}
-                      padding={{ left: 50, top: 40, right: 10, bottom: 40 }}
-                      domainPadding={{x: 20, y: [logScale ? 0 : 20, logScale ? 0 : 20]}}
-                      scale={{ x: 'linear', y: logScale ? 'log' : 'linear' }}>
-          <VictoryLabel text={this.props.title} x={200} y={30} textAnchor="middle"/>
-          <VictoryAxis
-            label={'gc'}
-            axisLabelComponent={<VictoryLabel y={485} />}
-            tickFormat={(t: number) => Math.round(t*10)/10}
+        <svg width={width} height={height}>
+          <rect x={0} y={0} width={width} height={height} fill="white" rx={14} />
+          <Grid<Number, number>
+            top={margin.top}
+            left={margin.left}
+            xScale={xScale}
+            yScale={yScale}
+            width={xMax}
+            height={yMax}
+            stroke="black"
+            strokeOpacity={0.1}
           />
-          <VictoryAxis
-            label={'coverage'}
-            axisLabelComponent={<VictoryLabel x={10} />}
-            dependentAxis={true}
-            tickFormat={(t: number) => {return  logScale ? t : t >= 1000 ? `${Math.round(t)/1000}k` : t >= 100 ? Math.round(t) : Math.round(t*10)/10}}
-          />
-          <VictoryScatter
-            style={{
-              data: {
-                fill: (d: any) => d.colour,
-              },
-            }}
-            bubbleProperty="size"
-            maxBubbleSize={20}
-            data={this.getData()}
-            x={'gc'}
-            y={'coverage'}
-          />
-        </VictoryChart>
-        {/*<p style={{textAlign: 'center'}}>Bubble size according to scaffold length</p>*/}
-        <div style={{display: 'flex', marginLeft: '50px'}}>
-          <Switch checked={this.state.logScale} label={'Log Scaling'} onChange={() => this.handleLogScaleChange()}/>
-          {/*<Tag style={{maxHeight: '20px'}} key={'lengthTotal'}>Length in total: {this.lengthTotal}</Tag>*/}
+          <Group left={margin.left} top={margin.top}>
+            {data.map((point, i) => {
+              return (
+                <Circle
+                  key={`point-${i}`}
+                  className="dot"
+                  cx={xScale(point.gc)}
+                  cy={yScale(point.coverage)}
+                  r={point.size}
+                  fill={point.colour}
+                />
+              );
+            })}
+            <AxisLeft<number>
+              top={0}
+              left={0}
+              scale={yScale}
+              hideZero
+              numTicks={10}
+              label="Coverage"
+            />
+            <AxisBottom<number>
+              top={yMax}
+              left={0}
+              scale={xScale}
+              numTicks={10}
+              label="gc"
+            />
+            <Brush
+              xScale={xScale}
+              yScale={yScale}
+              width={xMax}
+              height={yMax}
+              margin={margin}
+              handleSize={8}
+              resizeTriggerAreas={['left', 'right', 'bottomRight']}
+              brushDirection="both"
+              onChange={(domain) => this.handleDomainChange(domain)}
+              onBrushEnd={() => this.handleDomainChangeEnd()}
+              resetOnEnd={true}
+              selectedBoxStyle={{
+                fill: 'rgba(0, 0, 0, 0.1)',
+                stroke: 'black',
+              }}
+            />
+          </Group>
+        </svg>
+        <div style={{display: 'flex', marginLeft: '50px', marginTop: '-30px'}}>
+          <Switch checked={this.state.logScale} label={'Log scaling'} onChange={() => this.handleLogScaleChange()}/>
         </div>
       </div>
     )

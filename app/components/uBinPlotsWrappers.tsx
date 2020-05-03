@@ -9,12 +9,14 @@ import {Bin} from '../db/entities/Bin'
 import {ThunkAction} from 'redux-thunk'
 import {IClientState} from '../controllers'
 import {AnyAction} from 'redux'
-import {UBinScatter} from './uBinScatter'
+import {UBinScatterVX} from './uBinScatterVX'
 import {Crossfilter} from 'crossfilter2'
 import {Sample} from '../db/entities/Sample'
 import * as crossfilter from 'crossfilter2'
 import {Taxonomy} from '../db/entities/Taxonomy'
 import {IValueMap} from "common"
+// import BarStack from './BarStack'
+// import { ParentSize } from '@vx/responsive';
 
 
 interface IProps {
@@ -73,14 +75,12 @@ export class UBinPlotsWrappers extends React.Component<IProps> {
 
     return (
       <>
-        <div style={{width: '60%'}}>
-          <div style={{width: '100%', display: 'flex', justifyContent: 'space-between'}}>
-            <div style={{display: 'flex', alignItems: 'center'}}>
-              <UBinScatter cf={cf} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin} excludedTaxonomies={excludedTaxonomies}
-                           selectedTaxonomy={selectedTaxonomy} binView={binView} setGCAverage={setGCAverage} setCoverageAverage={setCoverageAverage}
-                           setTotalLength={setTotalLength} setSelectedCount={setSelectedCount} title={'GC-Coverage plot'}/>
-            </div>
-            <div style={{width: '360px', marginTop: '30px', minWidth: '280px'}}>
+        <div style={{width: '70%'}}>
+          <div style={{display: 'flex', alignItems: 'center'}}>
+            <UBinScatterVX cf={cf} domainChangeHandler={updateDomain} domain={domain} bin={selectedBin} excludedTaxonomies={excludedTaxonomies}
+                        selectedTaxonomy={selectedTaxonomy} binView={binView} setGCAverage={setGCAverage} setCoverageAverage={setCoverageAverage}
+                        setTotalLength={setTotalLength} setSelectedCount={setSelectedCount} title={'GC-Coverage plot'} />
+            <div style={{display: 'flex', justifyContent: 'center', width: '100%'}}>
               <UBinSunburst data={{ children: []}} taxonomies={taxonomies} cf={cf} setConsensus={setConsensus}
                             selectTaxonomy={setSelectedTaxonomy} excludeTaxonomy={addExcludedTaxonomy}/>
             </div>

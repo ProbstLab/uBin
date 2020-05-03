@@ -29,13 +29,7 @@ interface IActionsFromState {
 }
 
 interface IFileManagerState {
-  numFilesRequired: numberNOISIA - Halcyon (with The Upbeats) soundcloud.com
-
-submitted 10 hours ago by NarwhalNelly
-
-    2 commentssharesavehidegive awardreportcrosspost
-
-
+  numFilesRequired: number,
   importName: string,
   importNameLength: number
   importNameLengthReached: boolean

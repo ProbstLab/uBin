@@ -60,7 +60,7 @@ export const getBacterialEnzymeTypes = createSelector(
   getSamplesState,
   (state: ISamplesState) => state.enzymeTypes ?
     state.enzymeTypes.filter(value => value.bacterial)
-      .map((value: Enzyme) => value.name) : []
+      .map((value: Enzyme) => value.name).filter(name => !name.includes('scaffold')) : []
 )
 export const getArchaealEnzymeTypes = createSelector(
   getSamplesState,

@@ -24,7 +24,7 @@ export class BinMenu extends React.PureComponent<TProps> {
 
   render(): JSX.Element {
     return (
-      <Menu>
+      <Menu className={'bin-select'}>
         {this.listBins()}
       </Menu>
     )}

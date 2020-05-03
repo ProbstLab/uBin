@@ -68,11 +68,9 @@ export const importFiles = async (addedFiles: IFile[], connection: Connection, i
       fs.createReadStream(enzymeFile.filePath)
         .pipe(csv({separator: ','}))
         .on('headers', (headers: string[]) => {
-          headers.shift()
-          enzymeList = headers
+          enzymeList = headers.filter(header => header !== 'scaffolds')
         })
         .on('data', async (data: any) => {
-
           if (sampleMap.hasOwnProperty(data.scaffolds)) {
             let item: ISample = sampleMap[data.scaffolds] as ISample
             for (let key of enzymeList) {
@@ -190,7 +188,6 @@ const saveSamples = async (enzymeFile: IFile, taxonomyFile: IFile, connection: C
     if (item.binName && binMap.hasOwnProperty(item.binName) && binMap[item.binName] !== undefined) {
         item.bin = binMap[item.binName] as IBin
     }
-
     item.enzymes = newEnzymes
     item.importRecord = importRecord
     itemList.push(item)
@@ -230,7 +227,6 @@ const saveTaxonomy = async (taxonomyMap: ITaxonomyAssociativeArray, connection: 
         taxonomyMap[key].id = taxonomyId.id
       } else {
         taxonomyMap[key].parent = parent.id
-        console.log(taxonomyMap[key])
         taxonomyMap[key] = await connection.getRepository('taxonomy').save(taxonomyMap[key]) as ITaxonomy
       }
     } else {
@@ -247,7 +243,6 @@ const saveTaxonomy = async (taxonomyMap: ITaxonomyAssociativeArray, connection: 
                                             .getOne() as Taxonomy
         taxonomyMap[key].id = taxonomyId.id
       } else {
-        console.log(taxonomyMap[key])
         taxonomyMap[key] = await connection.getRepository('taxonomy').save(taxonomyMap[key]) as ITaxonomy
       }
     }

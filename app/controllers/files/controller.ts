@@ -40,7 +40,7 @@ export const generateFileTreeObject = (dir: string): IFile[] => {
     try {
       const stats: Stats = fs.statSync(fullPath)
       if (stats) {
-        if (stats.isFile() && ['text/csv', 'text/plain'].some((a: string) => a === mimeType.lookup(fullPath))){
+        if (stats.isFile() && ['text/csv', 'text/tsv', 'text/plain'].some((a: string) => a === mimeType.lookup(fullPath))){
           files.push({
             id: generateKey(fileName), isDirectory: false, label: fileName,
             filePath: fullPath, isExpanded: false, icon: 'document', isSelected: false,

@@ -1,5 +1,4 @@
 import * as React from 'react'
-import {VictoryAxis, VictoryBar, VictoryChart, VictoryTheme, VictoryBrushContainer, VictoryLabel} from 'victory'
 import {Crossfilter, Dimension, Grouping} from 'crossfilter2'
 import {IBin, IDomain} from 'samples'
 import {Sample} from '../db/entities/Sample'
@@ -7,6 +6,13 @@ import * as crossfilter from 'crossfilter2'
 import {numToColour} from '../utils/convert'
 import {compareArrayToString} from '../utils/compare'
 import {Taxonomy} from '../db/entities/Taxonomy'
+import {scaleLinear} from '@vx/scale'
+import {Bounds} from '@vx/brush/lib/types'
+import { Bar } from '@vx/shape';
+import { Grid } from '@vx/grid';
+import { Group } from '@vx/group';
+import Brush from './FutureBrush'
+import { AxisLeft, AxisBottom } from '@vx/axis';
 
 interface IProps {
   data: any[]
@@ -22,6 +28,8 @@ interface IProps {
   domainChangeHandler(domain: IDomain): void
   selectedTaxonomy?: Taxonomy
   excludedTaxonomies?: Taxonomy[]
+  width: number
+  height: number
 }
 
 export interface IBarCharState {
@@ -32,28 +40,41 @@ export interface IBarCharState {
   coverageDim?: Dimension<Sample, number>
   binDim?: Dimension<Sample, number>
   taxonomyDim?: Dimension<Sample, string>
+  xMax: number
+  yMax: number
 }
 
-export class UBinGCBarChart extends React.Component<IProps> {
+export class UBinGCBarChartVX extends React.Component<IProps> {
 
-  yMax: number = 0
   currentDomain?: any
   activeBin?: number
   binRange?: [number, number]
+  margin = {
+    top: 10,
+    left: 60,
+    bottom: 60,
+    right: 10,
+  }
+  xScale: any
+  yScale: any
 
   public state: IBarCharState = {
     cf: crossfilter(this.props.data),
+    xMax: Math.max(this.props.width - this.margin.left - this.margin.right, 0),
+    yMax: Math.max(this.props.height - this.margin.top - this.margin.bottom, 0)
   }
 
   public componentWillMount(): void {
     if (this.props.xName !== undefined) {
       let {cf} = this.state
-      this.setState({binDim: cf.dimension((d: Sample) => d.bin ? d.bin.id : 0)})
       this.setState({
+        binDim: cf.dimension((d: Sample) => d.bin ? d.bin.id : 0),
         coverageDim: cf.dimension((d: Sample) => d.coverage),
         groupDim: cf.dimension((d: Sample) => Math.round(d.gc)),
         taxonomyDim: cf.dimension((d: Sample) => d.taxonomiesRelationString),
       })
+      this.xScale = scaleLinear({ range: [0, this.state.xMax], domain: [0, 100] })
+      this.yScale = scaleLinear({ range: [this.state.yMax, 0], nice: true })
     }
   }
 
@@ -64,13 +85,17 @@ export class UBinGCBarChart extends React.Component<IProps> {
     }
   }
 
-  public handleBrushChange(domain: any): void {
-    this.currentDomain = domain.x
-    if (this.currentDomain && this.currentDomain[1] > 100) { this.currentDomain[1] = 100 }
-  }
-
   public handleBrushChangeEnd(): void {
     this.props.setWorldDomain(this.currentDomain)
+  }
+
+  public handleBrushChange(domain: Bounds): void {
+    if (domain) {
+      this.currentDomain = [domain.x0, domain.x1]
+      if (this.currentDomain && this.currentDomain[1] > 100) {
+        this.currentDomain[1] = 100
+      }
+    }
   }
 
   public reduceInitial(): any {
@@ -126,7 +151,7 @@ export class UBinGCBarChart extends React.Component<IProps> {
       if (xName) {
         let bottom: Sample =  groupDim.bottom(1)[0]
         let top: Sample =  groupDim.top(1)[0]
-        let grouped: Array<Grouping<any, any>> = groupDim.group().reduce(this.reduceAddLength, this.reduceRemoveLength, this.reduceInitial).all()
+        let grouped: readonly Grouping<any, any>[] = groupDim.group().reduce(this.reduceAddLength, this.reduceRemoveLength, this.reduceInitial).all()
         if (bottom && top && binChanged) {
           this.binRange = [groupDim.bottom(1)[0][xName], groupDim.top(1)[0][xName]]
         }
@@ -145,51 +170,80 @@ export class UBinGCBarChart extends React.Component<IProps> {
   }
 
   public render(): JSX.Element {
-    let {xName, bin} = this.props
+    let {xName, yName, bin} = this.props
     let {binRange} = this
     let binColour: string
     if (bin && xName) {
       binColour = numToColour(bin.id)
     }
-    // console.log("currentDomain GC:", this.currentDomain)
+    let data: any = this.getData()
+    let {xScale, yScale, margin} = this
+    let {yMax, xMax} = this.state
+    let {width, height} = this.props
+    let xKey = xName || 'x'
+    let yKey = yName || 'y'
+    yScale.domain([0, Math.max(...data.map(y => y[yKey])) || 10])
     return (
-      <VictoryChart theme={VictoryTheme.material} domainPadding={10}
-                    height={300}
-                    width={400}
-                    padding={{ left: 50, top: 20, right: 10, bottom: 40 }}
-                    containerComponent={
-                    <VictoryBrushContainer
-                      brushDimension='x'
-                      brushDomain={{x: this.currentDomain}}
-                      onBrushDomainChange={(domain: any, props: any) => this.handleBrushChange(domain)}
-                      onBrushDomainChangeEnd={() => this.handleBrushChangeEnd()}
-                      />
-                    }>
-        <VictoryLabel text={this.props.title} x={200} y={10} textAnchor="middle"/>
-        <VictoryAxis
-          axisLabelComponent={<VictoryLabel y={285} />}
-          tickValues={[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100]}
-          label={this.props.xName || 'x'}
-          fixLabelOverlap={true}
-        />
-        <VictoryAxis
-          axisLabelComponent={<VictoryLabel x={10} />}
-          label={this.props.yName || 'y'}
-          tickFormat={(t: number) => {return  t >= 1000000 ? `${Math.round(t)/1000000}M` : t >= 1000 ? `${Math.round(t)/1000}K` : t}}
-          dependentAxis={true}
-        />
-        <VictoryBar
-          style={{
-            data: {
-              fill: (d) => binRange && binRange[0] <= d[xName || 'x'] && binRange[1] >= d[xName || 'x'] ? binColour : "#455a64",
-            },
-          }}
-          barRatio={0.1}
-          data={this.getData()}
-          x={this.props.xName || 'x'}
-          y={this.props.yName || 'y'}
-        />
-      </VictoryChart>
+      <div>
+        <svg width={width} height={height}>
+          <rect width={width} height={height} rx={14} fill="transparent" />
+          <Group left={margin.left} top={margin.top}>
+            <Grid<number, number> xScale={xScale} yScale={yScale} width={xMax} height={yMax} stroke="rgba(10, 10, 10, 0.1)"/>
+            {this.props.xDomain &&
+              <rect height={yMax} width={Math.sqrt((xScale(this.props.xDomain[1]) - xScale(this.props.xDomain[0]))**2)}
+               x={xScale(this.props.xDomain[0])} fill={'rgba(48, 156, 34, 0.1)'} />
+            }
+            {data.map((val, i) => {
+              const barWidth = width / 100;
+              const barHeight = yMax - yScale(val[yKey]);
+              const barX = xScale(val[xKey]);
+              const barY = yMax - barHeight;
+              return (
+                <Bar
+                  key={`bar-${i}`}
+                  x={barX}
+                  y={barY}
+                  width={barWidth - 2}
+                  height={barHeight}
+                  fill={binRange && binRange[0] <= val[xName || 'x'] && binRange[1] >= val[xName || 'x'] ? '#'+binColour : "#455a64"}
+                />
+              );
+            })}
+            <AxisLeft<number>
+              top={0}
+              left={0}
+              scale={yScale}
+              numTicks={10}
+              tickFormat={(t: number) => {return  t >= 1000000 ? `${Math.round(t)/1000000}M` : t >= 1000 ? `${Math.round(t)/1000}K` : t}}
+              label="length"
+            />
+            <AxisBottom<any>
+              top={yMax}
+              left={0}
+              scale={xScale}
+              numTicks={10}
+              label="gc"
+            />
+            <Brush
+              xScale={xScale}
+              yScale={yScale}
+              width={xMax}
+              height={yMax}
+              margin={margin}
+              handleSize={8}
+              resizeTriggerAreas={['left', 'right', 'bottomRight']}
+              brushDirection="horizontal"
+              onChange={(domain) => this.handleBrushChange(domain)}
+              onBrushEnd={() => this.handleBrushChangeEnd()}
+              resetOnEnd={true}
+              selectedBoxStyle={{
+                fill: 'rgba(0, 0, 0, 0.1)',
+                stroke: 'black',
+              }}
+            />
+          </Group>
+        </svg>
+      </div>
     )
   }
 }

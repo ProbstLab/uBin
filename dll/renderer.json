@@ -1,1 +1,89 @@
-{"name":"renderer","content":{"@blueprintjs/core":{"id":"@blueprintjs/core","buildMeta":{"providedExports":true}},"@blueprintjs/select":{"id":"@blueprintjs/select","buildMeta":{"providedExports":true}},"@fortawesome/fontawesome-free":{"id":"@fortawesome/fontawesome-free","buildMeta":{"providedExports":true}},"color-convert":{"id":"color-convert","buildMeta":{"providedExports":true}},"connected-react-router":{"id":"connected-react-router","buildMeta":{"providedExports":true}},"crossfilter2":{"id":"crossfilter2","buildMeta":{"providedExports":true}},"csv-parser":{"id":"csv-parser","buildMeta":{"providedExports":true}},"devtron":{"id":"devtron","buildMeta":{"providedExports":true}},"electron-debug":{"id":"electron-debug","buildMeta":{"providedExports":true}},"electron-log":{"id":"electron-log","buildMeta":{"providedExports":true}},"electron-updater":{"id":"electron-updater","buildMeta":{"providedExports":true}},"history":{"id":"history","buildMeta":{"providedExports":true}},"lodash":{"id":"lodash","buildMeta":{"providedExports":true}},"mime-types":{"id":"mime-types","buildMeta":{"providedExports":true}},"react":{"id":"react","buildMeta":{"providedExports":true}},"react-dom":{"id":"react-dom","buildMeta":{"providedExports":true}},"react-hot-loader":{"id":"react-hot-loader","buildMeta":{"providedExports":true}},"react-redux":{"id":"react-redux","buildMeta":{"providedExports":true}},"react-router":{"id":"react-router","buildMeta":{"providedExports":true}},"react-router-dom":{"id":"react-router-dom","buildMeta":{"providedExports":true}},"react-vis":{"id":"react-vis","buildMeta":{"providedExports":true}},"redux":{"id":"redux","buildMeta":{"providedExports":true}},"redux-promise-middleware":{"id":"redux-promise-middleware","buildMeta":{"providedExports":true}},"redux-thunk":{"id":"redux-thunk","buildMeta":{"providedExports":true}},"reflect-metadata":{"id":"reflect-metadata","buildMeta":{"providedExports":true}},"reselect":{"id":"reselect","buildMeta":{"providedExports":true}},"source-map-support":{"id":"source-map-support","buildMeta":{"providedExports":true}},"sqlite3":{"id":"sqlite3","buildMeta":{"providedExports":true}},"typeorm":{"id":"typeorm","buildMeta":{"providedExports":true}},"victory":{"id":"victory","buildMeta":{"providedExports":true}}}}
+{
+  "name": "renderer",
+  "content": {
+    "@blueprintjs/core": {
+      "id": "@blueprintjs/core",
+      "buildMeta": { "providedExports": true }
+    },
+    "@blueprintjs/select": {
+      "id": "@blueprintjs/select",
+      "buildMeta": { "providedExports": true }
+    },
+    "@fortawesome/fontawesome-free": {
+      "id": "@fortawesome/fontawesome-free",
+      "buildMeta": { "providedExports": true }
+    },
+    "color-convert": {
+      "id": "color-convert",
+      "buildMeta": { "providedExports": true }
+    },
+    "connected-react-router": {
+      "id": "connected-react-router",
+      "buildMeta": { "providedExports": true }
+    },
+    "crossfilter2": {
+      "id": "crossfilter2",
+      "buildMeta": { "providedExports": true }
+    },
+    "csv-parser": {
+      "id": "csv-parser",
+      "buildMeta": { "providedExports": true }
+    },
+    "electron-log": {
+      "id": "electron-log",
+      "buildMeta": { "providedExports": true }
+    },
+    "electron-updater": {
+      "id": "electron-updater",
+      "buildMeta": { "providedExports": true }
+    },
+    "history": { "id": "history", "buildMeta": { "providedExports": true } },
+    "lodash": { "id": "lodash", "buildMeta": { "providedExports": true } },
+    "mime-types": {
+      "id": "mime-types",
+      "buildMeta": { "providedExports": true }
+    },
+    "react": { "id": "react", "buildMeta": { "providedExports": true } },
+    "react-dom": {
+      "id": "react-dom",
+      "buildMeta": { "providedExports": true }
+    },
+    "react-redux": {
+      "id": "react-redux",
+      "buildMeta": { "providedExports": true }
+    },
+    "react-router": {
+      "id": "react-router",
+      "buildMeta": { "providedExports": true }
+    },
+    "react-router-dom": {
+      "id": "react-router-dom",
+      "buildMeta": { "providedExports": true }
+    },
+    "react-vis": {
+      "id": "react-vis",
+      "buildMeta": { "providedExports": true }
+    },
+    "redux": { "id": "redux", "buildMeta": { "providedExports": true } },
+    "redux-promise-middleware": {
+      "id": "redux-promise-middleware",
+      "buildMeta": { "providedExports": true }
+    },
+    "redux-thunk": {
+      "id": "redux-thunk",
+      "buildMeta": { "providedExports": true }
+    },
+    "reflect-metadata": {
+      "id": "reflect-metadata",
+      "buildMeta": { "providedExports": true }
+    },
+    "reselect": { "id": "reselect", "buildMeta": { "providedExports": true } },
+    "source-map-support": {
+      "id": "source-map-support",
+      "buildMeta": { "providedExports": true }
+    },
+    "sqlite3": { "id": "sqlite3", "buildMeta": { "providedExports": true } },
+    "typeorm": { "id": "typeorm", "buildMeta": { "providedExports": true } },
+    "victory": { "id": "victory", "buildMeta": { "providedExports": true } }
+  }
+}
