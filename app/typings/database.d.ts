@@ -8,5 +8,6 @@ declare module 'database' {
     taxonomiesPending: boolean
     savingBinState?: string
     deletingBinState?: string
+    deletingRecordState?: string
   }
 }

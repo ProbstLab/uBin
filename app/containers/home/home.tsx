@@ -61,7 +61,6 @@ interface IPropsFromState {
 interface IActionsFromState {
   changePage(page: string): void
   startDb(): void
-  getImportData(recordId: number): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   refreshImports(): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   updateDomain(domain: IDomain): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   setDomain(domain: IDomain): void
@@ -110,7 +109,7 @@ class CHome extends React.Component<TProps> {
   render(): JSX.Element {
     let { samples, samplesPending, taxonomiesMap, domain, archaealEnzymeTypes, bacterialEnzymeTypes, excludedTaxonomies, reloadSamples,
           setSelectedTaxonomy, updateDomain, setDomainX, setDomainY, connection, importRecords, addExcludedTaxonomy, setConsensus,
-          importRecordsState, getImportData, resetFilters, bins, binView, selectedBin, selectedTaxonomy, resetBin, resetGC, resetCoverage,
+          importRecordsState, resetFilters, bins, binView, selectedBin, selectedTaxonomy, resetBin, resetGC, resetCoverage,
           resetTaxonomies, setGCAverage, setCoverageAverage, setTotalLength} = this.props
 
     const getBinDropdown = (): JSX.Element => {
@@ -157,8 +156,7 @@ class CHome extends React.Component<TProps> {
           <div style={{width: '100%', display: 'flex'}}>
             <div style={{width: '60%', minWidth: '400px'}}>
               <ButtonGroup>
-                <Popover content={<SampleMenu importRecords={importRecords} importRecordsState={importRecordsState}
-                                              connection={connection} getImportData={getImportData}/>}
+                <Popover content={<SampleMenu importRecords={importRecords} importRecordsState={importRecordsState} />}
                          position={Position.RIGHT_BOTTOM}>
                   <Button icon='settings' text='Import/Export' />
                 </Popover>
@@ -238,7 +236,6 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       changePage: push,
       startDb: DBActions.startDatabase,
       refreshImports: DBActions.refreshImports,
-      getImportData: recordId => DBActions.getImportData(recordId),
       setDomain: domain => SamplesActions.setDomain(domain),
       updateDomain: domain => SamplesActions.updateDomain(domain),
       setDomainX: domainX => SamplesActions.setDomainX(domainX),

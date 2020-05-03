@@ -77,6 +77,9 @@ export const dbReducer = createReducer(db.getInitialState(), {
   [dbActions.deleteBinPending]: db.setDeleteBinPending,
   [dbActions.deleteBinRejected]: db.setDeleteBinRejected,
   [dbActions.deleteBinFulfilled]: db.setDeleteBinFulfilled,
+  [dbActions.deleteRecordPending]: db.setDeleteRecordPending,
+  [dbActions.deleteRecordRejected]: db.setDeleteRecordRejected,
+  [dbActions.deleteRecordFulfilled]: db.setDeleteRecordFulfilled,
 })
 
 // Utils

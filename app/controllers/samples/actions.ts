@@ -39,6 +39,7 @@ import {IDomain} from 'samples'
 import {Bin} from '../../db/entities/Bin'
 import {Taxonomy} from '../../db/entities/Taxonomy'
 import {getBinName, getImportRecordId, getSamples, getSamplesFilters} from './selectors'
+import { IImportRecord } from 'app/utils/interfaces'
 
 export class SamplesActions {
   static getImportsPending(payload: any): IGetImportsPending {
@@ -201,7 +202,6 @@ export class SamplesActions {
     }
   }
 
-
   static setSelectedBin(bin: Bin): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
     return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
       return new Promise<void>(resolve => {
@@ -258,6 +258,24 @@ export class SamplesActions {
             })
         } else {
           resolve()
+        }
+      })
+    }
+  }
+
+  static deleteRecord(record: IImportRecord): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {
+    return async (dispatch: ThunkDispatch<{}, {}, AnyAction>, getState: () => IClientState): Promise<void> => {
+      return new Promise<void>(resolve => {
+        let connection = getDBConnection(getState())
+        if (connection && record) {
+          Promise.all([
+            dispatch(DBActions.deleteRecord(connection, record, dispatch))
+          ]).then(() => {
+            Promise.all([dispatch(DBActions.refreshImports())])
+              .then(() => resolve())
+            }
+          )} else {
+            resolve()
         }
       })
     }

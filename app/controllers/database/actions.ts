@@ -23,6 +23,7 @@ import {
   ISetSaveBinFulfilled,
   ISetDeleteBinPending,
   ISetDeleteBinRejected, ISetDeleteBinFulfilled, IDeleteBin,
+  ISetDeleteRecordPending, ISetDeleteRecordRejected, ISetDeleteRecordFulfilled, IDeleteRecord
 } from './interfaces'
 import {Connection} from 'typeorm'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
@@ -36,7 +37,8 @@ import {
   getSamplesForBinQuery,
   getSamplesQuery,
   getTaxonomiesAndCountQuery,
-  getAllTaxonomiesQuery, saveBinQuery, deleteBinQuery
+  getAllTaxonomiesQuery, saveBinQuery, deleteBinQuery,
+  deleteRecordQuery
 } from './queries'
 import {SamplesActions} from '../samples'
 import {ISampleFilter} from 'samples'
@@ -48,6 +50,7 @@ import {Enzyme} from "../../db/entities/Enzyme";
 import {ImportRecord} from "../../db/entities/ImportRecord";
 import {ImportFile} from "../../db/entities/ImportFile";
 import {remote} from 'electron'
+import { IImportRecord } from 'app/utils/interfaces'
 
 
 export class DBActions {
@@ -145,6 +148,19 @@ export class DBActions {
   }
   static deleteBinFulfilled(payload: any): ISetDeleteBinFulfilled{
     return {type: dbActions.deleteBinFulfilled, payload}
+  }
+  
+  static deleteRecord(connection: Connection, record: IImportRecord, dispatch?: ThunkDispatch<{}, {}, AnyAction>): IDeleteRecord {
+    return {type: dbActions.deleteRecord, payload: deleteRecordQuery(connection, record)}
+  }
+  static deleteRecordPending(payload: any): ISetDeleteRecordPending{
+    return {type: dbActions.deleteRecordPending, payload}
+  }
+  static deleteRecordRejected(payload: any): ISetDeleteRecordRejected{
+    return {type: dbActions.deleteRecordRejected, payload}
+  }
+  static deleteRecordFulfilled(payload: any): ISetDeleteRecordFulfilled{
+    return {type: dbActions.deleteRecordFulfilled, payload}
   }
 
   static startDatabase(): ThunkAction<Promise<void>, {}, IClientState, AnyAction> {

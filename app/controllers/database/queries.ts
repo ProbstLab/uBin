@@ -8,7 +8,9 @@ import {SamplesActions} from '../samples'
 import {Bin} from '../../db/entities/Bin'
 import {Taxonomy} from "../../db/entities/Taxonomy";
 import {Enzyme} from "../../db/entities/Enzyme";
+import {ImportFile} from "../../db/entities/ImportFile";
 import {ImportRecord} from "../../db/entities/ImportRecord";
+import { IImportRecord } from 'app/utils/interfaces'
 
 export const scatterFilter = (query: any, filter?: ISampleFilter): any => {
   if (filter) {
@@ -219,3 +221,24 @@ export const deleteBinQuery = async (connection: Connection, bin: Bin): Promise<
   await query.execute()
   return connection.getRepository(Bin).createQueryBuilder('bin').delete().where('id = :id', {id: bin.id}).execute()
 }
+
+export const deleteRecordQuery = async (connection: Connection, record: IImportRecord): Promise<any> => {
+  // let enzymesQuery = connection.getRepository(Enzyme).createQueryBuilder('enzyme')
+  //                   .leftJoin('enzyme.samples', 'samples')
+  //                   .delete()
+  //                   .where('samples.importRecordId = :recordId', {recordId: record.id})
+  let importFileQuery = connection.getRepository(ImportFile).createQueryBuilder('importFile')
+                        .delete()
+                        .where('importRecordId = :recordId', {recordId: record.id})
+  let binQuery = connection.getRepository(Bin).createQueryBuilder('bin')
+                  .delete()
+                  .where('importRecordId = :recordId', {recordId: record.id})
+  let samplesQuery = connection.getRepository(Sample).createQueryBuilder('sample')
+                    .delete()
+                    .where('importRecordId = :recordId', {recordId: record.id})
+  let recordQuery = connection.getRepository(ImportRecord).createQueryBuilder('record')
+                    .delete()
+                    .where('id = :recordId', {recordId: record.id})
+  return Promise.all([importFileQuery.execute(), binQuery.execute(), samplesQuery.execute()]).then(() => recordQuery.execute())
+}
+
