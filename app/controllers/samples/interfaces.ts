@@ -14,6 +14,7 @@ export interface IImportRecord {
 
 export interface ISamplesState {
   filters: ISampleFilter
+  pastFilters: ISampleFilter[]
   samples?: any[]
   importRecords: IImportRecord[]
   taxonomies?: Taxonomy[]
@@ -51,6 +52,7 @@ export enum samplesActions {
   setSelectedTaxonomy = 'samples.setSelectedTaxonomy',
   addExcludedTaxonomy = 'samples.addExcludedTaxonomy',
   removeFilters = 'samples.removeFilters',
+  revertFilters = 'samples.revertFilters',
   resetDomain = 'samples.resetDomain',
   resetGC = 'samples.resetGC',
   resetCoverage = 'samples.resetCoverage',
@@ -105,6 +107,9 @@ export interface IGetBinsFulfilled extends Action {
 
 export interface IRemoveFilters extends Action {
   type: samplesActions.removeFilters
+}
+export interface IRevertFilters extends Action {
+  type: samplesActions.revertFilters
 }
 export interface IResetDomain extends Action {
   type: samplesActions.resetDomain

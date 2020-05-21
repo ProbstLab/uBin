@@ -52,6 +52,8 @@ class CSampleMenu extends React.PureComponent<TProps> {
           UBinToaster.show({message: 'Sample record has been deleted!', icon: 'tick', intent: 'success'})
           this.handleDeleteDialogClose()
           break
+        default:
+          break
       }
     }
     this.currDeletingRecordState = deletingRecordState
