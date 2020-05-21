@@ -28,6 +28,7 @@ export const samplesReducer = createReducer(samples.getInitialState(), {
   [samplesActions.setBinFilter]: samples.setBinFilter,
   [samplesActions.setBinView]: samples.setBinView,
   [samplesActions.removeFilters]: samples.removeFilters,
+  [samplesActions.revertFilters]: samples.revertFilters,
   [samplesActions.resetDomain]: samples.resetDomain,
   [samplesActions.resetGC]: samples.resetGC,
   [samplesActions.resetCoverage]: samples.resetCoverage,

@@ -156,3 +156,7 @@ export const getSelectedCount = createSelector(
   getSamplesState,
   (state: ISamplesState) => state.selectedCount,
 )
+export const getPastFiltersCount = createSelector(
+  getSamplesState,
+  (state: ISamplesState) => state.pastFilters.length,
+)

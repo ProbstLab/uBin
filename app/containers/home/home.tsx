@@ -4,7 +4,7 @@ import {AnyAction, bindActionCreators, Dispatch} from 'redux'
 import {connect} from 'react-redux'
 import {withRouter, RouteComponentProps} from 'react-router'
 import {IClientState} from '../../controllers'
-import {Button, Popover, Position, ButtonGroup, Spinner, Icon, Tag} from '@blueprintjs/core'
+import {Button, Popover, Position, ButtonGroup, Spinner, Icon, Tag, Hotkeys, HotkeysTarget, Hotkey} from '@blueprintjs/core'
 import {
   getImportRecords,
   IImportRecord,
@@ -19,7 +19,7 @@ import {
   getBinView,
   getTaxonomiesMap,
   getSelectedTaxonomy,
-  getExcludedTaxonomies, getActiveRecord, getTotalLength, getReloadSamples, getSelectedCount,
+  getExcludedTaxonomies, getActiveRecord, getTotalLength, getReloadSamples, getSelectedCount, getPastFiltersCount
 } from '../../controllers/samples'
 import {DBActions, getSamplesStatePending} from '../../controllers/database'
 import {Connection} from 'typeorm'
@@ -56,6 +56,7 @@ interface IPropsFromState {
   totalLength: number
   reloadSamples?: boolean
   selectedCount?: number
+  pastFiltersCount?: number
 }
 
 interface IActionsFromState {
@@ -71,6 +72,7 @@ interface IActionsFromState {
   setSelectedTaxonomy(taxonomy: Taxonomy): void
   addExcludedTaxonomy(taxonomy: Taxonomy): void
   resetFilters(): void
+  revertFilters(): void
   resetGC(): void
   resetCoverage(): void
   resetTaxonomies(): void
@@ -93,6 +95,7 @@ const homeStyle = {
 
 type TProps = IProps & IPropsFromState & IActionsFromState
 
+@HotkeysTarget
 class CHome extends React.Component<TProps> {
   date: Date = new Date()
   wrapperKey: string = new Date().toISOString().toString()
@@ -106,11 +109,22 @@ class CHome extends React.Component<TProps> {
     this.props.updateBinView(!this.props.binView)
   }
 
+  public renderHotkeys() {
+    return <Hotkeys>
+      <Hotkey
+        global={true}
+        combo={'ctrl + z'}
+        label={'ctrl + z to revert your active filters'}
+        onKeyDown={this.props.revertFilters}
+      />
+    </Hotkeys>
+  }
+
   render(): JSX.Element {
     let { samples, samplesPending, taxonomiesMap, domain, archaealEnzymeTypes, bacterialEnzymeTypes, excludedTaxonomies, reloadSamples,
           setSelectedTaxonomy, updateDomain, setDomainX, setDomainY, connection, importRecords, addExcludedTaxonomy, setConsensus,
-          importRecordsState, resetFilters, bins, binView, selectedBin, selectedTaxonomy, resetBin, resetGC, resetCoverage,
-          resetTaxonomies, setGCAverage, setCoverageAverage, setTotalLength} = this.props
+          importRecordsState, revertFilters, pastFiltersCount, resetFilters, bins, binView, selectedBin, selectedTaxonomy, resetBin, resetGC,
+          resetCoverage, resetTaxonomies, setGCAverage, setCoverageAverage, setTotalLength} = this.props
 
     const getBinDropdown = (): JSX.Element => {
       return (
@@ -161,7 +175,7 @@ class CHome extends React.Component<TProps> {
                   <Button icon='settings' text='Import/Export' />
                 </Popover>
                 {getBinDropdown()}
-                <Popover disabled={!dataLoaded} content={<ResetMenu resetAll={resetFilters} resetGC={resetGC} resetCoverage={resetCoverage}
+                <Popover disabled={!dataLoaded} content={<ResetMenu revertFilters={revertFilters} canRevert={pastFiltersCount > 0} resetAll={resetFilters} resetGC={resetGC} resetCoverage={resetCoverage}
                                              resetTaxonomies={resetTaxonomies} resetBin={resetBin}/>}
                          position={Position.RIGHT_BOTTOM}>
                   <Button disabled={!dataLoaded} icon={'filter-remove'} text='Reset filters'/>
@@ -228,6 +242,7 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   totalLength: getTotalLength(state),
   reloadSamples: getReloadSamples(state),
   selectedCount: getSelectedCount(state),
+  pastFiltersCount: getPastFiltersCount(state)
 })
 
 const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
@@ -250,6 +265,7 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       setTotalLength: length => SamplesActions.setTotalLength(length),
       setSelectedCount: selectedCount => SamplesActions.setSelectedCount(selectedCount),
       resetFilters: SamplesActions.resetFilters,
+      revertFilters: SamplesActions.revertFilters,
       resetGC: SamplesActions.resetGC,
       resetCoverage: SamplesActions.resetCoverage,
       resetTaxonomies: SamplesActions.resetTaxonomies,

@@ -5,6 +5,7 @@ import {
   IGetSamplesFulfilled,
   IGetTaxonomiesForImportFulfilled,
   IRemoveFilters,
+  IRevertFilters,
   ISamplesState,
   ISetImportedRecord,
   ISetDomain,
@@ -33,15 +34,24 @@ import {
 } from './interfaces'
 import {ISetBinFilter} from './index'
 import {Sample} from '../../db/entities/Sample'
+import { ISampleFilter } from 'samples'
 
 export const getInitialState = (): ISamplesState => ({
   filters: {binView: true, excludedTaxonomies: []},
+  pastFilters: [],
   importRecords: [],
   importsLoaded: false,
   importRecordsPending: false,
   bins: [],
   totalLength: 0,
 })
+
+const updatePastFilters = (pastFilters: ISampleFilter[], latestFilter: ISampleFilter): ISampleFilter[] => {
+  if (pastFilters.length >= 10) {
+    return [...pastFilters.slice(1), latestFilter]
+  }
+  return [...pastFilters, latestFilter]
+}
 
 export const getImportsPending = (state: ISamplesState, action: IGetImportsPending): ISamplesState => {
   return {
@@ -110,6 +120,7 @@ export const setSelectedTaxonomy = (state: ISamplesState, action: ISetSelectedTa
       ...state.filters,
       selectedTaxonomy: action.taxonomy,
     },
+    pastFilters: updatePastFilters(state.pastFilters, state.filters)
   }
 }
 
@@ -120,6 +131,7 @@ export const addExcludedTaxonomy = (state: ISamplesState, action: ISetSelectedTa
       ...state.filters,
       excludedTaxonomies: [...state.filters.excludedTaxonomies, action.taxonomy],
     },
+    pastFilters: updatePastFilters(state.pastFilters, state.filters)
   }
 }
 export const resetTaxonomies = (state: ISamplesState, action: IResetTaxonomies): ISamplesState => {
@@ -130,6 +142,7 @@ export const resetTaxonomies = (state: ISamplesState, action: IResetTaxonomies):
       excludedTaxonomies: [],
       selectedTaxonomy: undefined,
     },
+    pastFilters: updatePastFilters(state.pastFilters, state.filters)
   }
 }
 
@@ -140,6 +153,7 @@ export const setDomain = (state: ISamplesState, action: ISetDomain): ISamplesSta
       ...state.filters,
       domain: action.domain,
     },
+    pastFilters: updatePastFilters(state.pastFilters, state.filters)
   }
 }
 export const setDomainX = (state: ISamplesState, action: ISetDomainX): ISamplesState => {
@@ -152,6 +166,7 @@ export const setDomainX = (state: ISamplesState, action: ISetDomainX): ISamplesS
         x: action.domain,
       },
     },
+    pastFilters: updatePastFilters(state.pastFilters, state.filters)
   }
 }
 export const setDomainY = (state: ISamplesState, action: ISetDomainY): ISamplesState => {
@@ -164,6 +179,7 @@ export const setDomainY = (state: ISamplesState, action: ISetDomainY): ISamplesS
         y: action.domain,
       },
     },
+    pastFilters: updatePastFilters(state.pastFilters, state.filters)
   }
 }
 
@@ -174,6 +190,7 @@ export const setBinFilter = (state: ISamplesState, action: ISetBinFilter): ISamp
       ...state.filters,
       bin: action.bin,
     },
+    pastFilters: updatePastFilters(state.pastFilters, state.filters)
   }
 }
 export const resetBin = (state: ISamplesState, action: IResetBin): ISamplesState => {
@@ -183,6 +200,7 @@ export const resetBin = (state: ISamplesState, action: IResetBin): ISamplesState
       ...state.filters,
       bin: undefined,
     },
+    pastFilters: updatePastFilters(state.pastFilters, state.filters)
   }
 }
 
@@ -193,15 +211,31 @@ export const setBinView = (state: ISamplesState, action: ISetBinView): ISamplesS
       ...state.filters,
       binView: action.binView,
     },
+    pastFilters: updatePastFilters(state.pastFilters, state.filters)
   }
 }
 
+// Remove all filters and reset it to the default state
 export const removeFilters = (state: ISamplesState, action: IRemoveFilters): ISamplesState => {
   return {
     ...state,
     filters: {binView: true, excludedTaxonomies: []},
+    pastFilters: updatePastFilters(state.pastFilters, state.filters)
   }
 }
+
+// If available, revert to the previous filter
+export const revertFilters = (state: ISamplesState, action: IRevertFilters): ISamplesState => {
+  if (!state.pastFilters.length) {
+    return state
+  }
+  return {
+    ...state,
+    filters: state.pastFilters[state.pastFilters.length - 1],
+    pastFilters: state.pastFilters.slice(0, -1)
+  }
+}
+
 export const resetDomain = (state: ISamplesState, action: IResetDomain): ISamplesState => {
   return {
     ...state,
@@ -209,6 +243,7 @@ export const resetDomain = (state: ISamplesState, action: IResetDomain): ISample
       ...state.filters,
       domain: undefined,
     },
+    pastFilters: updatePastFilters(state.pastFilters, state.filters)
   }
 }
 export const resetGC = (state: ISamplesState, action: IResetGC): ISamplesState => {
@@ -221,6 +256,7 @@ export const resetGC = (state: ISamplesState, action: IResetGC): ISamplesState =
         x: undefined,
       },
     },
+    pastFilters: updatePastFilters(state.pastFilters, state.filters)
   }
 }
 export const resetCoverage = (state: ISamplesState, action: IResetCoverage): ISamplesState => {
@@ -233,6 +269,7 @@ export const resetCoverage = (state: ISamplesState, action: IResetCoverage): ISa
         y: undefined,
       },
     },
+    pastFilters: updatePastFilters(state.pastFilters, state.filters)
   }
 }
 

@@ -26,7 +26,7 @@ import {
   ISetGCAverage,
   ISetCoverageAverage,
   ISetConsensusName,
-  ISetSampleName, ISetTotalLength, ISetNewBinToData, ISetReloadSamples, ISetSelectedCount,
+  ISetSampleName, ISetTotalLength, ISetNewBinToData, ISetReloadSamples, ISetSelectedCount, IRevertFilters,
 } from './interfaces'
 import {ThunkAction, ThunkDispatch} from 'redux-thunk'
 import {IClientState} from '../index'
@@ -69,6 +69,9 @@ export class SamplesActions {
   // Filters
   static removeFilters(): IRemoveFilters {
     return {type: samplesActions.removeFilters}
+  }
+  static revertFilters(): IRevertFilters {
+    return {type: samplesActions.revertFilters}
   }
   static resetDomain(): IResetDomain {
     return {type: samplesActions.resetDomain}
