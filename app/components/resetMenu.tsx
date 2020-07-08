@@ -2,6 +2,10 @@
 import * as React from 'react'
 import {Menu, MenuDivider, MenuItem} from '@blueprintjs/core'
 
+/**
+ * Resetting individual or all active filters
+ */
+
 interface IProps {
   revertFilters(): void
   resetAll(): void

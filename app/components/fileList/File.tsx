@@ -2,6 +2,8 @@ import * as React from 'react'
 import { IFile } from 'files'
 import {Icon} from '@blueprintjs/core';
 
+// Individual "File" objects as used in FileList.tsx
+
 interface IProps {
   file: IFile
 }

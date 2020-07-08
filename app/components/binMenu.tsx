@@ -4,6 +4,10 @@ import {Icon, Menu, MenuItem} from '@blueprintjs/core'
 import {Bin} from '../db/entities/Bin'
 import {numToColour} from '../utils/convert'
 
+/**
+ * Used to list all available Bins by their name and colour
+ */
+
 interface IProps {
   bins: Bin[]
   setSelectedBin(bin: Bin): void

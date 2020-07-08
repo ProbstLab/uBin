@@ -269,8 +269,7 @@
     "reselect": "^4.0.0",
     "source-map-support": "^0.5.9",
     "sqlite3": "^4.1.0",
-    "typeorm": "^0.2.19",
-    "victory": "^32.0.0"
+    "typeorm": "^0.2.19"
   },
   "devEngines": {
     "node": ">=7.x",

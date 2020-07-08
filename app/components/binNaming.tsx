@@ -17,6 +17,10 @@ import {Connection} from 'typeorm'
 import {IBin} from 'samples'
 import {IGenericAssociativeArray} from '../utils/interfaces'
 
+/**
+ * Component to change a bin's name, set a name and create a new bin, or delete an existing one.
+ */
+
 interface IPropsFromState {
   consensus?: Taxonomy
   gcAverage?: number

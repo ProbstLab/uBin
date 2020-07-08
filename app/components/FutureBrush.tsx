@@ -3,6 +3,12 @@ import BaseBrush, { BaseBrushProps, BaseBrushState } from './FutureBaseBrush';
 import { Bounds, MarginShape, Point, ResizeTriggerAreas, Scale } from '@vx/brush/lib/types';
 import { scaleInvert, getDomainFromExtent } from '@vx/brush/lib/utils';
 
+/**
+ * Adding a bit more functionality and correct TypeScript support to VX' Brush object.
+ * This will probably be added or is already added in VX, therefore:
+ * TODO: Remove this + FutureBaseBrush and use native VX implementation
+ */
+
 const SAFE_PIXEL = 2;
 const DEFAULT_COLOR = 'steelblue';
 

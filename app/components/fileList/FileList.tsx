@@ -2,6 +2,8 @@ import * as React from 'react'
 import { IFile } from 'files'
 import {File} from "./File";
 
+// Component to list the files added for import
+
 interface IProps {
   files: IFile[]
 }

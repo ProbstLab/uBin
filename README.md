@@ -1,30 +1,44 @@
-## uBin
+# uBin
 
 ⚠️ alpha version
 
-### Installation
+## Installation
+
+### Use an installer (recommended)
+
+1. Find the latest release on the release page: https://github.com/Shin--/uBin/releases
+2. Get the correct installer (other files can be ignored):
+   - Windows: .exe
+   - MacOS: .dmg
+   - Linux: .deb
+3. After downloading, execute the file and install the software
+
+### (Updates)
+
+If you find yourself on an old release and want to update the software, simply repeat the same process as for the initial installation.
+
+### Compile it yourself
 
 1. Make sure a recent version of [NodeJS](https://nodejs.org/en/download/) is installed
 2. Download the zip (and unzip it) or use `git clone`
-3. Use your terminal to navigate to the folder and run the following commands:
-    - `npm install` (or use `yarn` if you prefer)
-    - `npm run entities`
-    - `npm run rebuild`
-4. From now on you shouldn't have to run the commands above anymore 
-(until you use a new version). The project should now be runnable (in `dev` mode)
-via `npm run dev`
-
+3. Use your terminal to navigate to the folder and run the following commands (**this only need to be done once**):
+   - `npm install` (or use `yarn` if you prefer)
+   - `npm run entities`
+   - `npm run rebuild`
+4. Now you can either run the software in its `dev` mode or `build` it to an executable
+   1. `dev` mode: Simply run `npm run dev`. The program should launch after a bit and offer you more tools for debugging and inspecting
+   2. `npm run package` build/packages the software for your current OS. Check the `package.json` if you want to try to build it for other systems.
 
 ### Features
 
 - The _Import_ tab leads you to a view that has a file tree to find your import files
-and a list of files queued to import.
+  and a list of files queued to import.
 - In the _samples_ tab you can select your already imported data sets through the Import button
-(which are ordered by their creation time but have arbitrary names for now).
-Those can be selected by clicking.
-- After importing, you will see different graphs based on the imported data. 
-Taxonomies are filtered by through clicking on the corresponding taxonomy. 
-Clicking on it again will let you select a new one.
+  (which are ordered by their creation time but have arbitrary names for now).
+  Those can be selected by clicking.
+- After importing, you will see different graphs based on the imported data.
+  Taxonomies are filtered by through clicking on the corresponding taxonomy.
+  Clicking on it again will let you select a new one.
 - The scatter plot can be used to draw a rectangle for the samples you want to filter.
-Unlike taxonomies, you need to apply the filter (green button) manually.
+  Unlike taxonomies, you need to apply the filter (green button) manually.
 - gc/length and gc/coverage bar charts can be zoomed in and be trimmed.

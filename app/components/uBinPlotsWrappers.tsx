@@ -15,8 +15,6 @@ import {Sample} from '../db/entities/Sample'
 import * as crossfilter from 'crossfilter2'
 import {Taxonomy} from '../db/entities/Taxonomy'
 import {IValueMap} from "common"
-// import BarStack from './BarStack'
-// import { ParentSize } from '@vx/responsive';
 
 
 interface IProps {

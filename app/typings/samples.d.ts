@@ -14,8 +14,6 @@ declare module 'samples' {
     range: number[]
   }
 
-  // import {DomainPropType} from 'victory'
-
   interface IDomain {
     x?: [number, number]
     y?: [number, number]

@@ -11,6 +11,11 @@ import {IImportRecord, SamplesActions} from '../controllers/samples'
 import {getDeletingRecordState} from '../controllers/database'
 import {UBinToaster} from '../utils/uBinToaster'
 
+/**
+ * Component to list all imported samples/records
+ * TODO: Consider renaming it (records)
+ */
+
 interface IProps {
   importRecords: IImportRecord[]
   importRecordsState: {pending: boolean, loaded: boolean}
@@ -40,6 +45,7 @@ class CSampleMenu extends React.PureComponent<TProps> {
     isDeleteDialogOpen: false,
   }
 
+  // Compare states to track how it has changed, then show toaster message (delete record)
   public componentDidUpdate(): void {
     let {deletingRecordState} = this.props
     if (deletingRecordState && this.currDeletingRecordState === 'pending' && deletingRecordState !== this.currDeletingRecordState) {
@@ -59,6 +65,7 @@ class CSampleMenu extends React.PureComponent<TProps> {
     this.currDeletingRecordState = deletingRecordState
   }
 
+  // Render records after fetch, or display that no records exist
   public getImportData(): JSX.Element | JSX.Element[] {
     let { importRecordsState, importRecords } = this.props
     if (!importRecordsState.pending && importRecordsState.loaded && !importRecords.length) {
@@ -78,6 +85,7 @@ class CSampleMenu extends React.PureComponent<TProps> {
     return <MenuItem text={<Spinner size={20}/>}/>
   }
 
+  // Fetch records
   public loadSampleData(recordId: number): void {
     if (this.props.connection) {
       this.props.getImportData(recordId)

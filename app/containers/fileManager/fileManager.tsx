@@ -10,6 +10,10 @@ import {UBinTree} from '../../components/uBinTree'
 import {FileList} from '../../components/fileList/FileList'
 import {Connection} from 'typeorm'
 
+/**
+ * File manager/tree to add files for import
+ */
+
 interface IProps extends RouteComponentProps {
 }
 
