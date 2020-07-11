@@ -90,7 +90,7 @@ const homeStyle = {
   flexWrap: 'wrap',
   justifyContent: 'left',
   margin: '0',
-  marginTop: '64px',
+  marginTop: '52px',
 } as React.CSSProperties
 
 type TProps = IProps & IPropsFromState & IActionsFromState
@@ -167,12 +167,12 @@ class CHome extends React.Component<TProps> {
     return (
       <div>
         <div style={homeStyle}>
-          <div style={{width: '100%', display: 'flex'}}>
-            <div style={{width: '60%', minWidth: '400px'}}>
+          <div style={{width: '100%', display: 'flex', flexWrap: 'wrap'}}>
+            <div style={{flexGrow: 2, margin: '4px'}}>
               <ButtonGroup>
                 <Popover content={<SampleMenu importRecords={importRecords} importRecordsState={importRecordsState} />}
                          position={Position.RIGHT_BOTTOM}>
-                  <Button icon='settings' text='Import/Export' />
+                  <Button icon='settings' text='Sample selection' />
                 </Popover>
                 {getBinDropdown()}
                 <Popover disabled={!dataLoaded} content={<ResetMenu revertFilters={revertFilters} canRevert={pastFiltersCount > 0} resetAll={resetFilters} resetGC={resetGC} resetCoverage={resetCoverage}
@@ -184,7 +184,7 @@ class CHome extends React.Component<TProps> {
                         onClick={() => this.toggleBinView()}/>
               </ButtonGroup>
             </div>
-            <div style={{width: '40%', minWidth: '300px', display: 'flex'}}>
+            <div style={{flexGrow: 1, margin: '4px', display: 'flex'}}>
               <BinNaming dataLoaded={dataLoaded} activeRecord={this.props.activeRecord} data={samples} taxonomies={taxonomiesMap}/>
             </div>
           </div>
