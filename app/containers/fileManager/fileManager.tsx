@@ -114,7 +114,7 @@ class CFileManager extends React.Component<TProps> {
           <Card style={{ margin: '8px'}}>
             <h4>Import</h4>
             <Callout intent={(numFilesRequired - addedFiles.length) > 0 ?  'warning' : 'success'}>
-              Add your taxonomy file first, then .tsv, .csv or .txt of second dataset ({numFilesRequired - addedFiles.length} files remaining)
+              Add your overview file first (.tsv /.txt), then the single copy gene (SCG) file (.csv) ({numFilesRequired - addedFiles.length} files remaining)
             </Callout>
             <Callout style={{marginTop: '6px'}} intent={!importNameLengthReached ? 'warning': 'success'}>
               Choose a name for your import
