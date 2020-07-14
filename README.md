@@ -1,12 +1,22 @@
 # uBin
 
-⚠️ alpha version
+Software for manual curation of genomes from metagenomes
 
-## Installation
+Contact: till.bornemann@uni-duisburg-essen.de
+
+The uBin App is located in the repository https://github.com/ProbstLab/uBin.
+
+The input Generation script as well as test files are located in https://github.com/ProbstLab/uBin-helperscripts.
+
+The main README with instructions on how to install and use both the input generation script as well as uBin itself, including pictures and a short video tutorial, are located in the uBin-helperscripts repository https://github.com/ProbstLab/uBin-helperscripts. 
+
+The following contains mainly installation instructions for the uBin software.
+
+## uBin Installation
 
 ### Use an installer (recommended)
 
-1. Find the latest release on the release page: https://github.com/Shin--/uBin/releases
+1. Find the latest release on the release page: https://github.com/ProbstLab/uBin/releases
 2. Get the correct installer (other files can be ignored):
    - Windows: .exe
    - MacOS: .dmg
