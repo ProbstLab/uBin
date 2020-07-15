@@ -4,9 +4,10 @@ Software for manual curation of genomes from metagenomes
 
 Contact: till.bornemann@uni-duisburg-essen.de
 
-The uBin App is located in the repository https://github.com/ProbstLab/uBin.
+The uBin app is located in the repository https://github.com/ProbstLab/uBin.
 
-The input Generation script as well as test files are located in https://github.com/ProbstLab/uBin-helperscripts.
+A worflow including the input generation script as well as test files are located in https://github.com/ProbstLab/uBin-helperscripts.
+This is a step by step guide for the uBin workflow so we recommend using this if you are new to uBin.
 
 The main README with instructions on how to install and use both the input generation script as well as uBin itself, including pictures and a short video tutorial, are located in the uBin-helperscripts repository https://github.com/ProbstLab/uBin-helperscripts. 
 
