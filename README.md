@@ -17,11 +17,14 @@ The following contains mainly installation instructions for the uBin software.
 
 ### Use an installer (recommended)
 
-1. Find the latest release on the release page: https://github.com/ProbstLab/uBin/releases
+1. Find the latest release on the release page: https://github.com/ProbstLab/uBin/releases 
+
 2. Get the correct installer (other files can be ignored):
    - Windows: .exe
    - MacOS: .dmg
    - Linux: .deb
+Some users have reported that the Windows version may be instable. Thus, we recommend using either the Linux or MacOS installations.
+
 3. After downloading, execute the file and install the software
 
 ### (Updates)
