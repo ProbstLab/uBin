@@ -187,7 +187,7 @@
     "detect-port": "^1.3.0",
     "devtron": "^1.4.0",
     "electron": "^11.2.1",
-    "electron-builder": "22.3.2",
+    "electron-builder": "^22.3.2",
     "electron-builder-http": "^19.27.5",
     "electron-debug": "^3.0.1",
     "electron-devtools-installer": "^2.2.4",
@@ -273,7 +273,7 @@
     "reselect": "^4.0.0",
     "source-map-support": "^0.5.9",
     "split2": "^4.1.0",
-    "sqlite3": "^4.1.0",
+    "sqlite3": "^5.0.0",
     "typeorm": "^0.2.19"
   },
   "resolutions": {

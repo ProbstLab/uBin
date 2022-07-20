@@ -67,7 +67,8 @@ app.on('ready', async () => {
     width: 1600,
     height: 800,
     webPreferences: {
-      nodeIntegration:true
+      nodeIntegration: true,
+      enableRemoteModule: true
     }
   });
 
