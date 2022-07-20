@@ -1,7 +1,7 @@
 {
   "name": "ubin",
   "productName": "uBin",
-  "version": "0.9.14",
+  "version": "0.9.15",
   "description": "uBin beta",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
@@ -56,7 +56,7 @@
   "main": "./app/main.prod.js",
   "build": {
     "productName": "uBin",
-    "appId": "io.github.Shin--.uBin",
+    "appId": "io.github.ProbstLab.uBin",
     "files": [
       "app/dist/",
       "app/app.html",
@@ -89,28 +89,35 @@
       "buildResources": "resources",
       "output": "release"
     },
+    "extraResources": [
+      {
+        "from": "./resources/database/",
+        "to": "extraResources",
+        "filter": ["**/*"]
+      }
+    ],
     "publish": {
       "provider": "github",
-      "owner": "Shin--",
+      "owner": "ProbstLab",
       "repo": "uBin",
       "private": false
     }
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Shin--/uBin.git"
+    "url": "git+https://github.com/ProbstLab/uBin.git"
   },
   "author": {
     "name": "Tim Burg",
     "email": "tim.burg@protonmail.com",
-    "url": "https://github.com/Shin--"
+    "url": "https://github.com/ProbstLab"
   },
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Shin--/uBin/issues"
+    "url": "https://github.com/ProbstLab/uBin/issues"
   },
   "keywords": ["electron", "react", "redux", "typescript", "uBin"],
-  "homepage": "https://github.com/Shin--/uBin#readme",
+  "homepage": "https://github.comProbstLab/uBin#readme",
   "jest": {
     "testURL": "http://localhost/",
     "moduleNameMapper": {
@@ -149,15 +156,16 @@
     "@babel/preset-typescript": "^7.1.0",
     "@babel/register": "^7.0.0",
     "@types/color-convert": "^1.9.0",
-    "@types/enzyme": "^3.9.3",
     "@types/history": "^4.5.2",
     "@types/jest": "^23.3.11",
     "@types/lodash": "^4.14.119",
     "@types/mime-types": "^2.1.0",
+    "@types/react": "^16.9.49",
+    "@types/react-dom": "^16.9.16",
     "@types/react-hot-loader": "^3.0.4",
     "@types/react-redux": "^6.0.12",
     "@types/react-router": "^4.0.11",
-    "@types/react-router-dom": "^4.3.1",
+    "@types/react-router-dom": "4.3.1",
     "@types/redux-logger": "^3.0.6",
     "@types/redux-promise-middleware": "^0.0.11",
     "@types/sinon": "^4.0.0",
@@ -184,9 +192,6 @@
     "electron-debug": "^3.0.1",
     "electron-devtools-installer": "^2.2.4",
     "electron-rebuild": "^1.8.4",
-    "enzyme": "^3.8.0",
-    "enzyme-adapter-react-16": "^1.7.1",
-    "enzyme-to-json": "^3.3.5",
     "eslint": "^5.12.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-prettier": "^3.3.0",
@@ -213,7 +218,7 @@
     "opencollective-postinstall": "^2.0.1",
     "optimize-css-assets-webpack-plugin": "^5.0.1",
     "prettier": "^1.15.3",
-    "react-hot-loader": "^4.12.18",
+    "react-hot-loader": "^3.1.3",
     "react-test-renderer": "^16.7.0",
     "redux-logger": "^3.0.6",
     "rimraf": "^2.6.3",
@@ -241,11 +246,12 @@
   },
   "dependencies": {
     "@blueprintjs/core": "^3.18.1",
+    "@blueprintjs/popover2": "^1.4.2",
     "@blueprintjs/select": "^3.10.0",
     "@fortawesome/fontawesome-free": "^5.6.3",
     "@vx/vx": "0.0.193",
     "color-convert": "^1.9.3",
-    "connected-react-router": "^6.2.1",
+    "connected-react-router": "6.2.1",
     "core-js": "^2.6.11",
     "crossfilter2": "1.4.6",
     "csv-parser": "^2.1.0",
@@ -256,11 +262,11 @@
     "lodash": "^4.17.11",
     "mime-types": "^2.1.21",
     "npm": "^6.13.7",
-    "react": "16.12.0",
-    "react-dom": "16.12.0",
+    "react": "16.14.0",
+    "react-dom": "16.14.0",
     "react-redux": "^6.0.0",
-    "react-router": "^4.3.1",
-    "react-router-dom": "^4.3.1",
+    "react-router": "4.3.1",
+    "react-router-dom": "4.3.1",
     "react-vis": "^1.11.6",
     "redux": "^4.0.1",
     "redux-promise-middleware": "^5.1.1",
@@ -270,6 +276,9 @@
     "source-map-support": "^0.5.9",
     "sqlite3": "^4.1.0",
     "typeorm": "^0.2.19"
+  },
+  "resolutions": {
+    "**/@types/react": "16.14.28"
   },
   "devEngines": {
     "node": ">=7.x",

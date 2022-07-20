@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import {remote} from 'electron'
-import {Button, Dialog, InputGroup, Classes, ProgressBar, ButtonGroup, Tooltip, Label} from '@blueprintjs/core'
+import {Button, Dialog, InputGroup, Classes, ProgressBar, ButtonGroup, Label, Tooltip} from '@blueprintjs/core'
 import {Taxonomy} from '../db/entities/Taxonomy'
 import {IClientState} from '../controllers'
 import {getBinsMap, getConsensus, getCoverageAverage, getGCAverage, getSelectedBin, IImportRecord, SamplesActions} from '../controllers/samples'
@@ -78,8 +78,8 @@ class CBinNaming extends React.PureComponent<TProps> {
     isDeleteDialogOpen: false,
   }
 
-  private handleOpen = () => this.setState({ isOpen: true })
-  private handleClose = () => this.setState({ isOpen: false })
+  private handleOpen = () => React.useCallback(() => this.setState({ isOpen: true }), [])
+  private handleClose = () => React.useCallback(() => this.setState({ isOpen: false }), [])
   private handleDeleteDialogOpen = () => this.setState({ isDeleteDialogOpen: true })
   private handleDeleteDialogClose = () => this.setState({ isDeleteDialogOpen: false })
   private handleExportFileNameChange = (name: string) => this.setState({ exportFileName: name })
@@ -202,9 +202,10 @@ class CBinNaming extends React.PureComponent<TProps> {
 
         <Dialog
           icon='export'
-          onClose={this.handleClose}
           title='Export'
-          isOpen={isOpen}>
+          isOpen={isOpen}
+          onClose={this.handleClose}
+        >
           <div className={Classes.DIALOG_BODY}>
             <InputGroup style={{margin: '4px 0'}} value={exportFileName ? exportFileName : activeRecord ? activeRecord.name : ''}
                         placeholder={' Type in your file name...'} onChange={(e: any) => this.handleExportFileNameChange(e.target.value)}/>
