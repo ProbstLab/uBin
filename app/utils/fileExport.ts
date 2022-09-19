@@ -63,7 +63,7 @@ const writeFastaFiles = (bins: IValueMap<Bin>, fastaDict: IFastaDict, filePath: 
           }
           let wstream = fs.createWriteStream(fastaFilePath + bin.name + '.fasta')
           wstream.on('finish', () => {
-            resolve()
+            resolve(true)
           })
           wstream.on('error', err => {
             reject(err)

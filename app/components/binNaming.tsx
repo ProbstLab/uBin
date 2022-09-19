@@ -1,7 +1,7 @@
 
 import * as React from 'react'
 import {remote} from 'electron'
-import {Button, Dialog, InputGroup, Classes, ProgressBar, ButtonGroup, Label, Tooltip} from '@blueprintjs/core'
+import {Button, Dialog, InputGroup, Classes, ProgressBar, ButtonGroup, Label, AnchorButton, Tooltip} from '@blueprintjs/core'
 import {Taxonomy} from '../db/entities/Taxonomy'
 import {IClientState} from '../controllers'
 import {getBinsMap, getConsensus, getCoverageAverage, getGCAverage, getSelectedBin, IImportRecord, SamplesActions} from '../controllers/samples'
@@ -16,6 +16,7 @@ import {IValueMap} from 'common'
 import {Connection} from 'typeorm'
 import {IBin} from 'samples'
 import {IGenericAssociativeArray} from '../utils/interfaces'
+// import { Popover2, Tooltip2 } from '@blueprintjs/popover2'
 
 /**
  * Component to change a bin's name, set a name and create a new bin, or delete an existing one.
@@ -78,8 +79,8 @@ class CBinNaming extends React.PureComponent<TProps> {
     isDeleteDialogOpen: false,
   }
 
-  private handleOpen = () => React.useCallback(() => this.setState({ isOpen: true }), [])
-  private handleClose = () => React.useCallback(() => this.setState({ isOpen: false }), [])
+  private handleOpen = () => this.setState({ isOpen: true })
+  private handleClose = () => this.setState({ isOpen: false })
   private handleDeleteDialogOpen = () => this.setState({ isDeleteDialogOpen: true })
   private handleDeleteDialogClose = () => this.setState({ isDeleteDialogOpen: false })
   private handleExportFileNameChange = (name: string) => this.setState({ exportFileName: name })
@@ -194,9 +195,14 @@ class CBinNaming extends React.PureComponent<TProps> {
         <InputGroup style={{width: '52px'}} disabled={!dataLoaded} readOnly={true} value={coverageAverage ? coverageAverage.toString() : ''} name={'avg_coverage'} placeholder={'Coverage Avg.'}/><span style={{padding: '2px'}}></span>
         <ButtonGroup minimal={true}>
           <Button style={{minWidth: '80px'}} disabled={!dataLoaded} loading={savingBinState === 'pending'} onClick={this.props.saveBin} intent={'success'} text={'Save Bin'}/>
-          <Tooltip content={'Delete the currently selected bin.'}>
-            <Button disabled={!dataLoaded || !selectedBin} icon={'trash'} intent={'danger'} onClick={this.handleDeleteDialogOpen}/>
+          <Tooltip
+            content={<span>Delete the currently selected bin.</span>}
+          >
+            <AnchorButton disabled={!dataLoaded || !selectedBin} icon={'trash'} intent={'danger'} onClick={this.handleDeleteDialogOpen}/>
           </Tooltip>
+          {/* <Tooltip content={'Delete the currently selected bin.'}>
+            <Button disabled={!dataLoaded || !selectedBin} icon={'trash'} intent={'danger'} onClick={this.handleDeleteDialogOpen}/>
+          </Tooltip> */}
         </ButtonGroup>
         <Button minimal={true} style={{minWidth: '80px'}} disabled={!dataLoaded} rightIcon={'export'} onClick={this.handleOpen} text={'Export'}/>
 
@@ -238,6 +244,15 @@ class CBinNaming extends React.PureComponent<TProps> {
               <Tooltip content={'The selected bin will be permanently deleted!'}>
                 <Button intent={'danger'} rightIcon={'trash'} text={'Delete'} onClick={() => this.startDeleteBin()}/>
               </Tooltip>
+              {/* <Popover2
+                content={<h1>Popover!</h1>}
+              >
+                <Tooltip
+                  content={<span>This button also has a popover!</span>}
+                >
+                  <Button intent={'danger'} rightIcon={'trash'} text={'Delete'} onClick={() => this.startDeleteBin()}/>
+                </Tooltip2>
+              </Popover2> */}
             </div>
           </div>
         </Dialog>

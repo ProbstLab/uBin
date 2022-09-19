@@ -1,7 +1,7 @@
 {
   "name": "ubin",
   "productName": "uBin",
-  "version": "0.9.16",
+  "version": "0.9.18",
   "description": "uBin beta",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
@@ -229,9 +229,7 @@
     "stylelint-config-standard": "^18.2.0",
     "terser-webpack-plugin": "^1.2.1",
     "ts-loader": "^5.3.2",
-    "ts-node": "^4.1.0",
     "tslint": "^5.4.3",
-    "typescript": "^3.2.2",
     "url-loader": "^1.1.2",
     "webpack": "^4.28.3",
     "webpack-bundle-analyzer": "^3.0.3",
@@ -274,7 +272,8 @@
     "source-map-support": "^0.5.9",
     "split2": "^4.1.0",
     "sqlite3": "^5.0.0",
-    "typeorm": "^0.2.19"
+    "typeorm": "^0.2.19",
+    "typescript": "4.6.x"
   },
   "resolutions": {
     "**/@types/react": "16.14.28"

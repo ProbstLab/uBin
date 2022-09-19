@@ -59,7 +59,10 @@ export class UBinNav extends React.Component<IProps> {
           </NavbarHeading>
           <Dialog isOpen={this.state.citationMessageOpen} onClose={() => this.toggleCitationMessage()} icon='info-sign' title='Citation'>
             <div className={Classes.DIALOG_BODY}>
-              <h4>When using this software please cite:<br/>Till L. V. Bornemann, Tim Burg, and Alexander J. Probst: uBin - an interactive metagenome viewer and binner for educational purposes. <i>unpublished.</i></h4>
+              <h4>
+                When using this software please cite:<br/>Till L. V. Bornemann, Sarah P. Esser, Tom L. Stach, Tim Burg, and Alexander J. Probst (2020):<br/>
+                uBin - an interactive metagenome viewer and binner for educational purposes. <i>unpublished.</i>
+              </h4>
             </div>
           </Dialog>
         </NavbarGroup>
