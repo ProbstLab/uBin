@@ -40,6 +40,8 @@ import {
   getAllTaxonomiesQuery, saveBinQuery, deleteBinQuery,
   deleteRecordQuery
 } from './queries'
+import * as fs from 'fs'
+import * as path from 'path'
 import {SamplesActions} from '../samples'
 import {ISampleFilter} from 'samples'
 import {Bin} from '../../db/entities/Bin'
@@ -55,10 +57,19 @@ import { IImportRecord } from 'app/utils/interfaces'
 
 export class DBActions {
   static connectDatabase(): IConnectDatabase {
+    const databasePath = `${remote.app.getPath('appData')}/uBin/database.sqlite`
+    try {
+      if (!fs.existsSync(databasePath)) {
+        const initialDatabase = path.join(process.resourcesPath, 'extraResources', 'database.sqlite')
+        fs.copyFileSync(initialDatabase, databasePath)
+      }
+    } catch (err) {
+      console.log(err)
+    }
     return {
       type: dbActions.connectDatabase, payload: createConnection({
         type: 'sqlite',
-        database: `${remote.app.getPath('appData')}/database.sqlite`,
+        database: databasePath,
         synchronize: true,
         logging: false,
         entities: [Sample, Bin, Taxonomy, Enzyme, ImportRecord, ImportFile],

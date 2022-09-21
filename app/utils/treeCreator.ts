@@ -216,6 +216,6 @@ export class TreeCreator {
       }
       newHex = colorConvert.hsl.hex(hsl)
     }
-    return newHex
+    return newHex.length === 6 ? '#' + newHex : newHex
   }
 }

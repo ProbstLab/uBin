@@ -51,7 +51,6 @@ function updateData(data: any, keyPath: any): any {
     ...data.style,
     fillOpacity: keyPath && !keyPath[data.id] ? 0.2 : 1,
   }
-
   return data
 }
 
