@@ -38,6 +38,7 @@ import {IDomain} from 'samples'
 // import {getImportRecordId} from './selectors'
 import {Bin} from '../../db/entities/Bin'
 import {Taxonomy} from '../../db/entities/Taxonomy'
+import {UBinToaster} from '../../utils/uBinToaster'
 import {getBinName, getImportRecordId, getSamples, getSamplesFilters} from './selectors'
 import { IImportRecord } from 'app/utils/interfaces'
 
@@ -250,15 +251,18 @@ export class SamplesActions {
         if (connection && recordId) {
           Promise.all([
             dispatch(SamplesActions.removeFilters()),
-            dispatch(DBActions.deleteBin(connection, bin, dispatch))])
-            .then(() => {
-              if (connection && recordId) {
-                Promise.all([dispatch(DBActions.getBins(connection, recordId))])
-                  .then(() => resolve())
-              } else {
-                resolve()
-              }
-            })
+            dispatch(DBActions.deleteBin(connection, bin, dispatch))]
+          ).then(() => {
+            UBinToaster.show({message: 'Bin has been deleted!', icon: 'tick', intent: 'success'})
+            if (connection && recordId) {
+              Promise.all([dispatch(DBActions.getBins(connection, recordId))])
+                .then(() => resolve())
+            } else {
+              resolve()
+            }
+          }).catch(() => {
+            UBinToaster.show({message: 'Deleting bin failed', icon: 'error', intent: 'danger'})
+          })
         } else {
           resolve()
         }
