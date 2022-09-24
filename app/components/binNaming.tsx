@@ -1,14 +1,14 @@
 
 import * as React from 'react'
 import {remote} from 'electron'
-import {Button, Dialog, InputGroup, Classes, ProgressBar, ButtonGroup, Label, AnchorButton, Tooltip} from '@blueprintjs/core'
+import {Button, Dialog, InputGroup, Classes, ProgressBar, ButtonGroup, Label} from '@blueprintjs/core'
 import {Taxonomy} from '../db/entities/Taxonomy'
 import {IClientState} from '../controllers'
 import {getBinsMap, getConsensus, getCoverageAverage, getGCAverage, getSelectedBin, IImportRecord, SamplesActions} from '../controllers/samples'
 import {AnyAction, bindActionCreators, Dispatch} from 'redux'
 import {connect} from 'react-redux'
 import {ThunkAction} from 'redux-thunk'
-import {getDeletingBinState, getSavingBinState} from '../controllers/database'
+import {getSavingBinState} from '../controllers/database'
 import {UBinToaster} from '../utils/uBinToaster'
 import {FileTreeActions, getExportState, getFastaDict, getFastaImportState} from '../controllers/files'
 import {Bin} from '../db/entities/Bin'
@@ -16,6 +16,7 @@ import {IValueMap} from 'common'
 import {Connection} from 'typeorm'
 import {IBin} from 'samples'
 import {IGenericAssociativeArray} from '../utils/interfaces'
+import { BinDeleteDialog } from './binDeleteDialog'
 // import { Popover2, Tooltip2 } from '@blueprintjs/popover2'
 
 /**
@@ -27,7 +28,6 @@ interface IPropsFromState {
   gcAverage?: number
   coverageAverage?: number
   savingBinState?: string
-  deletingBinState?: string
   bins?: IValueMap<Bin>
   exportState?: string
   fastaDict?: IGenericAssociativeArray
@@ -40,7 +40,6 @@ interface IActionsFromState {
   setConsensusName(consensusName: string): void
   setSampleName(sampleName: string): void
   saveBin(): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
-  deleteSelectedBin(bin: Bin): ThunkAction<Promise<void>, {}, IClientState, AnyAction>
   saveExportFile(exportDir: string, exportName: string, taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>, activeRecord: IImportRecord,
                  connection: Connection, fastaDict?: IGenericAssociativeArray): void
   importFastaFile(file: string): void
@@ -57,7 +56,6 @@ interface IState {
   consensusName: string
   sampleName: string
   isOpen: boolean
-  isDeleteDialogOpen: boolean
   exportFilePath?: string
   exportFileName?: string
   fastaInputFilePath?: string
@@ -69,20 +67,16 @@ class CBinNaming extends React.PureComponent<TProps> {
   currConsensusName?: string
   currSampleName?: string
   currSavingBinState?: string
-  currDeletingBinState?: string
   currExportState?: string
 
   public state: IState = {
     consensusName: '',
     sampleName: '',
     isOpen: false,
-    isDeleteDialogOpen: false,
   }
 
   private handleOpen = () => this.setState({ isOpen: true })
   private handleClose = () => this.setState({ isOpen: false })
-  private handleDeleteDialogOpen = () => this.setState({ isDeleteDialogOpen: true })
-  private handleDeleteDialogClose = () => this.setState({ isDeleteDialogOpen: false })
   private handleExportFileNameChange = (name: string) => this.setState({ exportFileName: name })
   private openDirBrowser = async () => {
     const dirPath: string[] = await remote.dialog.showOpenDialog({properties: ['openDirectory']}).then(result => result.filePaths)
@@ -105,13 +99,6 @@ class CBinNaming extends React.PureComponent<TProps> {
     let {exportFilePath, exportFileName} = this.state
     if (exportFilePath && exportFileName && taxonomies && bins && activeRecord && connection) {
       saveExportFile(exportFilePath, exportFileName, taxonomies, bins, activeRecord, connection, fastaDict)
-    }
-  }
-
-  private startDeleteBin = (): void => {
-    let {deleteSelectedBin, selectedBin} = this.props
-    if (selectedBin) {
-      deleteSelectedBin(selectedBin as Bin)
     }
   }
 
@@ -138,7 +125,7 @@ class CBinNaming extends React.PureComponent<TProps> {
     }
   }
   public componentDidUpdate(): void {
-    let {savingBinState, deletingBinState, exportState} = this.props
+    let {savingBinState, exportState} = this.props
     if (savingBinState && this.currSavingBinState === 'pending' && savingBinState !== this.currSavingBinState) {
       switch (savingBinState) {
         case 'rejected':
@@ -146,18 +133,6 @@ class CBinNaming extends React.PureComponent<TProps> {
           break
         case 'fulfilled':
           UBinToaster.show({message: 'Bin has been saved!', icon: 'tick', intent: 'success'})
-          break
-      }
-    }
-    if (deletingBinState && this.currDeletingBinState === 'pending' && deletingBinState !== this.currDeletingBinState) {
-      switch (deletingBinState) {
-        case 'rejected':
-          UBinToaster.show({message: 'Deleting bin failed', icon: 'error', intent: 'danger'})
-          this.handleDeleteDialogClose()
-          break
-        case 'fulfilled':
-          UBinToaster.show({message: 'Bin has been deleted!', icon: 'tick', intent: 'success'})
-          this.handleDeleteDialogClose()
           break
       }
     }
@@ -172,7 +147,6 @@ class CBinNaming extends React.PureComponent<TProps> {
       }
     }
     this.currSavingBinState = savingBinState
-    this.currDeletingBinState = deletingBinState
     this.currExportState = exportState
   }
 
@@ -186,7 +160,7 @@ class CBinNaming extends React.PureComponent<TProps> {
   }
   render(): JSX.Element {
     let {dataLoaded, gcAverage, coverageAverage, savingBinState, exportState, selectedBin, isImportingFastaFile, activeRecord} = this.props
-    let {consensusName, sampleName, exportFilePath, fastaInputFilePath, exportFileName, isOpen, isDeleteDialogOpen} = this.state
+    let {consensusName, sampleName, exportFilePath, fastaInputFilePath, exportFileName, isOpen} = this.state
     return (
       <>
         <InputGroup disabled={!dataLoaded} onChange={(e: any) => this.handleSampleName(e)} value={sampleName} name={'sample_name'} placeholder={'Name'}/><span style={{padding: '2px'}}></span>
@@ -195,11 +169,7 @@ class CBinNaming extends React.PureComponent<TProps> {
         <InputGroup style={{width: '52px'}} disabled={!dataLoaded} readOnly={true} value={coverageAverage ? coverageAverage.toString() : ''} name={'avg_coverage'} placeholder={'Coverage Avg.'}/><span style={{padding: '2px'}}></span>
         <ButtonGroup minimal={true}>
           <Button style={{minWidth: '80px'}} disabled={!dataLoaded} loading={savingBinState === 'pending'} onClick={this.props.saveBin} intent={'success'} text={'Save Bin'}/>
-          <Tooltip
-            content={<span>Delete the currently selected bin.</span>}
-          >
-            <AnchorButton disabled={!dataLoaded || !selectedBin} icon={'trash'} intent={'danger'} onClick={this.handleDeleteDialogOpen}/>
-          </Tooltip>
+          <BinDeleteDialog bin={selectedBin} />
           {/* <Tooltip content={'Delete the currently selected bin.'}>
             <Button disabled={!dataLoaded || !selectedBin} icon={'trash'} intent={'danger'} onClick={this.handleDeleteDialogOpen}/>
           </Tooltip> */}
@@ -233,29 +203,6 @@ class CBinNaming extends React.PureComponent<TProps> {
           </div>
           }
         </Dialog>
-
-        <Dialog icon={'trash'} onClose={this.handleDeleteDialogClose} title={'Delete Bin'} isOpen={isDeleteDialogOpen}>
-          <div className={Classes.DIALOG_BODY}>
-            <p>Are you sure that you want to delete<br/>{selectedBin ? selectedBin.name : <b>undefined</b>}?</p>
-          </div>
-          <div className={Classes.DIALOG_FOOTER}>
-            <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-              <Button text={'Close'} onClick={this.handleDeleteDialogClose}/>
-              <Tooltip content={'The selected bin will be permanently deleted!'}>
-                <Button intent={'danger'} rightIcon={'trash'} text={'Delete'} onClick={() => this.startDeleteBin()}/>
-              </Tooltip>
-              {/* <Popover2
-                content={<h1>Popover!</h1>}
-              >
-                <Tooltip
-                  content={<span>This button also has a popover!</span>}
-                >
-                  <Button intent={'danger'} rightIcon={'trash'} text={'Delete'} onClick={() => this.startDeleteBin()}/>
-                </Tooltip2>
-              </Popover2> */}
-            </div>
-          </div>
-        </Dialog>
         </>
     )}
   }
@@ -265,7 +212,6 @@ const mapStateToProps = (state: IClientState): IPropsFromState => ({
   gcAverage: getGCAverage(state),
   coverageAverage: getCoverageAverage(state),
   savingBinState: getSavingBinState(state),
-  deletingBinState: getDeletingBinState(state),
   bins: getBinsMap(state),
   selectedBin: getSelectedBin(state),
   exportState: getExportState(state),
@@ -282,7 +228,6 @@ const mapDispatchToProps = (dispatch: Dispatch): IActionsFromState =>
       saveExportFile: (exportDir: string, exportName: string, taxonomies: IValueMap<Taxonomy>, bins: IValueMap<Bin>, activeRecord: IImportRecord, connection: Connection, fastaDict?: IGenericAssociativeArray) =>
                       FileTreeActions.saveExportFile(exportDir, exportName, taxonomies, bins, activeRecord, connection, fastaDict),
       importFastaFile: (file: string) => FileTreeActions.importFastaFile(file),
-      deleteSelectedBin: SamplesActions.deleteBin,
       saveBin: SamplesActions.saveBin,
     },
     dispatch,
